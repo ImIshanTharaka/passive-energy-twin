@@ -1,0 +1,316 @@
+# ============================================================================
+# Climate Configuration — Phase 2.3
+# Project: Web-Based Digital Twin Framework for Passive Energy Optimization
+# Researcher: M.G.I. Tharaka (Ishan), MSc CS, University of Moratuwa
+# ============================================================================
+#
+# DESIGN RULE (this is why the previous version drifted out of sync):
+#   This file declares ONLY what cannot be derived from the EPW file itself.
+#
+#   NOT stored here — parsed from the EPW header at runtime:
+#       latitude, longitude, elevation, timezone, station name, data source
+#   NOT stored here — resolved at download time by WMO number:
+#       exact zip filename, download URL, data vintage
+#   NOT stored here — computed by climate_features.py:
+#       HDD18, CDD10, GHI, mean DBT, mean RH, mean wind
+#
+#   Duplicating EPW header values in this file is what caused the earlier
+#   JFK-vs-Central-Park and Gatwick-vs-City-Airport mismatches. Do not
+#   reintroduce coordinate fields here.
+#
+# PROVENANCE:
+#   climate/download_epw.py writes climate/epw_provenance.json recording the
+#   resolved URL, vintage, SHA-256 and row count of every file actually
+#   downloaded. That file — not this one — is the reproducibility record.
+#
+# ============================================================================
+
+metadata:
+  schema_version: 5                 # 5: sampling block rewritten for 2.4 (climates unchanged)
+  last_updated: "2026-10-01"
+  epw_source: "climate.onebuilding.org"
+
+  # ── Vintage policy (Decision D1) ──────────────────────────────────────────
+  # All EPW files MUST share a single TMYx vintage. The previous set mixed
+  # TMY3 (period of record ~1973-2005) with TMYx (2009-2023), which confounded
+  # the held-out London test: London differed from the training climates in
+  # data vintage as well as in climate.
+  #
+  # TMYx is preferred over TMY3 for a 2026 thesis: TMY3's record ends in 2005,
+  # which is dated for climate-sensitive energy work. Trade-off: TMY3 is the
+  # more widely cited benchmark, so comparison against older published EUI
+  # figures is slightly less direct. Documented as a methodological choice.
+  #
+  # 'preferred_vintages' is tried in order. download_epw.py selects the newest
+  # vintage available for ALL stations and applies it uniformly — it will not
+  # mix vintages across the set.
+  preferred_vintages:
+    - "2011-2025"
+    - "2009-2023"
+    - "2007-2021"
+
+  # ── ASHRAE zone labels ────────────────────────────────────────────────────
+  # Edition: ASHRAE Standard 169-2021.
+  # Source:  the "Climate Zone" line of each station's .stat file, which
+  #          onebuilding derives from the ASHRAE design conditions (long-term
+  #          station record), NOT from the TMYx file itself.
+  #
+  # climate_features.py --validate re-reads every .stat file and FAILS if any
+  # label here disagrees with it, so these values cannot silently drift.
+  #
+  # Changes from schema_version 2 (labels had been taken from older editions):
+  #   Colombo  1A -> 0A   169-2021 added Zone 0 "extremely hot" (CDD10 > 6000)
+  #   Chennai  1A -> 0A   same
+  #   Phoenix  2B -> 1B   CDD10 > 5000 under the current edition
+  #
+  # London is 4A, confirmed by its .stat file. ASHRAE's "marine" (C) category
+  # requires a dry summer (Koppen Cs); London is Cfb, so it is Moist (A).
+  #
+  # FILE NAMING (schema_version 4): every EPW and .stat file is named after
+  # its config key - colombo.epw, london.epw. Zone and role are stored ONLY
+  # in the fields below, never in a filename. The earlier zone-prefixed names
+  # (1A_Colombo.epw, HOLDOUT_4A_London.epw) became false when 169-2021
+  # relabelled Colombo, Chennai and Phoenix. climate_features.py rejects any
+  # entry whose epw_filename is not "<key>.epw".
+  #
+  # Remaining collision: London and New York are both 4A. This is one reason
+  # ashrae_zone is recommended for stratification and reporting only, not as
+  # a surrogate input feature (Decision D2).
+
+# ============================================================================
+# CLIMATES
+# ============================================================================
+# role:  training → included in the LHS training campaign
+#        holdout  → out-of-distribution validation ONLY, never seen in training
+#        excluded → present in the config but skipped entirely (use this to
+#                   trim the set without deleting the entry)
+#
+# onebuilding_dir is relative to https://climate.onebuilding.org/
+# wmo is the resolution key: download_epw.py matches ".{wmo}_TMYx" against the
+# directory listing, so a station-name spelling change upstream cannot break it.
+# ============================================================================
+
+climates:
+
+  # ── Zones 0A / 1A — tropical ────────────────────────────────────────────────────
+  colombo:
+    city: "Colombo"
+    country: "Sri Lanka"
+    role: "training"
+    koppen: "Af"
+    ashrae_zone: "0A"
+    wmo: "434660"
+    onebuilding_dir: "WMO_Region_2_Asia/LKA_Sri_Lanka/EP_Nagenahira_Eastern"
+    epw_filename: "colombo.epw"
+    rationale: >
+      Primary local relevance — the thesis targets Sri Lankan practice.
+      Tropical rainforest: near-constant temperature, very high humidity,
+      heating demand expected to be exactly zero.
+
+  chennai:
+    city: "Chennai"
+    country: "India"
+    role: "training"
+    koppen: "Aw"
+    ashrae_zone: "0A"
+    wmo: "432790"
+    onebuilding_dir: "WMO_Region_2_Asia/IND_India/TN_Tamil_Nadu"
+    epw_filename: "chennai.epw"
+    rationale: >
+      Regional South Asian relevance alongside Colombo, but with a pronounced
+      dry season and higher peak temperatures — tests whether the surrogate
+      distinguishes two tropical climates rather than treating "tropical" as
+      one point. Added in Phase 2.3.
+
+  miami:
+    city: "Miami"
+    country: "USA"
+    role: "training"
+    koppen: "Am"
+    ashrae_zone: "1A"
+    wmo: "722020"
+    onebuilding_dir: "WMO_Region_4_North_and_Central_America/USA_United_States_of_America/FL_Florida"
+    epw_filename: "miami.epw"
+    rationale: >
+      Hot-humid North American benchmark; pairs with Phoenix to separate the
+      humidity axis from the temperature axis at near-identical CDD10.
+
+  # ── Zone 1B — hot-dry ─────────────────────────────────────────────────────
+  phoenix:
+    city: "Phoenix"
+    country: "USA"
+    role: "training"
+    koppen: "BWh"
+    ashrae_zone: "1B"
+    wmo: "722780"
+    onebuilding_dir: "WMO_Region_4_North_and_Central_America/USA_United_States_of_America/AZ_Arizona"
+    epw_filename: "phoenix.epw"
+    rationale: >
+      Hot-dry desert. Carries the mean-RH axis, which reconnaissance showed is
+      the only climate feature genuinely orthogonal to the thermal axis
+      (correlation 0.06 with HDD18). High GHI drives shading sensitivity.
+
+  # ── Zone 3A / 3C — warm-humid and marine ──────────────────────────────────
+  atlanta:
+    city: "Atlanta"
+    country: "USA"
+    role: "training"
+    koppen: "Cfa"
+    ashrae_zone: "3A"
+    wmo: "722190"
+    onebuilding_dir: "WMO_Region_4_North_and_Central_America/USA_United_States_of_America/GA_Georgia"
+    epw_filename: "atlanta.epw"
+    rationale: >
+      Warm-humid, genuinely mixed heating and cooling — the regime where
+      passive trade-offs (shading vs. solar gain) are least one-sided.
+
+  san_francisco:
+    city: "San Francisco"
+    country: "USA"
+    role: "training"
+    koppen: "Csb"
+    ashrae_zone: "3C"
+    wmo: "724940"
+    onebuilding_dir: "WMO_Region_4_North_and_Central_America/USA_United_States_of_America/CA_California"
+    epw_filename: "san_francisco.epw"
+    rationale: >
+      RANK BREAKER. Every climate in the original 7-climate set lay on a single
+      hot-to-cold axis, giving the climate feature block an effective rank of 3.
+      San Francisco is the only common climate with LOW HDD *and* LOW CDD
+      simultaneously, breaking the -0.94 HDD/CDD anticorrelation. Added in
+      Phase 2.3 specifically to raise the rank of the climate feature matrix.
+
+  # ── Zone 4A — mixed-humid ─────────────────────────────────────────────────
+  new_york:
+    city: "New York"
+    country: "USA"
+    role: "training"
+    koppen: "Cfa"
+    ashrae_zone: "4A"
+    wmo: "725053"                # Central Park / Belvedere Castle observatory.
+                                 # NOTE: TMY3 indexes this same station as 725033.
+                                 # TMYx uses 725053. Do not "correct" it back —
+                                 # 725033 resolves to nothing in the TMYx set.
+    onebuilding_dir: "WMO_Region_4_North_and_Central_America/USA_United_States_of_America/NY_New_York"
+    epw_filename: "new_york.epw"
+    rationale: >
+      Mixed-humid, balanced heating and cooling. Central Park chosen over JFK:
+      an urban station is more representative of a medium-office setting than
+      a coastal airport. The earlier config declared JFK while the file on disk
+      was Central Park — this entry settles that ambiguity explicitly.
+
+  # ── Zone 5A / 5B — cool-humid and cold-dry ────────────────────────────────
+  chicago:
+    city: "Chicago"
+    country: "USA"
+    role: "training"
+    koppen: "Dfa"
+    ashrae_zone: "5A"
+    wmo: "725300"
+    onebuilding_dir: "WMO_Region_4_North_and_Central_America/USA_United_States_of_America/IL_Illinois"
+    epw_filename: "chicago.epw"
+    rationale: >
+      Cool-humid, heating-dominated. Standard benchmark climate, widely used
+      in the surrogate-modelling literature for comparability.
+
+  denver:
+    city: "Denver"
+    country: "USA"
+    role: "training"
+    koppen: "BSk"
+    ashrae_zone: "5B"
+    wmo: "725650"
+    onebuilding_dir: "WMO_Region_4_North_and_Central_America/USA_United_States_of_America/CO_Colorado"
+    epw_filename: "denver.epw"
+    rationale: >
+      RANK BREAKER. Cold but sunny and dry at high altitude — breaks the -0.87
+      HDD/GHI correlation that holds across the original set, where cold
+      always implied low solar. Critical for learning that insulation and
+      solar-gain control are separable levers. Added in Phase 2.3.
+
+  # ── Zone 6A — cold ────────────────────────────────────────────────────────
+  minneapolis:
+    city: "Minneapolis"
+    country: "USA"
+    role: "training"
+    koppen: "Dfa"
+    ashrae_zone: "6A"
+    wmo: "726580"
+    onebuilding_dir: "WMO_Region_4_North_and_Central_America/USA_United_States_of_America/MN_Minnesota"
+    epw_filename: "minneapolis.epw"
+    rationale: >
+      Coldest climate in the set; anchors the upper end of the HDD18 range.
+      Phase 1 bounds the study at ASHRAE zone 6A.
+
+  # ── HELD-OUT — never used in training ─────────────────────────────────────
+  london:
+    city: "London"
+    country: "United Kingdom"
+    role: "holdout"
+    koppen: "Cfb"
+    ashrae_zone: "4A"            # see metadata note — 4A, not 4C
+    wmo: "037760"                # London Gatwick
+    onebuilding_dir: "WMO_Region_6_Europe/GBR_United_Kingdom/ENG_England"
+    epw_filename: "london.epw"
+    rationale: >
+      HELD OUT. Never appears in any training batch. Temperate oceanic: mild
+      and damp with low solar availability, a combination absent from the
+      training set.
+
+      HONEST FRAMING (carry this into the results chapter), from the 2.3.6
+      coverage report on the final 10-climate set: London is a PARTIAL
+      EXTRAPOLATION - outside the training envelope on annual GHI (49% of the
+      range below the minimum), latitude and CDD10, inside it on HDD18, mean
+      DBT, RH and wind. (An earlier note here, based on the old 7-climate set,
+      called it pure interpolation; that is superseded.)
+
+# ============================================================================
+# SAMPLING CONFIGURATION (consumed by sampling/sampler.py, Sub-task 2.4)
+# ============================================================================
+# Decisions S1-S4 (1 Oct 2026) - see claude/Phase2.4_Execution_Plan.md.
+#
+#   S1  Hybrid replication. 100 ANCHOR designs run in every training climate
+#       (clean "same building, different climate" comparison) plus 200
+#       CLIMATE-SPECIFIC designs per climate, drawn as one sliced Latin
+#       hypercube (Qian 2012): the 2,000 points form an LHS and each climate's
+#       200-point slice is itself an LHS. 2,100 unique training designs
+#       instead of 300, for the same 3,000 runs.
+#   S2  glazing_vt is not sampled (it has no effect on any target without
+#       daylighting controls). It is derived: glazing_vt = glazing_shgc.
+#       See design_space.yaml -> derived_parameters.
+#   S3  n_floors sampled uniformly over the integers 1-5 (floor of U[1, 6)).
+#   S4  The London (out-of-distribution) holdout runs the 100 anchor designs:
+#       only the climate is unseen, so London error isolates climate
+#       generalisation. Design generalisation is measured by holdout_id.
+#
+# Batches written by the sampler:
+#   samples_main.csv     main         100 anchors x 10 + 2,000 specific = 3,000
+#   samples_holdout.csv  holdout_id   300 unseen designs (30 per climate)
+#                        holdout_ood  100 anchors x london             =   100
+#   samples_pilot.csv    pilot        (42 LHS + 8 edge cases) x 4      =   200
+#
+# Changing ANY value here changes every sample. Rebuild with
+#   python sampling/sampler.py --build
+# and re-run the tests; the manifest records the SHA-256 of this file.
+
+sampling:
+  replication_strategy: "hybrid"      # S1
+  master_seed: 20261001               # all sub-seeds derive from this
+
+  n_anchor_designs: 100               # replicated in all training climates
+  n_specific_per_climate: 200         # sliced LHS, one climate each
+  n_holdout_id_per_climate: 30        # sliced LHS, unseen designs (300 total)
+  holdout_ood_designs: "anchors"      # S4 - London runs the anchor designs
+
+  n_candidates: 50                    # best of K candidate designs, scored by
+                                      #   centred L2 discrepancy
+  decorrelate_iterations: 100000      # then within-slice swaps that remove chance
+                                      #   correlation between parameters while
+                                      #   keeping every (sliced) LHS property
+
+  n_pilot_lhs: 42                     # + 8 fixed edge cases = 50 pilot designs
+  pilot_climates:                     # deliberately spans the extremes
+    - colombo                         # zero heating
+    - phoenix                         # extreme cooling, high GHI
+    - san_francisco                   # low heating AND low cooling
+    - minneapolis                     # extreme heating

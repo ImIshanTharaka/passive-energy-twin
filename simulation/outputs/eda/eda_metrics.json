@@ -1,0 +1,4178 @@
+{
+  "created_utc": "2026-10-18T09:41:56+00:00",
+  "fast": false,
+  "dataset_sha256": {
+    "training": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e",
+    "holdout": "d14bc0b03d1e2e804f09b32b6d10e4c73a2f794cfde416dbf3ed8fcd6d501ea4"
+  },
+  "rf_params": {
+    "n_estimators": 300,
+    "min_samples_leaf": 2,
+    "max_features": 0.3333333333333333,
+    "n_jobs": -1,
+    "random_state": 42
+  },
+  "shap_rows_per_climate": {
+    "primary": 100,
+    "secondary": 30
+  },
+  "thresholds": {
+    "r2_pooled_min": 0.85,
+    "design_skill_min": 0.7,
+    "ks_alpha": 0.01,
+    "input_corr_max": 0.15,
+    "physics_alpha": 0.01
+  },
+  "heating_climates": [
+    "atlanta",
+    "chicago",
+    "denver",
+    "minneapolis",
+    "new_york",
+    "phoenix",
+    "san_francisco"
+  ],
+  "decision": {
+    "gate": "NO-GO",
+    "failed_checks": [
+      "R2:eui_kwh_m2"
+    ],
+    "rule": "Option C (plan \u00a75.1, agreed 17 Oct 2026)",
+    "decision": "PROCEED (documented exception)",
+    "rising_with_data": {
+      "eui_kwh_m2": true
+    },
+    "reason": "all data checks pass; only baseline-model checks failed (['R2:eui_kwh_m2']) and design skill still rises with training size, so the shortfall is attributed to the untuned RF, not the dataset. Phase 3 must exceed the thresholds."
+  },
+  "gate": "NO-GO",
+  "checks": [
+    {
+      "id": "G0",
+      "check": "data loaded via load_dataset (sha256 verified)",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "training 3000 rows, holdout 400 rows"
+    },
+    {
+      "id": "C1",
+      "check": "input uniformity per climate (KS / chi2)",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "0/210 (input, climate) pairs with p < 0.01; min p 1"
+    },
+    {
+      "id": "C2",
+      "check": "design-input decorrelation per climate",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "max |rho| 0.033 (floor_area ~ n_floors, phoenix); limit 0.15"
+    },
+    {
+      "id": "P1",
+      "check": "physics direction P1",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "rho +0.65..+0.83"
+    },
+    {
+      "id": "P2",
+      "check": "physics direction P2",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "rho +0.70..+0.74"
+    },
+    {
+      "id": "P3-wall",
+      "check": "physics direction P3-wall",
+      "severity": "FAIL",
+      "status": "WARN",
+      "detail": "rho -0.12..-0.08; not significant in ['atlanta', 'chicago', 'denver', 'minneapolis', 'new_york', 'phoenix', 'san_francisco']"
+    },
+    {
+      "id": "P3-roof",
+      "check": "physics direction P3-roof",
+      "severity": "FAIL",
+      "status": "WARN",
+      "detail": "rho -0.16..-0.13; not significant in ['atlanta', 'phoenix', 'san_francisco']"
+    },
+    {
+      "id": "P4-north",
+      "check": "physics direction P4-north",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "rho +0.27..+0.69"
+    },
+    {
+      "id": "P4-east",
+      "check": "physics direction P4-east",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "rho +0.40..+0.70"
+    },
+    {
+      "id": "P4-south",
+      "check": "physics direction P4-south",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "rho +0.26..+0.67"
+    },
+    {
+      "id": "P4-west",
+      "check": "physics direction P4-west",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "rho +0.24..+0.68"
+    },
+    {
+      "id": "P5-north",
+      "check": "physics direction P5-north",
+      "severity": "WARN",
+      "status": "INFO",
+      "detail": "rho -0.23..-0.13; not significant in ['phoenix']"
+    },
+    {
+      "id": "P5-east",
+      "check": "physics direction P5-east",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "rho -0.26..-0.18"
+    },
+    {
+      "id": "P5-south",
+      "check": "physics direction P5-south",
+      "severity": "WARN",
+      "status": "INFO",
+      "detail": "rho -0.20..-0.14; not significant in ['new_york', 'san_francisco']"
+    },
+    {
+      "id": "P5-west",
+      "check": "physics direction P5-west",
+      "severity": "WARN",
+      "status": "INFO",
+      "detail": "rho -0.13..-0.03; not significant in ['atlanta', 'chennai', 'chicago', 'colombo', 'denver', 'miami', 'minneapolis', 'new_york', 'phoenix', 'san_francisco']"
+    },
+    {
+      "id": "P6",
+      "check": "physics direction P6",
+      "severity": "WARN",
+      "status": "INFO",
+      "detail": "rho +0.06..+0.12; not significant in ['atlanta', 'chicago', 'denver', 'minneapolis', 'new_york', 'phoenix', 'san_francisco']"
+    },
+    {
+      "id": "P7",
+      "check": "physics direction P7",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "rho -0.36..-0.27"
+    },
+    {
+      "id": "O1",
+      "check": "W/SW-facing facades cool more than N-facing (lat > 25)",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "8/8 climates pass"
+    },
+    {
+      "id": "R1:heating_demand_kwh_m2",
+      "check": "pooled R2 >= 0.85",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "R2 0.891"
+    },
+    {
+      "id": "R2:heating_demand_kwh_m2",
+      "check": "design skill >= 0.7",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "skill 0.704 over 7 climates"
+    },
+    {
+      "id": "R1:cooling_demand_kwh_m2",
+      "check": "pooled R2 >= 0.85",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "R2 0.886"
+    },
+    {
+      "id": "R2:cooling_demand_kwh_m2",
+      "check": "design skill >= 0.7",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "skill 0.749 over 10 climates"
+    },
+    {
+      "id": "R1:eui_kwh_m2",
+      "check": "pooled R2 >= 0.85",
+      "severity": "FAIL",
+      "status": "PASS",
+      "detail": "R2 0.977"
+    },
+    {
+      "id": "R2:eui_kwh_m2",
+      "check": "design skill >= 0.7",
+      "severity": "FAIL",
+      "status": "FAIL",
+      "detail": "skill 0.680 over 10 climates"
+    },
+    {
+      "id": "R3:peak_heating_w_m2",
+      "check": "pooled R2 >= 0.85",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "R2 0.930, design skill 0.764"
+    },
+    {
+      "id": "R3:peak_cooling_w_m2",
+      "check": "pooled R2 >= 0.85",
+      "severity": "WARN",
+      "status": "WARN",
+      "detail": "R2 0.776, design skill 0.745"
+    },
+    {
+      "id": "R3:zone_cooling_core_kwh_m2",
+      "check": "pooled R2 >= 0.85",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "R2 0.965, design skill 0.868"
+    },
+    {
+      "id": "R3:zone_cooling_south_kwh_m2",
+      "check": "pooled R2 >= 0.85",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "R2 0.881, design skill 0.830"
+    },
+    {
+      "id": "R3:zone_cooling_east_kwh_m2",
+      "check": "pooled R2 >= 0.85",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "R2 0.888, design skill 0.852"
+    },
+    {
+      "id": "R3:zone_cooling_north_kwh_m2",
+      "check": "pooled R2 >= 0.85",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "R2 0.886, design skill 0.826"
+    },
+    {
+      "id": "R3:zone_cooling_west_kwh_m2",
+      "check": "pooled R2 >= 0.85",
+      "severity": "WARN",
+      "status": "PASS",
+      "detail": "R2 0.876, design skill 0.766"
+    }
+  ],
+  "signal_grouped": [
+    {
+      "target": "heating_demand_kwh_m2",
+      "r2": 0.8907731258129642,
+      "mae": 1.231635640034786,
+      "rmse": 2.3140867833461223,
+      "cv_rmse": 0.42618142994535047,
+      "n": 3000,
+      "climate_only_r2": 0.6305884546961587,
+      "design_skill": 0.7043208071954214,
+      "skill_climates": 7,
+      "within_r2_mean": 0.6865053715771519
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "r2": 0.8858441852594758,
+      "mae": 4.783946878899682,
+      "rmse": 6.844567892103612,
+      "cv_rmse": 0.09609398423940557,
+      "n": 3000,
+      "climate_only_r2": 0.5453949892911824,
+      "design_skill": 0.7488901088825812,
+      "skill_climates": 10,
+      "within_r2_mean": 0.7531127731449955
+    },
+    {
+      "target": "eui_kwh_m2",
+      "r2": 0.9774691917382868,
+      "mae": 5.861000671627534,
+      "rmse": 8.023794238499823,
+      "cv_rmse": 0.05551884136553069,
+      "n": 3000,
+      "climate_only_r2": 0.9296258189873791,
+      "design_skill": 0.6798426931935092,
+      "skill_climates": 10,
+      "within_r2_mean": 0.660766561112317
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "r2": 0.9302068617578126,
+      "mae": 1.0277795750606362,
+      "rmse": 1.6625742980734128,
+      "cv_rmse": 0.22354529740493442,
+      "n": 3000,
+      "climate_only_r2": 0.7054305697938362,
+      "design_skill": 0.7644026854481436,
+      "skill_climates": 7,
+      "within_r2_mean": 0.7715448835002305
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "r2": 0.7759138655169053,
+      "mae": 1.9483016562380309,
+      "rmse": 2.7579244055905114,
+      "cv_rmse": 0.10473203065071741,
+      "n": 3000,
+      "climate_only_r2": 0.12216891877330216,
+      "design_skill": 0.744727500227091,
+      "skill_climates": 10,
+      "within_r2_mean": 0.7536160797340938
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "r2": 0.9648115658260585,
+      "mae": 0.8974703010416903,
+      "rmse": 1.2984715469732477,
+      "cv_rmse": 0.02299617907482117,
+      "n": 3000,
+      "climate_only_r2": 0.7333627683153472,
+      "design_skill": 0.8680288047111209,
+      "skill_climates": 10,
+      "within_r2_mean": 0.8486969550735104
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "r2": 0.8806422536856015,
+      "mae": 16.468953383290135,
+      "rmse": 24.145451540916337,
+      "cv_rmse": 0.2156933121475663,
+      "n": 3000,
+      "climate_only_r2": 0.2976692637810533,
+      "design_skill": 0.8300547873542166,
+      "skill_climates": 10,
+      "within_r2_mean": 0.8351914135167735
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "r2": 0.8882907454056239,
+      "mae": 19.254150961600825,
+      "rmse": 27.742176638003315,
+      "cv_rmse": 0.20894642189701443,
+      "n": 3000,
+      "climate_only_r2": 0.24408398923312336,
+      "design_skill": 0.8522200178283734,
+      "skill_climates": 10,
+      "within_r2_mean": 0.8572672081202282
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "r2": 0.8856608360659032,
+      "mae": 16.46437922156581,
+      "rmse": 24.698944579032908,
+      "cv_rmse": 0.2214797531798372,
+      "n": 3000,
+      "climate_only_r2": 0.3446189759242504,
+      "design_skill": 0.8255378783733578,
+      "skill_climates": 10,
+      "within_r2_mean": 0.8306658130592226
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "r2": 0.8757776248572695,
+      "mae": 15.180052929967331,
+      "rmse": 22.389113754538528,
+      "cv_rmse": 0.2315516270176131,
+      "n": 3000,
+      "climate_only_r2": 0.46871741197820715,
+      "design_skill": 0.7661839895689657,
+      "skill_climates": 10,
+      "within_r2_mean": 0.7579163371243506
+    }
+  ],
+  "signal_random": [
+    {
+      "target": "heating_demand_kwh_m2",
+      "r2": 0.8879240113113112,
+      "mae": 1.050882602860628,
+      "rmse": 2.0955970596472935,
+      "cv_rmse": 0.4349717137581292,
+      "n": 600,
+      "climate_only_r2": 0.6225227066488237,
+      "design_skill": 0.7030919848396863,
+      "skill_climates": 7,
+      "within_r2_mean": 0.7264268383308339
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "r2": 0.9173744152904306,
+      "mae": 3.949397945604425,
+      "rmse": 5.921553362272735,
+      "cv_rmse": 0.0812419068344721,
+      "n": 600,
+      "climate_only_r2": 0.5415733618690668,
+      "design_skill": 0.8197626886464432,
+      "skill_climates": 10,
+      "within_r2_mean": 0.838615476759079
+    },
+    {
+      "target": "eui_kwh_m2",
+      "r2": 0.9801032747447063,
+      "mae": 5.640799043009295,
+      "rmse": 7.85473583146901,
+      "cv_rmse": 0.05320007135575554,
+      "n": 600,
+      "climate_only_r2": 0.9318582269036625,
+      "design_skill": 0.7080098689659262,
+      "skill_climates": 10,
+      "within_r2_mean": 0.6849563672838024
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "r2": 0.9483316753861643,
+      "mae": 0.842491877632046,
+      "rmse": 1.3567821908602278,
+      "cv_rmse": 0.19511052041622823,
+      "n": 600,
+      "climate_only_r2": 0.7153067337373475,
+      "design_skill": 0.8226359415581352,
+      "skill_climates": 7,
+      "within_r2_mean": 0.8309966317040157
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "r2": 0.8227263344203646,
+      "mae": 1.5945383569827314,
+      "rmse": 2.507187853566614,
+      "cv_rmse": 0.09395998327534978,
+      "n": 600,
+      "climate_only_r2": 0.13260136372017117,
+      "design_skill": 0.7956260729899907,
+      "skill_climates": 10,
+      "within_r2_mean": 0.8210855382476044
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "r2": 0.9744755908125597,
+      "mae": 0.7433894209683183,
+      "rmse": 1.096147579023387,
+      "cv_rmse": 0.019297092569190842,
+      "n": 600,
+      "climate_only_r2": 0.7551861155523557,
+      "design_skill": 0.8957395359947449,
+      "skill_climates": 10,
+      "within_r2_mean": 0.8671225728304919
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "r2": 0.9167195113320821,
+      "mae": 12.979750183386829,
+      "rmse": 20.139755573023905,
+      "cv_rmse": 0.17288878419151618,
+      "n": 600,
+      "climate_only_r2": 0.27525818880130126,
+      "design_skill": 0.8850894382232829,
+      "skill_climates": 10,
+      "within_r2_mean": 0.892760211551338
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "r2": 0.9196800227713193,
+      "mae": 15.910872972396765,
+      "rmse": 22.652982217347592,
+      "cv_rmse": 0.1667548305760801,
+      "n": 600,
+      "climate_only_r2": 0.19678745074726833,
+      "design_skill": 0.900001590732856,
+      "skill_climates": 10,
+      "within_r2_mean": 0.9034455545240586
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "r2": 0.9143026968707666,
+      "mae": 13.738355589204541,
+      "rmse": 22.057757086957402,
+      "cv_rmse": 0.19153771881544587,
+      "n": 600,
+      "climate_only_r2": 0.3660090295720311,
+      "design_skill": 0.8648288270235389,
+      "skill_climates": 10,
+      "within_r2_mean": 0.8773662774118935
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "r2": 0.9011737529030968,
+      "mae": 12.8711832010163,
+      "rmse": 20.100525222412163,
+      "cv_rmse": 0.19875642136949367,
+      "n": 600,
+      "climate_only_r2": 0.43987166777995534,
+      "design_skill": 0.8235649914275722,
+      "skill_climates": 10,
+      "within_r2_mean": 0.8248405871132842
+    }
+  ],
+  "leakage_gap": [
+    {
+      "target": "heating_demand_kwh_m2",
+      "r2_grouped": 0.8907731258129642,
+      "design_skill_grouped": 0.7043208071954214,
+      "r2_random": 0.8879240113113112,
+      "design_skill_random": 0.7030919848396863,
+      "r2_gap": -0.0028491145016530384,
+      "skill_gap": -0.0012288223557351818
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "r2_grouped": 0.8858441852594758,
+      "design_skill_grouped": 0.7488901088825812,
+      "r2_random": 0.9173744152904306,
+      "design_skill_random": 0.8197626886464432,
+      "r2_gap": 0.03153023003095479,
+      "skill_gap": 0.07087257976386196
+    },
+    {
+      "target": "eui_kwh_m2",
+      "r2_grouped": 0.9774691917382868,
+      "design_skill_grouped": 0.6798426931935092,
+      "r2_random": 0.9801032747447063,
+      "design_skill_random": 0.7080098689659262,
+      "r2_gap": 0.00263408300641943,
+      "skill_gap": 0.028167175772417008
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "r2_grouped": 0.9302068617578126,
+      "design_skill_grouped": 0.7644026854481436,
+      "r2_random": 0.9483316753861643,
+      "design_skill_random": 0.8226359415581352,
+      "r2_gap": 0.01812481362835161,
+      "skill_gap": 0.05823325610999164
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "r2_grouped": 0.7759138655169053,
+      "design_skill_grouped": 0.744727500227091,
+      "r2_random": 0.8227263344203646,
+      "design_skill_random": 0.7956260729899907,
+      "r2_gap": 0.04681246890345925,
+      "skill_gap": 0.05089857276289966
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "r2_grouped": 0.9648115658260585,
+      "design_skill_grouped": 0.8680288047111209,
+      "r2_random": 0.9744755908125597,
+      "design_skill_random": 0.8957395359947449,
+      "r2_gap": 0.009664024986501207,
+      "skill_gap": 0.027710731283624
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "r2_grouped": 0.8806422536856015,
+      "design_skill_grouped": 0.8300547873542166,
+      "r2_random": 0.9167195113320821,
+      "design_skill_random": 0.8850894382232829,
+      "r2_gap": 0.03607725764648062,
+      "skill_gap": 0.05503465086906634
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "r2_grouped": 0.8882907454056239,
+      "design_skill_grouped": 0.8522200178283734,
+      "r2_random": 0.9196800227713193,
+      "design_skill_random": 0.900001590732856,
+      "r2_gap": 0.03138927736569541,
+      "skill_gap": 0.047781572904482594
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "r2_grouped": 0.8856608360659032,
+      "design_skill_grouped": 0.8255378783733578,
+      "r2_random": 0.9143026968707666,
+      "design_skill_random": 0.8648288270235389,
+      "r2_gap": 0.028641860804863417,
+      "skill_gap": 0.03929094865018112
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "r2_grouped": 0.8757776248572695,
+      "design_skill_grouped": 0.7661839895689657,
+      "r2_random": 0.9011737529030968,
+      "design_skill_random": 0.8235649914275722,
+      "r2_gap": 0.02539612804582725,
+      "skill_gap": 0.057381001858606506
+    }
+  ],
+  "per_climate": [
+    {
+      "target": "heating_demand_kwh_m2",
+      "climate_key": "atlanta",
+      "r2": 0.6891786408621575,
+      "mae": 1.0084488650253938,
+      "rmse": 1.3749192505018648,
+      "cv_rmse": 0.3677387551834324,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "heating_demand_kwh_m2",
+      "climate_key": "chennai",
+      "r2": 0.7217772601942655,
+      "mae": 0.03087484429034715,
+      "rmse": 0.04268847175547943,
+      "cv_rmse": 0.0768806090824147,
+      "n": 300,
+      "in_skill_set": false
+    },
+    {
+      "target": "heating_demand_kwh_m2",
+      "climate_key": "chicago",
+      "r2": 0.7163695139232267,
+      "mae": 2.704447805990661,
+      "rmse": 3.6411702144235827,
+      "cv_rmse": 0.2957236961262494,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "heating_demand_kwh_m2",
+      "climate_key": "colombo",
+      "r2": 0.730605218642619,
+      "mae": 0.02962567702007415,
+      "rmse": 0.03887598963173724,
+      "cv_rmse": 0.08349763882578792,
+      "n": 300,
+      "in_skill_set": false
+    },
+    {
+      "target": "heating_demand_kwh_m2",
+      "climate_key": "denver",
+      "r2": 0.7119213284563835,
+      "mae": 2.1107413807106665,
+      "rmse": 2.8452857218383163,
+      "cv_rmse": 0.3194529884376535,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "heating_demand_kwh_m2",
+      "climate_key": "miami",
+      "r2": 0.6942909802105884,
+      "mae": 0.02588933168299172,
+      "rmse": 0.03878158989706318,
+      "cv_rmse": 0.12583521096833714,
+      "n": 300,
+      "in_skill_set": false
+    },
+    {
+      "target": "heating_demand_kwh_m2",
+      "climate_key": "minneapolis",
+      "r2": 0.6886657871074315,
+      "mae": 3.7737628389509776,
+      "rmse": 4.9046553658242145,
+      "cv_rmse": 0.2888168463331362,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "heating_demand_kwh_m2",
+      "climate_key": "new_york",
+      "r2": 0.7368440978136859,
+      "mae": 1.8085373257236366,
+      "rmse": 2.3226916292166417,
+      "cv_rmse": 0.2866615375447941,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "heating_demand_kwh_m2",
+      "climate_key": "phoenix",
+      "r2": 0.6105400957516447,
+      "mae": 0.24600934641634897,
+      "rmse": 0.39377535045415246,
+      "cv_rmse": 0.32675874134624155,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "heating_demand_kwh_m2",
+      "climate_key": "san_francisco",
+      "r2": 0.6520181371255342,
+      "mae": 0.578018984536766,
+      "rmse": 0.8338853310837983,
+      "cv_rmse": 0.4844675497092101,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "climate_key": "atlanta",
+      "r2": 0.743954441008774,
+      "mae": 4.1517342406511535,
+      "rmse": 5.778672934359053,
+      "cv_rmse": 0.08869483080106774,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "climate_key": "chennai",
+      "r2": 0.7338397928855109,
+      "mae": 6.111858385267249,
+      "rmse": 8.594059415652438,
+      "cv_rmse": 0.09107593536243799,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "climate_key": "chicago",
+      "r2": 0.769638107949569,
+      "mae": 3.5116105043139565,
+      "rmse": 4.897064866087413,
+      "cv_rmse": 0.08542736497280577,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "climate_key": "colombo",
+      "r2": 0.7425883020207161,
+      "mae": 5.758921780666617,
+      "rmse": 7.567316986315076,
+      "cv_rmse": 0.08258618344115735,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "climate_key": "denver",
+      "r2": 0.6939656455279497,
+      "mae": 4.947400749549672,
+      "rmse": 7.911149917447255,
+      "cv_rmse": 0.13423984918736975,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "climate_key": "miami",
+      "r2": 0.7786212435297111,
+      "mae": 5.166262618354235,
+      "rmse": 6.494881731614789,
+      "cv_rmse": 0.07971274413712774,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "climate_key": "minneapolis",
+      "r2": 0.7344477551374984,
+      "mae": 4.268219201201689,
+      "rmse": 5.778402451959849,
+      "cv_rmse": 0.1040997926681183,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "climate_key": "new_york",
+      "r2": 0.7962090890845074,
+      "mae": 3.3101769131182315,
+      "rmse": 4.5485467974183935,
+      "cv_rmse": 0.07709123300465358,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "climate_key": "phoenix",
+      "r2": 0.749430296285762,
+      "mae": 6.487278020338948,
+      "rmse": 9.305990090769878,
+      "cv_rmse": 0.105408469362846,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "climate_key": "san_francisco",
+      "r2": 0.7884330580199566,
+      "mae": 4.126006375535067,
+      "rmse": 5.876580752567005,
+      "cv_rmse": 0.09696675075745322,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "eui_kwh_m2",
+      "climate_key": "atlanta",
+      "r2": 0.697217161672772,
+      "mae": 4.315641753374795,
+      "rmse": 5.80303649987028,
+      "cv_rmse": 0.048113875531606995,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "eui_kwh_m2",
+      "climate_key": "chennai",
+      "r2": 0.7167958278739794,
+      "mae": 7.5173653844933215,
+      "rmse": 10.574800409938254,
+      "cv_rmse": 0.04476963233385367,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "eui_kwh_m2",
+      "climate_key": "chicago",
+      "r2": 0.6273590405040448,
+      "mae": 5.270983642633028,
+      "rmse": 6.937749407852084,
+      "cv_rmse": 0.05944509510528061,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "eui_kwh_m2",
+      "climate_key": "colombo",
+      "r2": 0.712622658283935,
+      "mae": 7.593215949411152,
+      "rmse": 9.783303734340848,
+      "cv_rmse": 0.04225698052591246,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "eui_kwh_m2",
+      "climate_key": "denver",
+      "r2": 0.583366300953434,
+      "mae": 5.373671439294652,
+      "rmse": 7.240941648158381,
+      "cv_rmse": 0.07262570721569962,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "eui_kwh_m2",
+      "climate_key": "miami",
+      "r2": 0.7248845216709376,
+      "mae": 6.065128570970482,
+      "rmse": 8.145530755405346,
+      "cv_rmse": 0.045087248826956486,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "eui_kwh_m2",
+      "climate_key": "minneapolis",
+      "r2": 0.5979679041696082,
+      "mae": 6.029984178985224,
+      "rmse": 7.63454302613112,
+      "cv_rmse": 0.06075967450706605,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "eui_kwh_m2",
+      "climate_key": "new_york",
+      "r2": 0.6002544909995183,
+      "mae": 4.427810842432911,
+      "rmse": 5.621708796768468,
+      "cv_rmse": 0.051655524615136776,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "eui_kwh_m2",
+      "climate_key": "phoenix",
+      "r2": 0.6804568003451823,
+      "mae": 7.615503913769435,
+      "rmse": 10.458246594681121,
+      "cv_rmse": 0.07145029656171116,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "eui_kwh_m2",
+      "climate_key": "san_francisco",
+      "r2": 0.6667409046497581,
+      "mae": 4.400701040910335,
+      "rmse": 6.034900048591806,
+      "cv_rmse": 0.07641220028316503,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "climate_key": "atlanta",
+      "r2": 0.7276134830810135,
+      "mae": 1.3707245494862037,
+      "rmse": 1.88858636102056,
+      "cv_rmse": 0.22081316158609407,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "climate_key": "chennai",
+      "r2": 0.7322921435266913,
+      "mae": 0.07378132918732681,
+      "rmse": 0.09308845947467538,
+      "cv_rmse": 0.15428442154605038,
+      "n": 300,
+      "in_skill_set": false
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "climate_key": "chicago",
+      "r2": 0.7423694507485488,
+      "mae": 1.8063983019332703,
+      "rmse": 2.6007931366735284,
+      "cv_rmse": 0.20040379195007313,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "climate_key": "colombo",
+      "r2": 0.6794055855075967,
+      "mae": 0.05952956465197732,
+      "rmse": 0.08106890242634787,
+      "cv_rmse": 0.16524468283148416,
+      "n": 300,
+      "in_skill_set": false
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "climate_key": "denver",
+      "r2": 0.8036235954970066,
+      "mae": 1.5869219632803058,
+      "rmse": 2.07086673967696,
+      "cv_rmse": 0.16258453733620018,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "climate_key": "miami",
+      "r2": 0.567935399906676,
+      "mae": 0.37889941017499834,
+      "rmse": 0.5800868630847825,
+      "cv_rmse": 0.4882758257253996,
+      "n": 300,
+      "in_skill_set": false
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "climate_key": "minneapolis",
+      "r2": 0.7285056870856377,
+      "mae": 2.158527448816807,
+      "rmse": 2.780179673403607,
+      "cv_rmse": 0.17979801886664293,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "climate_key": "new_york",
+      "r2": 0.8259481298859991,
+      "mae": 1.3613860837663185,
+      "rmse": 1.6853957216177373,
+      "cv_rmse": 0.15169401136081917,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "climate_key": "phoenix",
+      "r2": 0.7742617696068792,
+      "mae": 0.71185368748571,
+      "rmse": 1.0336302952402554,
+      "cv_rmse": 0.20820949618584292,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "climate_key": "san_francisco",
+      "r2": 0.7984920685965282,
+      "mae": 0.7697734118234438,
+      "rmse": 1.0159098339900936,
+      "cv_rmse": 0.16162541538158448,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "climate_key": "atlanta",
+      "r2": 0.7827327575135081,
+      "mae": 1.6621426193100073,
+      "rmse": 2.285455784357602,
+      "cv_rmse": 0.0891271676194327,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "climate_key": "chennai",
+      "r2": 0.7562932368447353,
+      "mae": 2.015788993157959,
+      "rmse": 2.729401434158535,
+      "cv_rmse": 0.09670637961047181,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "climate_key": "chicago",
+      "r2": 0.7569058561825935,
+      "mae": 1.93954438965123,
+      "rmse": 2.7313622141211193,
+      "cv_rmse": 0.1038567500053564,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "climate_key": "colombo",
+      "r2": 0.7692019695190668,
+      "mae": 1.697563733404835,
+      "rmse": 2.2121119975854016,
+      "cv_rmse": 0.08114353368429035,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "climate_key": "denver",
+      "r2": 0.7476293611059828,
+      "mae": 1.9044127613473218,
+      "rmse": 2.9316914762384356,
+      "cv_rmse": 0.11723958407713708,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "climate_key": "miami",
+      "r2": 0.7833945463579427,
+      "mae": 1.7239235043625043,
+      "rmse": 2.3923948994579587,
+      "cv_rmse": 0.09055181537995655,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "climate_key": "minneapolis",
+      "r2": 0.7760218136683086,
+      "mae": 1.892975089781826,
+      "rmse": 2.6258479472335208,
+      "cv_rmse": 0.1067964060331962,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "climate_key": "new_york",
+      "r2": 0.77491327699029,
+      "mae": 1.7487575375921578,
+      "rmse": 2.3256743843871543,
+      "cv_rmse": 0.09117626257810675,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "climate_key": "phoenix",
+      "r2": 0.6283490627573518,
+      "mae": 2.7968584352276675,
+      "rmse": 4.167926407073825,
+      "cv_rmse": 0.13428685869075857,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "climate_key": "san_francisco",
+      "r2": 0.7607189164011583,
+      "mae": 2.101049498544797,
+      "rmse": 2.6534757052058375,
+      "cv_rmse": 0.1136600468707957,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "climate_key": "atlanta",
+      "r2": 0.7901345338747614,
+      "mae": 0.7049800250797658,
+      "rmse": 0.8908569592964364,
+      "cv_rmse": 0.016429631907804977,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "climate_key": "chennai",
+      "r2": 0.8918350354733969,
+      "mae": 1.0601590084127375,
+      "rmse": 1.6489454261941885,
+      "cv_rmse": 0.024944828496044246,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "climate_key": "chicago",
+      "r2": 0.8878569862476028,
+      "mae": 0.9638270316077047,
+      "rmse": 1.2544698402254373,
+      "cv_rmse": 0.024322080092369074,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "climate_key": "colombo",
+      "r2": 0.8725075629668876,
+      "mae": 1.1274005471687796,
+      "rmse": 1.7590957491143746,
+      "cv_rmse": 0.026671782703663806,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "climate_key": "denver",
+      "r2": 0.8766129059675252,
+      "mae": 1.0002059020262153,
+      "rmse": 1.418170189539922,
+      "cv_rmse": 0.02779904954093109,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "climate_key": "miami",
+      "r2": 0.8170576886468808,
+      "mae": 0.5425571682564144,
+      "rmse": 0.784114566017139,
+      "cv_rmse": 0.012892311345214598,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "climate_key": "minneapolis",
+      "r2": 0.8462789468957106,
+      "mae": 1.2770699819614788,
+      "rmse": 1.70911404925783,
+      "cv_rmse": 0.03389371979696307,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "climate_key": "new_york",
+      "r2": 0.881216224875143,
+      "mae": 0.86045509908536,
+      "rmse": 1.108309485502807,
+      "cv_rmse": 0.021156163573078555,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "climate_key": "phoenix",
+      "r2": 0.7593005973105338,
+      "mae": 0.6541074249283741,
+      "rmse": 0.8808059177633529,
+      "cv_rmse": 0.014583392266366338,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "climate_key": "san_francisco",
+      "r2": 0.8641690684766615,
+      "mae": 0.7839408218900741,
+      "rmse": 1.062187297503123,
+      "cv_rmse": 0.02052793256232201,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "climate_key": "atlanta",
+      "r2": 0.8659370533691737,
+      "mae": 11.224880060775247,
+      "rmse": 16.509231372794385,
+      "cv_rmse": 0.18786769684856083,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "climate_key": "chennai",
+      "r2": 0.8340877885999041,
+      "mae": 18.31222566341656,
+      "rmse": 26.28720934641301,
+      "cv_rmse": 0.15269099542775233,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "climate_key": "chicago",
+      "r2": 0.8608289613124334,
+      "mae": 12.311578686034272,
+      "rmse": 17.60945380072965,
+      "cv_rmse": 0.23175885487740389,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "climate_key": "colombo",
+      "r2": 0.833172423694872,
+      "mae": 18.577864511627993,
+      "rmse": 24.226553305510897,
+      "cv_rmse": 0.15080667906844936,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "climate_key": "denver",
+      "r2": 0.7979746910050372,
+      "mae": 18.80764868071135,
+      "rmse": 29.871590505186603,
+      "cv_rmse": 0.3567414274597859,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "climate_key": "miami",
+      "r2": 0.8513889673246648,
+      "mae": 18.62641556480431,
+      "rmse": 23.946935663452564,
+      "cv_rmse": 0.17204536565571638,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "climate_key": "minneapolis",
+      "r2": 0.8485394208694712,
+      "mae": 14.199548139976747,
+      "rmse": 18.81000609035461,
+      "cv_rmse": 0.26464261670441963,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "climate_key": "new_york",
+      "r2": 0.8373744793050263,
+      "mae": 12.074848241790576,
+      "rmse": 18.451240268897347,
+      "cv_rmse": 0.23282226724628285,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "climate_key": "phoenix",
+      "r2": 0.8197351569327288,
+      "mae": 22.171012378789847,
+      "rmse": 31.706563282382767,
+      "cv_rmse": 0.20210440806225902,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "climate_key": "san_francisco",
+      "r2": 0.8028751927544243,
+      "mae": 18.38351190497445,
+      "rmse": 28.356640464649644,
+      "cv_rmse": 0.3061078753358349,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "climate_key": "atlanta",
+      "r2": 0.8407003498667702,
+      "mae": 16.8095724651062,
+      "rmse": 24.77027042147668,
+      "cv_rmse": 0.21787442775252475,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "climate_key": "chennai",
+      "r2": 0.8441664363135607,
+      "mae": 20.53017722205956,
+      "rmse": 30.066673632161987,
+      "cv_rmse": 0.15986840815469552,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "climate_key": "chicago",
+      "r2": 0.8866805805347139,
+      "mae": 14.233909985561764,
+      "rmse": 19.102628302117434,
+      "cv_rmse": 0.21123863178822505,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "climate_key": "colombo",
+      "r2": 0.8468731898897239,
+      "mae": 20.473682761098427,
+      "rmse": 26.245935077509575,
+      "cv_rmse": 0.15071748890369216,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "climate_key": "denver",
+      "r2": 0.848871400028983,
+      "mae": 19.97069533982073,
+      "rmse": 30.447021328800453,
+      "cv_rmse": 0.2886819181980211,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "climate_key": "miami",
+      "r2": 0.8792753767026944,
+      "mae": 20.425773881571086,
+      "rmse": 24.951819330382936,
+      "cv_rmse": 0.15526569721854888,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "climate_key": "minneapolis",
+      "r2": 0.8700043787129179,
+      "mae": 16.553919760056743,
+      "rmse": 21.63680214741197,
+      "cv_rmse": 0.2477990920693381,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "climate_key": "new_york",
+      "r2": 0.8916991119397046,
+      "mae": 14.48911133731756,
+      "rmse": 19.968513461905456,
+      "cv_rmse": 0.20515254288954707,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "climate_key": "phoenix",
+      "r2": 0.8319293985061228,
+      "mae": 28.25237339458815,
+      "rmse": 41.675274632778965,
+      "cv_rmse": 0.20820493375136173,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "climate_key": "san_francisco",
+      "r2": 0.8324718587070892,
+      "mae": 20.802293468828005,
+      "rmse": 31.170776722587995,
+      "cv_rmse": 0.282356347700215,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "climate_key": "atlanta",
+      "r2": 0.7747270495650667,
+      "mae": 19.285426919284895,
+      "rmse": 28.380096245202456,
+      "cv_rmse": 0.2742962499493625,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "climate_key": "chennai",
+      "r2": 0.8415777170959584,
+      "mae": 18.558912641442618,
+      "rmse": 25.495482770529243,
+      "cv_rmse": 0.14833397926272585,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "climate_key": "chicago",
+      "r2": 0.8599735755434655,
+      "mae": 10.640841851787714,
+      "rmse": 15.633114183005969,
+      "cv_rmse": 0.226302501699297,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "climate_key": "colombo",
+      "r2": 0.8286493854813182,
+      "mae": 18.38142687057493,
+      "rmse": 25.391397211581065,
+      "cv_rmse": 0.15451729714137452,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "climate_key": "denver",
+      "r2": 0.7888174962393341,
+      "mae": 16.1912862350548,
+      "rmse": 26.484074563934243,
+      "cv_rmse": 0.3462140213817657,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "climate_key": "miami",
+      "r2": 0.8663931292688523,
+      "mae": 18.119659803577168,
+      "rmse": 22.063094800561476,
+      "cv_rmse": 0.15976671191737657,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "climate_key": "minneapolis",
+      "r2": 0.8399417528331803,
+      "mae": 13.031075830504214,
+      "rmse": 18.09770607821675,
+      "cv_rmse": 0.27055219074416753,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "climate_key": "new_york",
+      "r2": 0.8551023947039703,
+      "mae": 11.02391811634938,
+      "rmse": 17.32073545630184,
+      "cv_rmse": 0.23059926569281425,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "climate_key": "phoenix",
+      "r2": 0.8101892417117662,
+      "mae": 25.653472718982567,
+      "rmse": 38.43536877896212,
+      "cv_rmse": 0.22314638186120428,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "climate_key": "san_francisco",
+      "r2": 0.8412863881493132,
+      "mae": 13.757771228099818,
+      "rmse": 21.513090068020702,
+      "cv_rmse": 0.2772726749353004,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "climate_key": "atlanta",
+      "r2": 0.6730137654249906,
+      "mae": 14.785210027537477,
+      "rmse": 22.453042576410926,
+      "cv_rmse": 0.2759539911767271,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "climate_key": "chennai",
+      "r2": 0.804940901543201,
+      "mae": 19.141919652712854,
+      "rmse": 27.553657768761845,
+      "cv_rmse": 0.16571922963046412,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "climate_key": "chicago",
+      "r2": 0.7881727419693281,
+      "mae": 9.460910377123215,
+      "rmse": 13.828346115075592,
+      "cv_rmse": 0.2361876596256569,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "climate_key": "colombo",
+      "r2": 0.8138803842357869,
+      "mae": 20.550083902360008,
+      "rmse": 26.327942577219325,
+      "cv_rmse": 0.16265778601968597,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "climate_key": "denver",
+      "r2": 0.707743307265011,
+      "mae": 14.237141703073435,
+      "rmse": 21.89115235001384,
+      "cv_rmse": 0.3741459440350174,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "climate_key": "miami",
+      "r2": 0.775783006831675,
+      "mae": 17.60555670293613,
+      "rmse": 23.16579102903173,
+      "cv_rmse": 0.1889853697281479,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "climate_key": "minneapolis",
+      "r2": 0.7821526964794607,
+      "mae": 11.260415261041386,
+      "rmse": 15.125368778552707,
+      "cv_rmse": 0.2797671551543606,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "climate_key": "new_york",
+      "r2": 0.7717265385750353,
+      "mae": 10.010909680800738,
+      "rmse": 15.399481534853468,
+      "cv_rmse": 0.24955019550085825,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "climate_key": "phoenix",
+      "r2": 0.7446570307936478,
+      "mae": 21.45472435758408,
+      "rmse": 30.985269213126095,
+      "cv_rmse": 0.22246188070686063,
+      "n": 300,
+      "in_skill_set": true
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "climate_key": "san_francisco",
+      "r2": 0.7170929981253693,
+      "mae": 13.293657634503989,
+      "rmse": 20.569713354374063,
+      "cv_rmse": 0.32791237922627575,
+      "n": 300,
+      "in_skill_set": true
+    }
+  ],
+  "learning_curve": [
+    {
+      "fraction": 0.4,
+      "n_designs": 840,
+      "n_rows": 1236,
+      "target": "heating_demand_kwh_m2",
+      "design_skill": 0.6243621368357257,
+      "r2": 0.8618864619217124
+    },
+    {
+      "fraction": 0.4,
+      "n_designs": 840,
+      "n_rows": 1236,
+      "target": "cooling_demand_kwh_m2",
+      "design_skill": 0.6407581527613492,
+      "r2": 0.8410570644314423
+    },
+    {
+      "fraction": 0.4,
+      "n_designs": 840,
+      "n_rows": 1236,
+      "target": "eui_kwh_m2",
+      "design_skill": 0.5400015946214463,
+      "r2": 0.9683844315059434
+    },
+    {
+      "fraction": 0.7,
+      "n_designs": 1470,
+      "n_rows": 2145,
+      "target": "heating_demand_kwh_m2",
+      "design_skill": 0.6584132364283874,
+      "r2": 0.8763846769195538
+    },
+    {
+      "fraction": 0.7,
+      "n_designs": 1470,
+      "n_rows": 2145,
+      "target": "cooling_demand_kwh_m2",
+      "design_skill": 0.7292564198813539,
+      "r2": 0.874687131125745
+    },
+    {
+      "fraction": 0.7,
+      "n_designs": 1470,
+      "n_rows": 2145,
+      "target": "eui_kwh_m2",
+      "design_skill": 0.6499278259001213,
+      "r2": 0.9748609379144837
+    },
+    {
+      "fraction": 1.0,
+      "n_designs": 2100,
+      "n_rows": 3000,
+      "target": "heating_demand_kwh_m2",
+      "design_skill": 0.7043208071954214,
+      "r2": 0.8907731258129642
+    },
+    {
+      "fraction": 1.0,
+      "n_designs": 2100,
+      "n_rows": 3000,
+      "target": "cooling_demand_kwh_m2",
+      "design_skill": 0.7488901088825812,
+      "r2": 0.8858441852594758
+    },
+    {
+      "fraction": 1.0,
+      "n_designs": 2100,
+      "n_rows": 3000,
+      "target": "eui_kwh_m2",
+      "design_skill": 0.6798426931935093,
+      "r2": 0.9774691917382868
+    }
+  ],
+  "physics": [
+    {
+      "rule": "P1",
+      "x": "glazing_shgc",
+      "y": "cooling_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "atlanta",
+      "rho": 0.8286611311953758,
+      "p": 4.444396648881846e-77,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P1",
+      "x": "glazing_shgc",
+      "y": "cooling_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "chennai",
+      "rho": 0.6521716859648867,
+      "p": 1.0040769564080864e-37,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P1",
+      "x": "glazing_shgc",
+      "y": "cooling_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "chicago",
+      "rho": 0.7472791358302244,
+      "p": 7.858729849099924e-55,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P1",
+      "x": "glazing_shgc",
+      "y": "cooling_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "colombo",
+      "rho": 0.6490847617478649,
+      "p": 2.8479711353014857e-37,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P1",
+      "x": "glazing_shgc",
+      "y": "cooling_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "denver",
+      "rho": 0.7801831509849935,
+      "p": 1.1420082426038902e-62,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P1",
+      "x": "glazing_shgc",
+      "y": "cooling_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "miami",
+      "rho": 0.7907548275275146,
+      "p": 1.76038463738492e-65,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P1",
+      "x": "glazing_shgc",
+      "y": "cooling_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "minneapolis",
+      "rho": 0.7357347240457728,
+      "p": 2.3095246447181373e-52,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P1",
+      "x": "glazing_shgc",
+      "y": "cooling_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "new_york",
+      "rho": 0.7801230636169625,
+      "p": 1.183598102888666e-62,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P1",
+      "x": "glazing_shgc",
+      "y": "cooling_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "phoenix",
+      "rho": 0.7764094659739668,
+      "p": 1.0565872502048047e-61,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P1",
+      "x": "glazing_shgc",
+      "y": "cooling_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "san_francisco",
+      "rho": 0.8271794666094973,
+      "p": 1.4233372777495274e-76,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P2",
+      "x": "glazing_u",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "atlanta",
+      "rho": 0.7325039386562275,
+      "p": 1.074404471070121e-51,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P2",
+      "x": "glazing_u",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "chicago",
+      "rho": 0.7227289378978851,
+      "p": 9.846478111714226e-50,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P2",
+      "x": "glazing_u",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "denver",
+      "rho": 0.707098092344874,
+      "p": 9.155306633669616e-47,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P2",
+      "x": "glazing_u",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "minneapolis",
+      "rho": 0.7398667717938805,
+      "p": 3.1274261153446052e-53,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P2",
+      "x": "glazing_u",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "new_york",
+      "rho": 0.7077731462423709,
+      "p": 6.879202221707269e-47,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P2",
+      "x": "glazing_u",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "phoenix",
+      "rho": 0.6970099870066685,
+      "p": 5.963534099890807e-45,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P2",
+      "x": "glazing_u",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "san_francisco",
+      "rho": 0.6989677101789489,
+      "p": 2.688071117129053e-45,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-wall",
+      "x": "wall_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "atlanta",
+      "rho": -0.11219525908013035,
+      "p": 0.05222192584311783,
+      "verdict": "weak",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-wall",
+      "x": "wall_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "chicago",
+      "rho": -0.12111187087317277,
+      "p": 0.036021403863394516,
+      "verdict": "weak",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-wall",
+      "x": "wall_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "denver",
+      "rho": -0.11410575032137112,
+      "p": 0.048316678027901454,
+      "verdict": "weak",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-wall",
+      "x": "wall_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "minneapolis",
+      "rho": -0.11115971660565178,
+      "p": 0.054446211112911376,
+      "verdict": "weak",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-wall",
+      "x": "wall_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "new_york",
+      "rho": -0.12229760826178554,
+      "p": 0.03422863444969552,
+      "verdict": "weak",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-wall",
+      "x": "wall_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "phoenix",
+      "rho": -0.0849271752938566,
+      "p": 0.14224188411226593,
+      "verdict": "weak",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-wall",
+      "x": "wall_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "san_francisco",
+      "rho": -0.09321417789559665,
+      "p": 0.1071172278485713,
+      "verdict": "weak",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-roof",
+      "x": "roof_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "atlanta",
+      "rho": -0.1482696968643168,
+      "p": 0.010122548448585894,
+      "verdict": "weak",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-roof",
+      "x": "roof_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "chicago",
+      "rho": -0.15680796453293924,
+      "p": 0.006498419410680248,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-roof",
+      "x": "roof_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "denver",
+      "rho": -0.158407093412149,
+      "p": 0.005966458495369289,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-roof",
+      "x": "roof_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "minneapolis",
+      "rho": -0.14986657072485016,
+      "p": 0.009332528660720376,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-roof",
+      "x": "roof_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "new_york",
+      "rho": -0.157664675755218,
+      "p": 0.006208372297217199,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-roof",
+      "x": "roof_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "phoenix",
+      "rho": -0.14030159008469106,
+      "p": 0.01501608356215867,
+      "verdict": "weak",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P3-roof",
+      "x": "roof_r_value",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "san_francisco",
+      "rho": -0.1288565858031558,
+      "p": 0.025624445412358202,
+      "verdict": "weak",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-north",
+      "x": "wwr_north",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": 1,
+      "climate_key": "atlanta",
+      "rho": 0.3998861764625231,
+      "p": 6.023627238259292e-13,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-north",
+      "x": "wwr_north",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": 1,
+      "climate_key": "chennai",
+      "rho": 0.6893163408370564,
+      "p": 1.284825440783147e-43,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-north",
+      "x": "wwr_north",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": 1,
+      "climate_key": "chicago",
+      "rho": 0.31467160124167615,
+      "p": 2.5526576415220674e-08,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-north",
+      "x": "wwr_north",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": 1,
+      "climate_key": "colombo",
+      "rho": 0.6521337628344536,
+      "p": 1.017094615893024e-37,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-north",
+      "x": "wwr_north",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": 1,
+      "climate_key": "denver",
+      "rho": 0.2947058171888131,
+      "p": 2.00293717754015e-07,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-north",
+      "x": "wwr_north",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": 1,
+      "climate_key": "miami",
+      "rho": 0.5644956341717866,
+      "p": 1.206224073695412e-26,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-north",
+      "x": "wwr_north",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": 1,
+      "climate_key": "minneapolis",
+      "rho": 0.3376740867145667,
+      "p": 1.95548116411622e-09,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-north",
+      "x": "wwr_north",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": 1,
+      "climate_key": "new_york",
+      "rho": 0.3233910702968443,
+      "p": 9.885141883591103e-09,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-north",
+      "x": "wwr_north",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": 1,
+      "climate_key": "phoenix",
+      "rho": 0.5857676847262433,
+      "p": 5.0010450931182916e-29,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-north",
+      "x": "wwr_north",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": 1,
+      "climate_key": "san_francisco",
+      "rho": 0.27493917707496224,
+      "p": 1.3266610176710458e-06,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-east",
+      "x": "wwr_east",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": 1,
+      "climate_key": "atlanta",
+      "rho": 0.5055020611340126,
+      "p": 7.272008075951021e-21,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-east",
+      "x": "wwr_east",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": 1,
+      "climate_key": "chennai",
+      "rho": 0.6973601358682906,
+      "p": 5.173852478400455e-45,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-east",
+      "x": "wwr_east",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": 1,
+      "climate_key": "chicago",
+      "rho": 0.4547598711407728,
+      "p": 1.0204427261454085e-16,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-east",
+      "x": "wwr_east",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": 1,
+      "climate_key": "colombo",
+      "rho": 0.6650753897265526,
+      "p": 1.1234496484280116e-39,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-east",
+      "x": "wwr_east",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": 1,
+      "climate_key": "denver",
+      "rho": 0.43814718789036244,
+      "p": 1.672674892424158e-15,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-east",
+      "x": "wwr_east",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": 1,
+      "climate_key": "miami",
+      "rho": 0.6290037828220078,
+      "p": 1.8883167467297908e-34,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-east",
+      "x": "wwr_east",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": 1,
+      "climate_key": "minneapolis",
+      "rho": 0.40257905173805897,
+      "p": 4.077455196969398e-13,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-east",
+      "x": "wwr_east",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": 1,
+      "climate_key": "new_york",
+      "rho": 0.4473328738465243,
+      "p": 3.6308367521855983e-16,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-east",
+      "x": "wwr_east",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": 1,
+      "climate_key": "phoenix",
+      "rho": 0.6669722996922187,
+      "p": 5.694741040868836e-40,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-east",
+      "x": "wwr_east",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": 1,
+      "climate_key": "san_francisco",
+      "rho": 0.4422852347882274,
+      "p": 8.453451406168097e-16,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-south",
+      "x": "wwr_south",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": 1,
+      "climate_key": "atlanta",
+      "rho": 0.4202138268440594,
+      "p": 2.898051341791971e-14,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-south",
+      "x": "wwr_south",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": 1,
+      "climate_key": "chennai",
+      "rho": 0.6728317749450213,
+      "p": 6.762585738761132e-41,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-south",
+      "x": "wwr_south",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": 1,
+      "climate_key": "chicago",
+      "rho": 0.37554714508987586,
+      "p": 1.752616636048529e-11,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-south",
+      "x": "wwr_south",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": 1,
+      "climate_key": "colombo",
+      "rho": 0.6549247518999197,
+      "p": 3.921810087998407e-38,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-south",
+      "x": "wwr_south",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": 1,
+      "climate_key": "denver",
+      "rho": 0.26466325114611117,
+      "p": 3.349861061748554e-06,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-south",
+      "x": "wwr_south",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": 1,
+      "climate_key": "miami",
+      "rho": 0.5584900092179395,
+      "p": 5.288762003668917e-26,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-south",
+      "x": "wwr_south",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": 1,
+      "climate_key": "minneapolis",
+      "rho": 0.30302346793526097,
+      "p": 8.651247747954079e-08,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-south",
+      "x": "wwr_south",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": 1,
+      "climate_key": "new_york",
+      "rho": 0.34378763583902655,
+      "p": 9.524805473493615e-10,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-south",
+      "x": "wwr_south",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": 1,
+      "climate_key": "phoenix",
+      "rho": 0.6045561642664541,
+      "p": 2.780181094475731e-31,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-south",
+      "x": "wwr_south",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": 1,
+      "climate_key": "san_francisco",
+      "rho": 0.2873592567382501,
+      "p": 4.1135176060092596e-07,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-west",
+      "x": "wwr_west",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": 1,
+      "climate_key": "atlanta",
+      "rho": 0.4190019063551738,
+      "p": 3.492967148100795e-14,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-west",
+      "x": "wwr_west",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": 1,
+      "climate_key": "chennai",
+      "rho": 0.6831974447713288,
+      "p": 1.3801298870584823e-42,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-west",
+      "x": "wwr_west",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": 1,
+      "climate_key": "chicago",
+      "rho": 0.31491960407993086,
+      "p": 2.485738117341289e-08,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-west",
+      "x": "wwr_west",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": 1,
+      "climate_key": "colombo",
+      "rho": 0.6465375496478009,
+      "p": 6.671209008123882e-37,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-west",
+      "x": "wwr_west",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": 1,
+      "climate_key": "denver",
+      "rho": 0.23912801688107982,
+      "p": 2.8465514983599807e-05,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-west",
+      "x": "wwr_west",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": 1,
+      "climate_key": "miami",
+      "rho": 0.5884899114390347,
+      "p": 2.406659983747218e-29,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-west",
+      "x": "wwr_west",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": 1,
+      "climate_key": "minneapolis",
+      "rho": 0.2721227605570182,
+      "p": 1.716571698477233e-06,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-west",
+      "x": "wwr_west",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": 1,
+      "climate_key": "new_york",
+      "rho": 0.2695414992481092,
+      "p": 2.1683217872351427e-06,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-west",
+      "x": "wwr_west",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": 1,
+      "climate_key": "phoenix",
+      "rho": 0.61342575514212,
+      "p": 2.1214921857385847e-32,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P4-west",
+      "x": "wwr_west",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": 1,
+      "climate_key": "san_francisco",
+      "rho": 0.2599661151640231,
+      "p": 5.051554470194126e-06,
+      "verdict": "confirmed",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "P5-north",
+      "x": "overhang_depth_n",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": -1,
+      "climate_key": "atlanta",
+      "rho": -0.1723943101089531,
+      "p": 0.002735878997581741,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-north",
+      "x": "overhang_depth_n",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": -1,
+      "climate_key": "chennai",
+      "rho": -0.1871213630495506,
+      "p": 0.0011286804893606212,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-north",
+      "x": "overhang_depth_n",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": -1,
+      "climate_key": "chicago",
+      "rho": -0.2292619202414563,
+      "p": 6.126991427308683e-05,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-north",
+      "x": "overhang_depth_n",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": -1,
+      "climate_key": "colombo",
+      "rho": -0.16691600315841057,
+      "p": 0.0037391602313897126,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-north",
+      "x": "overhang_depth_n",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": -1,
+      "climate_key": "denver",
+      "rho": -0.1654571885182062,
+      "p": 0.004057311717540687,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-north",
+      "x": "overhang_depth_n",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": -1,
+      "climate_key": "miami",
+      "rho": -0.19683182653664444,
+      "p": 0.0006067124385677724,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-north",
+      "x": "overhang_depth_n",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": -1,
+      "climate_key": "minneapolis",
+      "rho": -0.19317889137730226,
+      "p": 0.000768973824746692,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-north",
+      "x": "overhang_depth_n",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": -1,
+      "climate_key": "new_york",
+      "rho": -0.19742896714818778,
+      "p": 0.0005834218613846485,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-north",
+      "x": "overhang_depth_n",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": -1,
+      "climate_key": "phoenix",
+      "rho": -0.1324874706734204,
+      "p": 0.02171607238147673,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-north",
+      "x": "overhang_depth_n",
+      "y": "zone_cooling_north_kwh_m2",
+      "expected": -1,
+      "climate_key": "san_francisco",
+      "rho": -0.18727859441797812,
+      "p": 0.0011176562871365195,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-east",
+      "x": "overhang_depth_e",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": -1,
+      "climate_key": "atlanta",
+      "rho": -0.22765549971308768,
+      "p": 6.92001413724468e-05,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-east",
+      "x": "overhang_depth_e",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": -1,
+      "climate_key": "chennai",
+      "rho": -0.1827944969982977,
+      "p": 0.0014742311962393437,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-east",
+      "x": "overhang_depth_e",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": -1,
+      "climate_key": "chicago",
+      "rho": -0.23359298479957466,
+      "p": 4.39396885855743e-05,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-east",
+      "x": "overhang_depth_e",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": -1,
+      "climate_key": "colombo",
+      "rho": -0.22405372690303407,
+      "p": 9.062829108280928e-05,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-east",
+      "x": "overhang_depth_e",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": -1,
+      "climate_key": "denver",
+      "rho": -0.25770087703393346,
+      "p": 6.141068696014443e-06,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-east",
+      "x": "overhang_depth_e",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": -1,
+      "climate_key": "miami",
+      "rho": -0.23535117718724796,
+      "p": 3.832282725169201e-05,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-east",
+      "x": "overhang_depth_e",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": -1,
+      "climate_key": "minneapolis",
+      "rho": -0.22353147322873038,
+      "p": 9.420972291317628e-05,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-east",
+      "x": "overhang_depth_e",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": -1,
+      "climate_key": "new_york",
+      "rho": -0.26001115792329466,
+      "p": 5.031882330266087e-06,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-east",
+      "x": "overhang_depth_e",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": -1,
+      "climate_key": "phoenix",
+      "rho": -0.22398881230421036,
+      "p": 9.106638407033039e-05,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-east",
+      "x": "overhang_depth_e",
+      "y": "zone_cooling_east_kwh_m2",
+      "expected": -1,
+      "climate_key": "san_francisco",
+      "rho": -0.25333284888304297,
+      "p": 8.903934819530864e-06,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-south",
+      "x": "overhang_depth_s",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": -1,
+      "climate_key": "atlanta",
+      "rho": -0.1615804552235864,
+      "p": 0.005024951262481657,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-south",
+      "x": "overhang_depth_s",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": -1,
+      "climate_key": "chennai",
+      "rho": -0.1784953125534326,
+      "p": 0.001911267356632546,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-south",
+      "x": "overhang_depth_s",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": -1,
+      "climate_key": "chicago",
+      "rho": -0.1991223663688958,
+      "p": 0.0005218011442931681,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-south",
+      "x": "overhang_depth_s",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": -1,
+      "climate_key": "colombo",
+      "rho": -0.19296382042280782,
+      "p": 0.0007796766358708146,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-south",
+      "x": "overhang_depth_s",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": -1,
+      "climate_key": "denver",
+      "rho": -0.1903854485159928,
+      "p": 0.0009191542256136314,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-south",
+      "x": "overhang_depth_s",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": -1,
+      "climate_key": "miami",
+      "rho": -0.16619154922106663,
+      "p": 0.0038942215090136596,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-south",
+      "x": "overhang_depth_s",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": -1,
+      "climate_key": "minneapolis",
+      "rho": -0.18297314555782074,
+      "p": 0.0014582312547401308,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-south",
+      "x": "overhang_depth_s",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": -1,
+      "climate_key": "new_york",
+      "rho": -0.1404073184475892,
+      "p": 0.014939515232566793,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-south",
+      "x": "overhang_depth_s",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": -1,
+      "climate_key": "phoenix",
+      "rho": -0.1508250215615667,
+      "p": 0.00888508878539108,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-south",
+      "x": "overhang_depth_s",
+      "y": "zone_cooling_south_kwh_m2",
+      "expected": -1,
+      "climate_key": "san_francisco",
+      "rho": -0.14538374460499268,
+      "p": 0.011701649303234661,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-west",
+      "x": "overhang_depth_w",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": -1,
+      "climate_key": "atlanta",
+      "rho": -0.07742767322655675,
+      "p": 0.18106055932562912,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-west",
+      "x": "overhang_depth_w",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": -1,
+      "climate_key": "chennai",
+      "rho": -0.11696592601298211,
+      "p": 0.04292844542515025,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-west",
+      "x": "overhang_depth_w",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": -1,
+      "climate_key": "chicago",
+      "rho": -0.07601274060591742,
+      "p": 0.18918857165186567,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-west",
+      "x": "overhang_depth_w",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": -1,
+      "climate_key": "colombo",
+      "rho": -0.12876662008490947,
+      "p": 0.025728515544025877,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-west",
+      "x": "overhang_depth_w",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": -1,
+      "climate_key": "denver",
+      "rho": -0.07525980873104206,
+      "p": 0.19362134059863212,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-west",
+      "x": "overhang_depth_w",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": -1,
+      "climate_key": "miami",
+      "rho": -0.10543532379917546,
+      "p": 0.06820412873712597,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-west",
+      "x": "overhang_depth_w",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": -1,
+      "climate_key": "minneapolis",
+      "rho": -0.07834492272910733,
+      "p": 0.1759310705575917,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-west",
+      "x": "overhang_depth_w",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": -1,
+      "climate_key": "new_york",
+      "rho": -0.10927024869652535,
+      "p": 0.0587072503417605,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-west",
+      "x": "overhang_depth_w",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": -1,
+      "climate_key": "phoenix",
+      "rho": -0.027136124517184296,
+      "p": 0.6396876659606191,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P5-west",
+      "x": "overhang_depth_w",
+      "y": "zone_cooling_west_kwh_m2",
+      "expected": -1,
+      "climate_key": "san_francisco",
+      "rho": -0.04687391665322668,
+      "p": 0.4185522692376828,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P6",
+      "x": "infiltration_ach",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "atlanta",
+      "rho": 0.06965855176168623,
+      "p": 0.22899705728633363,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P6",
+      "x": "infiltration_ach",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "chicago",
+      "rho": 0.07894487716530184,
+      "p": 0.17263479555037806,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P6",
+      "x": "infiltration_ach",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "denver",
+      "rho": 0.05774064797838322,
+      "p": 0.3188838802633372,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P6",
+      "x": "infiltration_ach",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "minneapolis",
+      "rho": 0.07608241782295942,
+      "p": 0.18878215183731514,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P6",
+      "x": "infiltration_ach",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "new_york",
+      "rho": 0.06948744647023303,
+      "p": 0.23014540199919542,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P6",
+      "x": "infiltration_ach",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "phoenix",
+      "rho": 0.061452474239153995,
+      "p": 0.2887137039948656,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P6",
+      "x": "infiltration_ach",
+      "y": "heating_demand_kwh_m2",
+      "expected": 1,
+      "climate_key": "san_francisco",
+      "rho": 0.11631776271242472,
+      "p": 0.04410302384891114,
+      "verdict": "weak",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P7",
+      "x": "glazing_shgc",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "chicago",
+      "rho": -0.28019250884844055,
+      "p": 8.140924569769186e-07,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P7",
+      "x": "glazing_shgc",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "denver",
+      "rho": -0.3579756523880417,
+      "p": 1.6878921547497948e-10,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P7",
+      "x": "glazing_shgc",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "minneapolis",
+      "rho": -0.27135135783793957,
+      "p": 1.8411670405980575e-06,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    },
+    {
+      "rule": "P7",
+      "x": "glazing_shgc",
+      "y": "heating_demand_kwh_m2",
+      "expected": -1,
+      "climate_key": "new_york",
+      "rho": -0.34855261692966716,
+      "p": 5.378144496765276e-10,
+      "verdict": "confirmed",
+      "severity": "WARN"
+    }
+  ],
+  "physics_status": [
+    {
+      "rule": "P1",
+      "severity": "FAIL",
+      "status": "PASS",
+      "opposite": [],
+      "weak": [],
+      "rho_min": 0.6490847617478649,
+      "rho_max": 0.8286611311953758
+    },
+    {
+      "rule": "P2",
+      "severity": "FAIL",
+      "status": "PASS",
+      "opposite": [],
+      "weak": [],
+      "rho_min": 0.6970099870066685,
+      "rho_max": 0.7398667717938805
+    },
+    {
+      "rule": "P3-wall",
+      "severity": "FAIL",
+      "status": "WARN",
+      "opposite": [],
+      "weak": [
+        "atlanta",
+        "chicago",
+        "denver",
+        "minneapolis",
+        "new_york",
+        "phoenix",
+        "san_francisco"
+      ],
+      "rho_min": -0.12229760826178554,
+      "rho_max": -0.0849271752938566
+    },
+    {
+      "rule": "P3-roof",
+      "severity": "FAIL",
+      "status": "WARN",
+      "opposite": [],
+      "weak": [
+        "atlanta",
+        "phoenix",
+        "san_francisco"
+      ],
+      "rho_min": -0.158407093412149,
+      "rho_max": -0.1288565858031558
+    },
+    {
+      "rule": "P4-north",
+      "severity": "FAIL",
+      "status": "PASS",
+      "opposite": [],
+      "weak": [],
+      "rho_min": 0.27493917707496224,
+      "rho_max": 0.6893163408370564
+    },
+    {
+      "rule": "P4-east",
+      "severity": "FAIL",
+      "status": "PASS",
+      "opposite": [],
+      "weak": [],
+      "rho_min": 0.40257905173805897,
+      "rho_max": 0.6973601358682906
+    },
+    {
+      "rule": "P4-south",
+      "severity": "FAIL",
+      "status": "PASS",
+      "opposite": [],
+      "weak": [],
+      "rho_min": 0.26466325114611117,
+      "rho_max": 0.6728317749450213
+    },
+    {
+      "rule": "P4-west",
+      "severity": "FAIL",
+      "status": "PASS",
+      "opposite": [],
+      "weak": [],
+      "rho_min": 0.23912801688107982,
+      "rho_max": 0.6831974447713288
+    },
+    {
+      "rule": "P5-north",
+      "severity": "WARN",
+      "status": "INFO",
+      "opposite": [],
+      "weak": [
+        "phoenix"
+      ],
+      "rho_min": -0.2292619202414563,
+      "rho_max": -0.1324874706734204
+    },
+    {
+      "rule": "P5-east",
+      "severity": "WARN",
+      "status": "PASS",
+      "opposite": [],
+      "weak": [],
+      "rho_min": -0.26001115792329466,
+      "rho_max": -0.1827944969982977
+    },
+    {
+      "rule": "P5-south",
+      "severity": "WARN",
+      "status": "INFO",
+      "opposite": [],
+      "weak": [
+        "new_york",
+        "san_francisco"
+      ],
+      "rho_min": -0.1991223663688958,
+      "rho_max": -0.1404073184475892
+    },
+    {
+      "rule": "P5-west",
+      "severity": "WARN",
+      "status": "INFO",
+      "opposite": [],
+      "weak": [
+        "atlanta",
+        "chennai",
+        "chicago",
+        "colombo",
+        "denver",
+        "miami",
+        "minneapolis",
+        "new_york",
+        "phoenix",
+        "san_francisco"
+      ],
+      "rho_min": -0.12876662008490947,
+      "rho_max": -0.027136124517184296
+    },
+    {
+      "rule": "P6",
+      "severity": "WARN",
+      "status": "INFO",
+      "opposite": [],
+      "weak": [
+        "atlanta",
+        "chicago",
+        "denver",
+        "minneapolis",
+        "new_york",
+        "phoenix",
+        "san_francisco"
+      ],
+      "rho_min": 0.05774064797838322,
+      "rho_max": 0.11631776271242472
+    },
+    {
+      "rule": "P7",
+      "severity": "WARN",
+      "status": "PASS",
+      "opposite": [],
+      "weak": [],
+      "rho_min": -0.3579756523880417,
+      "rho_max": -0.27135135783793957
+    }
+  ],
+  "facade": [
+    {
+      "climate_key": "atlanta",
+      "latitude": 33.63,
+      "applies": true,
+      "mean_resid_W_SW": 3.453088570931164,
+      "mean_resid_N": -35.04260886310079,
+      "difference": 38.49569743403195,
+      "pass": true,
+      "bin_N": -35.04260886310079,
+      "bin_NE": -10.526766270195527,
+      "bin_E": 23.990634898401762,
+      "bin_SE": 28.76722238321703,
+      "bin_S": 11.291049747169497,
+      "bin_SW": 8.349885768022597,
+      "bin_W": -1.443708626160269,
+      "bin_NW": -25.369539468982794
+    },
+    {
+      "climate_key": "chennai",
+      "latitude": 12.994,
+      "applies": false,
+      "mean_resid_W_SW": 15.860661038408072,
+      "mean_resid_N": -32.32583778802275,
+      "difference": 48.18649882643082,
+      "pass": null,
+      "bin_N": -32.32583778802275,
+      "bin_NE": -12.876225701771887,
+      "bin_E": 19.7897269438156,
+      "bin_SE": 9.82341811390292,
+      "bin_S": -3.481595129707242,
+      "bin_SW": 11.307257740832023,
+      "bin_W": 20.414064335984122,
+      "bin_NW": -12.709820036670955
+    },
+    {
+      "climate_key": "chicago",
+      "latitude": 41.96,
+      "applies": true,
+      "mean_resid_W_SW": 16.664675294701297,
+      "mean_resid_N": -30.317283824136187,
+      "difference": 46.98195911883748,
+      "pass": true,
+      "bin_N": -30.317283824136187,
+      "bin_NE": -20.75651796914637,
+      "bin_E": 2.357416113442625,
+      "bin_SE": 13.10506807860347,
+      "bin_S": 16.181962473754055,
+      "bin_SW": 20.37571817450468,
+      "bin_W": 12.953632414897916,
+      "bin_NW": -13.915777034778971
+    },
+    {
+      "climate_key": "colombo",
+      "latitude": 6.9047,
+      "applies": false,
+      "mean_resid_W_SW": 10.140256301795294,
+      "mean_resid_N": -31.188671634196602,
+      "difference": 41.3289279359919,
+      "pass": null,
+      "bin_N": -31.188671634196602,
+      "bin_NE": -5.752832529176807,
+      "bin_E": 24.298377626755602,
+      "bin_SE": 12.44967471414058,
+      "bin_S": -13.953862852869337,
+      "bin_SW": 3.5720612583756983,
+      "bin_W": 16.70845134521489,
+      "bin_NW": -6.077685102538321
+    },
+    {
+      "climate_key": "denver",
+      "latitude": 39.833,
+      "applies": true,
+      "mean_resid_W_SW": 20.275063310162572,
+      "mean_resid_N": -42.90796227428286,
+      "difference": 63.18302558444543,
+      "pass": true,
+      "bin_N": -42.90796227428286,
+      "bin_NE": -27.79668054961242,
+      "bin_E": 6.006941561076947,
+      "bin_SE": 18.00597255913625,
+      "bin_S": 30.743886004723173,
+      "bin_SW": 24.944636168502246,
+      "bin_W": 15.6054904518229,
+      "bin_NW": -24.729107488390543
+    },
+    {
+      "climate_key": "miami",
+      "latitude": 25.7552,
+      "applies": true,
+      "mean_resid_W_SW": 18.640876777524866,
+      "mean_resid_N": -41.57065337187169,
+      "difference": 60.21153014939656,
+      "pass": true,
+      "bin_N": -41.57065337187169,
+      "bin_NE": -21.13934032017312,
+      "bin_E": 13.634869443264897,
+      "bin_SE": 18.503052710170724,
+      "bin_S": 12.323875758153012,
+      "bin_SW": 20.532745886946156,
+      "bin_W": 16.749007668103573,
+      "bin_NW": -19.0488208550988
+    },
+    {
+      "climate_key": "minneapolis",
+      "latitude": 44.883,
+      "applies": true,
+      "mean_resid_W_SW": 15.75075807418908,
+      "mean_resid_N": -30.57880009059705,
+      "difference": 46.32955816478613,
+      "pass": true,
+      "bin_N": -30.57880009059705,
+      "bin_NE": -20.483357968102002,
+      "bin_E": 3.658156002297634,
+      "bin_SE": 14.190290800585267,
+      "bin_S": 19.161541045813408,
+      "bin_SW": 19.376347434034194,
+      "bin_W": 12.125168714343964,
+      "bin_NW": -17.507950846722533
+    },
+    {
+      "climate_key": "new_york",
+      "latitude": 40.7789,
+      "applies": true,
+      "mean_resid_W_SW": 16.32456435567923,
+      "mean_resid_N": -30.019324682723077,
+      "difference": 46.34388903840231,
+      "pass": true,
+      "bin_N": -30.019324682723077,
+      "bin_NE": -23.21377086302552,
+      "bin_E": 2.6014311131678114,
+      "bin_SE": 19.844778610613517,
+      "bin_S": 16.761556420953163,
+      "bin_SW": 22.901248191702788,
+      "bin_W": 9.747880519655666,
+      "bin_NW": -18.611605261633905
+    },
+    {
+      "climate_key": "phoenix",
+      "latitude": 33.428,
+      "applies": true,
+      "mean_resid_W_SW": 14.68744973591878,
+      "mean_resid_N": -58.709355021624916,
+      "difference": 73.39680475754369,
+      "pass": true,
+      "bin_N": -58.709355021624916,
+      "bin_NE": -26.075543232205927,
+      "bin_E": 30.337808598174465,
+      "bin_SE": 44.56966683727391,
+      "bin_S": 21.02184627180156,
+      "bin_SW": 23.303428302303942,
+      "bin_W": 6.071471169533617,
+      "bin_NW": -40.50216548925514
+    },
+    {
+      "climate_key": "san_francisco",
+      "latitude": 37.62,
+      "applies": true,
+      "mean_resid_W_SW": 29.40787388873326,
+      "mean_resid_N": -44.384380965663176,
+      "difference": 73.79225485439643,
+      "pass": true,
+      "bin_N": -44.384380965663176,
+      "bin_NE": -32.16214421362882,
+      "bin_E": -2.054615638213852,
+      "bin_SE": 16.6991251119964,
+      "bin_S": 22.31767189958368,
+      "bin_SW": 35.889654154696856,
+      "bin_W": 22.926093622769663,
+      "bin_NW": -19.215360601318938
+    }
+  ],
+  "core_roof": [
+    {
+      "climate_key": "chennai",
+      "subset": "n_floors=1",
+      "n": 60,
+      "rho": -0.956321200333426,
+      "p": 1.139440016736731e-32,
+      "core_cooling_median": 70.6611
+    },
+    {
+      "climate_key": "chennai",
+      "subset": "n_floors>=2",
+      "n": 240,
+      "rho": -0.651930872033747,
+      "p": 1.9760894893618088e-30,
+      "core_cooling_median": 63.7997
+    },
+    {
+      "climate_key": "colombo",
+      "subset": "n_floors=1",
+      "n": 60,
+      "rho": -0.9518755209780497,
+      "p": 1.7813667099660852e-31,
+      "core_cooling_median": 70.1188
+    },
+    {
+      "climate_key": "colombo",
+      "subset": "n_floors>=2",
+      "n": 240,
+      "rho": -0.7393378093968513,
+      "p": 9.158822568841376e-43,
+      "core_cooling_median": 63.775949999999995
+    },
+    {
+      "climate_key": "miami",
+      "subset": "n_floors=1",
+      "n": 60,
+      "rho": -0.9031397610447347,
+      "p": 5.805616001354386e-23,
+      "core_cooling_median": 62.9014
+    },
+    {
+      "climate_key": "miami",
+      "subset": "n_floors>=2",
+      "n": 240,
+      "rho": -0.45825101130227947,
+      "p": 7.303775173345376e-14,
+      "core_cooling_median": 60.0296
+    },
+    {
+      "climate_key": "phoenix",
+      "subset": "n_floors=1",
+      "n": 60,
+      "rho": -0.7785495971103086,
+      "p": 2.440127546436316e-13,
+      "core_cooling_median": 61.0822
+    },
+    {
+      "climate_key": "phoenix",
+      "subset": "n_floors>=2",
+      "n": 240,
+      "rho": -0.4214450911333788,
+      "p": 9.42602831596215e-12,
+      "core_cooling_median": 59.779250000000005
+    }
+  ],
+  "coverage_min_p": 1.0,
+  "input_corr": [
+    {
+      "climate_key": "atlanta",
+      "max_abs_rho": 0.019895417184185096,
+      "pair": "n_floors ~ roof_r_value",
+      "flag": false
+    },
+    {
+      "climate_key": "chennai",
+      "max_abs_rho": 0.027257535015072266,
+      "pair": "n_floors ~ orientation",
+      "flag": false
+    },
+    {
+      "climate_key": "chicago",
+      "max_abs_rho": 0.020113148653158656,
+      "pair": "n_floors ~ glazing_shgc",
+      "flag": false
+    },
+    {
+      "climate_key": "colombo",
+      "max_abs_rho": 0.020262840557884524,
+      "pair": "n_floors ~ infiltration_ach",
+      "flag": false
+    },
+    {
+      "climate_key": "denver",
+      "max_abs_rho": 0.019813780254609135,
+      "pair": "n_floors ~ floor_height",
+      "flag": false
+    },
+    {
+      "climate_key": "miami",
+      "max_abs_rho": 0.018398497970600725,
+      "pair": "n_floors ~ wwr_north",
+      "flag": false
+    },
+    {
+      "climate_key": "minneapolis",
+      "max_abs_rho": 0.024304521985481362,
+      "pair": "n_floors ~ infiltration_ach",
+      "flag": false
+    },
+    {
+      "climate_key": "new_york",
+      "max_abs_rho": 0.02058947081799815,
+      "pair": "n_floors ~ overhang_depth_n",
+      "flag": false
+    },
+    {
+      "climate_key": "phoenix",
+      "max_abs_rho": 0.032850561609619154,
+      "pair": "floor_area ~ n_floors",
+      "flag": false
+    },
+    {
+      "climate_key": "san_francisco",
+      "max_abs_rho": 0.021977517704503676,
+      "pair": "n_floors ~ overhang_depth_w",
+      "flag": false
+    }
+  ],
+  "shap_importance": {
+    "heating_demand_kwh_m2": {
+      "glazing_u": 1.4802973702705526,
+      "mean_dbt": 1.4439956847468927,
+      "hdd18": 1.2827345843666111,
+      "latitude": 1.0724709932848617,
+      "floor_area": 0.5571680058549122,
+      "glazing_shgc": 0.5064566183942572,
+      "cdd10": 0.48489566177557175,
+      "annual_ghi": 0.45382531898386785,
+      "floor_height": 0.23057031949993761,
+      "mean_rh": 0.22082210026628696,
+      "mean_wind": 0.2000783729257794,
+      "n_floors": 0.15492578193387568,
+      "wwr_north": 0.14852131667875113,
+      "roof_r_value": 0.13687899345204632,
+      "wwr_south": 0.1116973793124113,
+      "wall_r_value": 0.06607119391487036,
+      "wwr_west": 0.05832812051618129,
+      "infiltration_ach": 0.04155025680189104,
+      "aspect_ratio": 0.03711466392104277,
+      "overhang_depth_s": 0.03361398734502416,
+      "floor_r_value": 0.029469261344407385,
+      "overhang_depth_n": 0.029467341265641926,
+      "wwr_east": 0.0266413076522341,
+      "orientation": 0.020770848625087546,
+      "wall_thermal_mass": 0.017880001221105377,
+      "overhang_depth_w": 0.01759181348674477,
+      "sidefin_depth": 0.01681657647202056,
+      "overhang_depth_e": 0.013444641423116738
+    },
+    "cooling_demand_kwh_m2": {
+      "glazing_shgc": 6.768748415655939,
+      "mean_dbt": 3.5495745580478033,
+      "cdd10": 3.149726440912368,
+      "latitude": 3.0162824152395356,
+      "hdd18": 2.8691489754365924,
+      "floor_area": 2.3229171937759503,
+      "glazing_u": 1.5371044371250306,
+      "wwr_south": 1.1310569673143216,
+      "annual_ghi": 0.8448720816502154,
+      "wwr_north": 0.8069900421941617,
+      "floor_height": 0.7885627770650121,
+      "mean_wind": 0.7651178041211885,
+      "n_floors": 0.5313232446290242,
+      "mean_rh": 0.4695782210703885,
+      "wwr_east": 0.44963472558453155,
+      "wwr_west": 0.31968235454715854,
+      "infiltration_ach": 0.27841486827909145,
+      "roof_r_value": 0.23313980191932443,
+      "overhang_depth_s": 0.2055850487253556,
+      "aspect_ratio": 0.2046378042822117,
+      "overhang_depth_n": 0.20131595091927992,
+      "overhang_depth_e": 0.1315827261283899,
+      "wall_r_value": 0.1104977967096938,
+      "overhang_depth_w": 0.10803388442960682,
+      "sidefin_depth": 0.08503073602665481,
+      "orientation": 0.07665099794884253,
+      "wall_thermal_mass": 0.06850777688844116,
+      "floor_r_value": 0.06300622286707633
+    },
+    "eui_kwh_m2": {
+      "latitude": 9.502922780522287,
+      "hdd18": 9.101227544907522,
+      "mean_rh": 7.849695789920168,
+      "cdd10": 7.844895652958882,
+      "mean_dbt": 6.860824946334012,
+      "glazing_shgc": 4.836161563016503,
+      "floor_area": 3.7329083675813655,
+      "annual_ghi": 2.8317161503020762,
+      "mean_wind": 1.9679961447270662,
+      "wwr_south": 1.2916579427659034,
+      "floor_height": 1.1846447526277464,
+      "wwr_north": 1.0874145824122876,
+      "glazing_u": 0.610672639669912,
+      "n_floors": 0.5830881655341279,
+      "roof_r_value": 0.529970404390488,
+      "wwr_east": 0.4727459690251319,
+      "wwr_west": 0.43140804010674894,
+      "aspect_ratio": 0.2915649142900075,
+      "overhang_depth_n": 0.17944902584825512,
+      "infiltration_ach": 0.1543459019705619,
+      "overhang_depth_e": 0.14682180634628342,
+      "overhang_depth_s": 0.14533813000213922,
+      "wall_r_value": 0.11799879239186738,
+      "overhang_depth_w": 0.10246886693672175,
+      "sidefin_depth": 0.0865755446198187,
+      "wall_thermal_mass": 0.07937675704588996,
+      "orientation": 0.06757928800846649,
+      "floor_r_value": 0.06457339528591866
+    },
+    "peak_heating_w_m2": {
+      "hdd18": 1.5693151192370214,
+      "latitude": 1.0279757570357482,
+      "n_floors": 1.0147942843901743,
+      "glazing_u": 0.9133590539693505,
+      "mean_dbt": 0.8697998195765361,
+      "cdd10": 0.7756058907572619,
+      "floor_area": 0.5749781165142815,
+      "mean_rh": 0.3885984289742995,
+      "glazing_shgc": 0.273402995383355,
+      "mean_wind": 0.200308477942152,
+      "annual_ghi": 0.18250508452125844,
+      "roof_r_value": 0.17460731257297885,
+      "floor_height": 0.1678886279714891,
+      "wwr_north": 0.08292167950131767,
+      "wwr_south": 0.051975314531730564,
+      "aspect_ratio": 0.038011045125883776,
+      "wall_r_value": 0.03188114658980648,
+      "infiltration_ach": 0.02947953269055949,
+      "wwr_west": 0.02647185011125852,
+      "wall_thermal_mass": 0.020741899767317315,
+      "overhang_depth_n": 0.020679260048695945,
+      "wwr_east": 0.019351607496391237,
+      "floor_r_value": 0.018446510937672488,
+      "overhang_depth_s": 0.018231939850736918,
+      "overhang_depth_w": 0.01775516060155885,
+      "overhang_depth_e": 0.01704179189493363,
+      "sidefin_depth": 0.013048480506439194,
+      "orientation": 0.01207815983886183
+    },
+    "peak_cooling_w_m2": {
+      "glazing_shgc": 2.292570898362847,
+      "floor_area": 1.9266254723727851,
+      "wwr_south": 0.8650701226547826,
+      "floor_height": 0.5481163198237357,
+      "annual_ghi": 0.5046314778869778,
+      "wwr_north": 0.38879499323092775,
+      "cdd10": 0.3078524021517147,
+      "latitude": 0.25398785970653937,
+      "mean_rh": 0.18331307899206783,
+      "aspect_ratio": 0.16749869675527576,
+      "hdd18": 0.16283754090246932,
+      "wwr_west": 0.16146534694280018,
+      "wwr_east": 0.15906022432090475,
+      "mean_dbt": 0.1367702697407378,
+      "glazing_u": 0.12451089349934608,
+      "roof_r_value": 0.11247067412957165,
+      "overhang_depth_s": 0.09340727111695205,
+      "mean_wind": 0.08313679414162296,
+      "overhang_depth_n": 0.0751885161512139,
+      "orientation": 0.05580885496442427,
+      "overhang_depth_e": 0.050807324095057664,
+      "overhang_depth_w": 0.04612754557917139,
+      "wall_thermal_mass": 0.03274284390413067,
+      "n_floors": 0.03150916340050721,
+      "infiltration_ach": 0.03061705028808549,
+      "wall_r_value": 0.030266976510373973,
+      "sidefin_depth": 0.028464354492252913,
+      "floor_r_value": 0.020408646727427895
+    },
+    "zone_cooling_core_kwh_m2": {
+      "cdd10": 1.2939905359438304,
+      "latitude": 1.283583611022145,
+      "mean_dbt": 1.2546446195265821,
+      "hdd18": 1.038284976226133,
+      "n_floors": 0.8729800543861569,
+      "roof_r_value": 0.6318959531078466,
+      "infiltration_ach": 0.5650862171144345,
+      "glazing_shgc": 0.3618716349033828,
+      "mean_rh": 0.31913444108892647,
+      "mean_wind": 0.2968937451789919,
+      "annual_ghi": 0.1715972580100369,
+      "glazing_u": 0.13049962717843366,
+      "floor_area": 0.07491834212167998,
+      "floor_height": 0.03350828626117094,
+      "wwr_north": 0.029614044771697063,
+      "wwr_south": 0.027325448785500916,
+      "aspect_ratio": 0.021118262667430242,
+      "wwr_west": 0.02032557384546833,
+      "overhang_depth_n": 0.019987302953152174,
+      "wwr_east": 0.018912234730824325,
+      "wall_r_value": 0.015061104994727738,
+      "overhang_depth_s": 0.01347406753983879,
+      "wall_thermal_mass": 0.01293999750672532,
+      "floor_r_value": 0.012514763780397302,
+      "sidefin_depth": 0.01230995122423373,
+      "overhang_depth_w": 0.011321772601717206,
+      "orientation": 0.011009963715098426,
+      "overhang_depth_e": 0.010310741039976057
+    },
+    "zone_cooling_south_kwh_m2": {
+      "glazing_shgc": 23.570437758665417,
+      "wwr_south": 20.507613878854414,
+      "orientation": 14.60061174256116,
+      "latitude": 8.80353280675858,
+      "hdd18": 7.97770530747875,
+      "mean_dbt": 7.617976763584049,
+      "cdd10": 7.34277486762282,
+      "overhang_depth_s": 4.867082424664406,
+      "glazing_u": 3.6394246311805833,
+      "floor_height": 3.216015164234587,
+      "annual_ghi": 2.1725840978183144,
+      "mean_wind": 1.3353522367680546,
+      "mean_rh": 1.0862385574359872,
+      "infiltration_ach": 0.43251767678760417,
+      "wall_r_value": 0.3776360253541216,
+      "sidefin_depth": 0.3739637768190887,
+      "wwr_west": 0.34668800294924007,
+      "overhang_depth_e": 0.3382356727900263,
+      "wall_thermal_mass": 0.316746998746158,
+      "wwr_north": 0.2901020955814041,
+      "aspect_ratio": 0.27124847686533815,
+      "wwr_east": 0.26273702774946756,
+      "floor_area": 0.2503734464533689,
+      "overhang_depth_n": 0.24484292982477834,
+      "floor_r_value": 0.22420641639282357,
+      "overhang_depth_w": 0.22341105200522796,
+      "roof_r_value": 0.2136858808320888,
+      "n_floors": 0.17262015072588063
+    },
+    "zone_cooling_east_kwh_m2": {
+      "glazing_shgc": 34.75205410533328,
+      "wwr_east": 30.205382964410262,
+      "latitude": 11.055553913863887,
+      "overhang_depth_e": 10.436182315268464,
+      "hdd18": 8.456746909563329,
+      "cdd10": 8.194284152793351,
+      "mean_dbt": 7.332979812774513,
+      "glazing_u": 6.7582273318037105,
+      "floor_height": 5.447821255525006,
+      "annual_ghi": 3.0493888356766905,
+      "mean_wind": 1.333422101863595,
+      "orientation": 0.804652393077044,
+      "mean_rh": 0.6552329493731545,
+      "floor_area": 0.5848527671364872,
+      "sidefin_depth": 0.5610456880914584,
+      "overhang_depth_n": 0.531188627391125,
+      "wwr_north": 0.4431948850701093,
+      "wall_r_value": 0.431784659591141,
+      "roof_r_value": 0.36616069081192787,
+      "wwr_south": 0.3571781154237784,
+      "infiltration_ach": 0.3174661443980081,
+      "aspect_ratio": 0.31398106355784317,
+      "wwr_west": 0.30314884292175504,
+      "overhang_depth_w": 0.2781703799632652,
+      "wall_thermal_mass": 0.27275069879867847,
+      "overhang_depth_s": 0.24330188421055482,
+      "floor_r_value": 0.24309990428915934,
+      "n_floors": 0.24188842528591417
+    },
+    "zone_cooling_north_kwh_m2": {
+      "glazing_shgc": 24.21242599141274,
+      "wwr_north": 21.8932455779395,
+      "orientation": 15.38905288423819,
+      "latitude": 11.45581112601495,
+      "cdd10": 8.680776144913006,
+      "hdd18": 8.58354978119688,
+      "mean_dbt": 6.744731463189089,
+      "overhang_depth_n": 5.376131806783773,
+      "glazing_u": 3.9949752573569004,
+      "annual_ghi": 2.966420040238846,
+      "mean_wind": 2.554441944622942,
+      "floor_height": 2.2410449980211458,
+      "mean_rh": 0.7474465493086704,
+      "aspect_ratio": 0.4081446690340239,
+      "wwr_east": 0.3768536758475656,
+      "floor_area": 0.3730428585444105,
+      "overhang_depth_w": 0.35708630020009885,
+      "wall_r_value": 0.3460469777180004,
+      "wwr_west": 0.3313201319024192,
+      "infiltration_ach": 0.32756125143470544,
+      "overhang_depth_s": 0.2954664581353749,
+      "wall_thermal_mass": 0.29010500771671893,
+      "overhang_depth_e": 0.275365128655305,
+      "wwr_south": 0.26500829532700804,
+      "roof_r_value": 0.24972077249493752,
+      "sidefin_depth": 0.2421571030888848,
+      "floor_r_value": 0.22070481741811004,
+      "n_floors": 0.22039580511268686
+    },
+    "zone_cooling_west_kwh_m2": {
+      "glazing_shgc": 18.257847531125723,
+      "wwr_west": 15.291585206183946,
+      "latitude": 10.573871811848955,
+      "cdd10": 8.630710052583382,
+      "hdd18": 8.509989021026906,
+      "mean_dbt": 8.312530219972368,
+      "orientation": 7.247116984871524,
+      "glazing_u": 3.7385022361752864,
+      "floor_height": 2.42458065405662,
+      "mean_wind": 2.2261498849886485,
+      "annual_ghi": 2.1960290621201395,
+      "mean_rh": 1.7513110849197926,
+      "overhang_depth_w": 1.5424184810003951,
+      "wall_r_value": 0.5014744921685679,
+      "aspect_ratio": 0.4717897649897898,
+      "sidefin_depth": 0.4258320504393893,
+      "wall_thermal_mass": 0.42500260879440727,
+      "floor_area": 0.3646832159843469,
+      "wwr_north": 0.2772577572330933,
+      "infiltration_ach": 0.27438534297599126,
+      "overhang_depth_n": 0.2623078968882414,
+      "overhang_depth_e": 0.26195471473914156,
+      "wwr_east": 0.26096973890737307,
+      "roof_r_value": 0.23266584317317854,
+      "floor_r_value": 0.22298883022162427,
+      "overhang_depth_s": 0.2214816683424777,
+      "wwr_south": 0.1945968948559162,
+      "n_floors": 0.17719762360428581
+    }
+  },
+  "shap_group_share": {
+    "heating_demand_kwh_m2": {
+      "climate": 0.6459809404018781,
+      "geometry": 0.08234687991667133,
+      "opaque_envelope": 0.024922014863503095,
+      "glazing": 0.20679832644822374,
+      "window_area": 0.02792470641051074,
+      "shading": 0.009266959476365171,
+      "orientation": 0.002760172482847803
+    },
+    "cooling_demand_kwh_m2": {
+      "climate": 0.5379836089268517,
+      "geometry": 0.09947719035626204,
+      "opaque_envelope": 0.0199384160178354,
+      "glazing": 0.2674672237652218,
+      "window_area": 0.05646842765724302,
+      "shading": 0.015753282892635376,
+      "orientation": 0.00291185038395081
+    },
+    "eui_kwh_m2": {
+      "climate": 0.7860767103036223,
+      "geometry": 0.07254484929609661,
+      "opaque_envelope": 0.012284811867697643,
+      "glazing": 0.08809410014634418,
+      "window_area": 0.03300788786439509,
+      "shading": 0.006768870151926758,
+      "orientation": 0.0012227703699174146
+    },
+    "peak_heating_w_m2": {
+      "climate": 0.639054311354658,
+      "geometry": 0.17419551747088516,
+      "opaque_envelope": 0.026966792826365635,
+      "glazing": 0.13374348017723434,
+      "window_area": 0.016726939490169773,
+      "shading": 0.007648755111296229,
+      "orientation": 0.001664203569390914
+    },
+    "peak_cooling_w_m2": {
+      "climate": 0.20128551016447488,
+      "geometry": 0.27970156873406177,
+      "opaque_envelope": 0.02209654708704412,
+      "glazing": 0.3233112348762082,
+      "window_area": 0.14199513607346773,
+      "shading": 0.02369934125987156,
+      "orientation": 0.00791066180487185
+    },
+    "zone_cooling_core_kwh_m2": {
+      "climate": 0.698669930258036,
+      "geometry": 0.11502207105167572,
+      "opaque_envelope": 0.11995643879749314,
+      "glazing": 0.05161835337878223,
+      "window_area": 0.007642758485338909,
+      "shading": 0.005688012527951997,
+      "orientation": 0.0014024355007220626
+    },
+    "zone_cooling_south_kwh_m2": {
+      "climate": 0.3383175039792841,
+      "geometry": 0.03184409359235156,
+      "opaque_envelope": 0.00985414965855379,
+      "glazing": 0.23469166947547096,
+      "window_area": 0.1973363227315762,
+      "shading": 0.04834625354147093,
+      "orientation": 0.13961000702129248
+    },
+    "zone_cooling_east_kwh_m2": {
+      "climate": 0.3107969446106017,
+      "geometry": 0.04616569612615817,
+      "opaque_envelope": 0.009870405141883655,
+      "glazing": 0.2947312347190069,
+      "window_area": 0.24450783607213106,
+      "shading": 0.08746161210899295,
+      "orientation": 0.006466271221225521
+    },
+    "zone_cooling_north_kwh_m2": {
+      "climate": 0.3571181249114348,
+      "geometry": 0.022393447969658076,
+      "opaque_envelope": 0.008595292881949955,
+      "glazing": 0.22625440381387793,
+      "window_area": 0.19751268864534785,
+      "shading": 0.05024733244430105,
+      "orientation": 0.1378787093334304
+    },
+    "zone_cooling_west_kwh_m2": {
+      "climate": 0.46147275935833454,
+      "geometry": 0.031439402973035095,
+      "opaque_envelope": 0.012631131571540947,
+      "glazing": 0.21655070387727046,
+      "window_area": 0.17550708516615765,
+      "shading": 0.020220662832640925,
+      "orientation": 0.08217825422102042
+    }
+  },
+  "shap_group_share_by_climate": {
+    "heating_demand_kwh_m2": {
+      "atlanta": {
+        "geometry": 0.2549027507702699,
+        "opaque_envelope": 0.06347511992233407,
+        "glazing": 0.5679346601160927,
+        "window_area": 0.0766410505901585,
+        "shading": 0.024870941170558644,
+        "orientation": 0.012175477430586109
+      },
+      "chennai": {
+        "geometry": 0.2386496159240184,
+        "opaque_envelope": 0.06718688486216047,
+        "glazing": 0.5981751567183656,
+        "window_area": 0.06994955792362012,
+        "shading": 0.01884960148708452,
+        "orientation": 0.007189183084750985
+      },
+      "chicago": {
+        "geometry": 0.23790079701787378,
+        "opaque_envelope": 0.06740578057945662,
+        "glazing": 0.5793515278184824,
+        "window_area": 0.07847453882641918,
+        "shading": 0.028920733933153385,
+        "orientation": 0.007946621824614601
+      },
+      "colombo": {
+        "geometry": 0.24151619264278837,
+        "opaque_envelope": 0.06243493480206669,
+        "glazing": 0.5984579914231353,
+        "window_area": 0.07080225318154365,
+        "shading": 0.02046971525556136,
+        "orientation": 0.006318912694904795
+      },
+      "denver": {
+        "geometry": 0.2277025252817706,
+        "opaque_envelope": 0.07977476379927136,
+        "glazing": 0.5751776330392638,
+        "window_area": 0.082600047434504,
+        "shading": 0.028557488474134397,
+        "orientation": 0.006187541971055712
+      },
+      "miami": {
+        "geometry": 0.24295322686331255,
+        "opaque_envelope": 0.06088334512032017,
+        "glazing": 0.5923589202545698,
+        "window_area": 0.0787674603736052,
+        "shading": 0.017929204967242984,
+        "orientation": 0.007107842420949245
+      },
+      "minneapolis": {
+        "geometry": 0.23126404728138955,
+        "opaque_envelope": 0.07601101538459797,
+        "glazing": 0.5647726737334526,
+        "window_area": 0.08593641027503919,
+        "shading": 0.03337954203104524,
+        "orientation": 0.00863631129447528
+      },
+      "new_york": {
+        "geometry": 0.21084106442990486,
+        "opaque_envelope": 0.07373738225523699,
+        "glazing": 0.6052860990028718,
+        "window_area": 0.07862693306718543,
+        "shading": 0.024880158588433083,
+        "orientation": 0.006628362656367821
+      },
+      "phoenix": {
+        "geometry": 0.23500720591318328,
+        "opaque_envelope": 0.0670335814337894,
+        "glazing": 0.5989442332944636,
+        "window_area": 0.07461093368303372,
+        "shading": 0.018490917691209537,
+        "orientation": 0.005913127984320672
+      },
+      "san_francisco": {
+        "geometry": 0.2294350528149999,
+        "opaque_envelope": 0.06241983136072604,
+        "glazing": 0.6064254373472641,
+        "window_area": 0.07209818721292308,
+        "shading": 0.020864930730218514,
+        "orientation": 0.008756560533868502
+      }
+    },
+    "cooling_demand_kwh_m2": {
+      "atlanta": {
+        "geometry": 0.18546747632247473,
+        "opaque_envelope": 0.04446395634295332,
+        "glazing": 0.613287000296593,
+        "window_area": 0.11861233131136811,
+        "shading": 0.03216853674001079,
+        "orientation": 0.006000698986599815
+      },
+      "chennai": {
+        "geometry": 0.28281264217792357,
+        "opaque_envelope": 0.038784877255516506,
+        "glazing": 0.5021879714526644,
+        "window_area": 0.13806688171843134,
+        "shading": 0.03175696953676623,
+        "orientation": 0.006390657858698061
+      },
+      "chicago": {
+        "geometry": 0.16670937489714135,
+        "opaque_envelope": 0.06046176014463316,
+        "glazing": 0.6182084560699505,
+        "window_area": 0.10904654849790557,
+        "shading": 0.038744082315800406,
+        "orientation": 0.006829778074568975
+      },
+      "colombo": {
+        "geometry": 0.275376433454391,
+        "opaque_envelope": 0.03675513737329491,
+        "glazing": 0.5071679477269129,
+        "window_area": 0.14413485265243786,
+        "shading": 0.030748533164458084,
+        "orientation": 0.005817095628505144
+      },
+      "denver": {
+        "geometry": 0.16886169405743565,
+        "opaque_envelope": 0.051736133537505447,
+        "glazing": 0.6326250097245234,
+        "window_area": 0.1037515962762897,
+        "shading": 0.03691694007602864,
+        "orientation": 0.006108626328217155
+      },
+      "miami": {
+        "geometry": 0.253924189421099,
+        "opaque_envelope": 0.020590767876452924,
+        "glazing": 0.5528861746340308,
+        "window_area": 0.13779027329859658,
+        "shading": 0.02942950268532215,
+        "orientation": 0.005379092084498503
+      },
+      "minneapolis": {
+        "geometry": 0.17172539609172083,
+        "opaque_envelope": 0.061025959192616455,
+        "glazing": 0.618314884457267,
+        "window_area": 0.10357107115332743,
+        "shading": 0.03774631038546564,
+        "orientation": 0.007616378719602569
+      },
+      "new_york": {
+        "geometry": 0.15877630317177346,
+        "opaque_envelope": 0.05302498713220139,
+        "glazing": 0.636042537059846,
+        "window_area": 0.10649813887454361,
+        "shading": 0.03905473356073179,
+        "orientation": 0.006603300200903806
+      },
+      "phoenix": {
+        "geometry": 0.2729107411850529,
+        "opaque_envelope": 0.027182408987390844,
+        "glazing": 0.5205753964587236,
+        "window_area": 0.13943754613182216,
+        "shading": 0.03373227913677848,
+        "orientation": 0.006161628100232023
+      },
+      "san_francisco": {
+        "geometry": 0.16429376903530654,
+        "opaque_envelope": 0.049849883602180484,
+        "glazing": 0.640748222776629,
+        "window_area": 0.10540876222818851,
+        "shading": 0.03320574272445972,
+        "orientation": 0.00649361963323561
+      }
+    }
+  },
+  "eui_decomposition": {
+    "minneapolis": {
+      "elec_kwh_m2": 48.87,
+      "sys_heat_kwh_m2": 44.42,
+      "sys_cool_kwh_m2": 32.37,
+      "heating_demand_kwh_m2": 16.98,
+      "cooling_demand_kwh_m2": 55.51,
+      "oa_net": 4.29,
+      "eui_kwh_m2": 125.65,
+      "closure": -0.0
+    },
+    "chicago": {
+      "elec_kwh_m2": 48.87,
+      "sys_heat_kwh_m2": 31.1,
+      "sys_cool_kwh_m2": 36.74,
+      "heating_demand_kwh_m2": 12.31,
+      "cooling_demand_kwh_m2": 57.32,
+      "oa_net": -1.8,
+      "eui_kwh_m2": 116.71,
+      "closure": 0.0
+    },
+    "denver": {
+      "elec_kwh_m2": 48.87,
+      "sys_heat_kwh_m2": 20.1,
+      "sys_cool_kwh_m2": 30.73,
+      "heating_demand_kwh_m2": 8.91,
+      "cooling_demand_kwh_m2": 58.93,
+      "oa_net": -17.01,
+      "eui_kwh_m2": 99.7,
+      "closure": 0.0
+    },
+    "new_york": {
+      "elec_kwh_m2": 48.87,
+      "sys_heat_kwh_m2": 19.8,
+      "sys_cool_kwh_m2": 40.16,
+      "heating_demand_kwh_m2": 8.1,
+      "cooling_demand_kwh_m2": 59.0,
+      "oa_net": -7.14,
+      "eui_kwh_m2": 108.83,
+      "closure": 0.0
+    },
+    "atlanta": {
+      "elec_kwh_m2": 48.87,
+      "sys_heat_kwh_m2": 7.82,
+      "sys_cool_kwh_m2": 63.92,
+      "heating_demand_kwh_m2": 3.74,
+      "cooling_demand_kwh_m2": 65.15,
+      "oa_net": 2.85,
+      "eui_kwh_m2": 120.61,
+      "closure": 0.0
+    },
+    "san_francisco": {
+      "elec_kwh_m2": 48.87,
+      "sys_heat_kwh_m2": 3.26,
+      "sys_cool_kwh_m2": 26.85,
+      "heating_demand_kwh_m2": 1.72,
+      "cooling_demand_kwh_m2": 60.6,
+      "oa_net": -32.22,
+      "eui_kwh_m2": 78.98,
+      "closure": 0.0
+    },
+    "phoenix": {
+      "elec_kwh_m2": 48.87,
+      "sys_heat_kwh_m2": 1.55,
+      "sys_cool_kwh_m2": 95.95,
+      "heating_demand_kwh_m2": 1.21,
+      "cooling_demand_kwh_m2": 88.29,
+      "oa_net": 8.01,
+      "eui_kwh_m2": 146.37,
+      "closure": 0.0
+    },
+    "miami": {
+      "elec_kwh_m2": 48.87,
+      "sys_heat_kwh_m2": 0.04,
+      "sys_cool_kwh_m2": 131.75,
+      "heating_demand_kwh_m2": 0.31,
+      "cooling_demand_kwh_m2": 81.48,
+      "oa_net": 50.01,
+      "eui_kwh_m2": 180.66,
+      "closure": -0.0
+    },
+    "chennai": {
+      "elec_kwh_m2": 48.87,
+      "sys_heat_kwh_m2": 0.0,
+      "sys_cool_kwh_m2": 187.34,
+      "heating_demand_kwh_m2": 0.56,
+      "cooling_demand_kwh_m2": 94.36,
+      "oa_net": 92.42,
+      "eui_kwh_m2": 236.2,
+      "closure": 0.0
+    },
+    "colombo": {
+      "elec_kwh_m2": 48.87,
+      "sys_heat_kwh_m2": 0.0,
+      "sys_cool_kwh_m2": 182.65,
+      "heating_demand_kwh_m2": 0.47,
+      "cooling_demand_kwh_m2": 91.63,
+      "oa_net": 90.55,
+      "eui_kwh_m2": 231.52,
+      "closure": 0.0
+    }
+  },
+  "figures": [
+    "F01_input_histograms",
+    "F02_input_correlation",
+    "F03_climate_space",
+    "F04_targets_by_climate",
+    "F05_target_transforms",
+    "F06_target_correlation",
+    "F07_eui_decomposition",
+    "F08_physics_directions",
+    "F09_facade_azimuth",
+    "F10_core_nfloors",
+    "F11_rf_parity",
+    "F12_shap_features",
+    "F13_shap_groups",
+    "F14_shap_by_climate",
+    "F15_learning_curve"
+  ],
+  "environment": {
+    "python": "3.13.9",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "shap": "0.52.0",
+    "matplotlib": "3.11.2"
+  },
+  "runtime_s": 389.5
+}

@@ -1,0 +1,5 @@
+run_id,batch,design_set,design_id,climate_key,floor_area,aspect_ratio,n_floors,floor_height,wall_r_value,roof_r_value,floor_r_value,wall_thermal_mass,infiltration_ach,wwr_north,wwr_east,wwr_south,wwr_west,glazing_u,glazing_shgc,glazing_vt,overhang_depth_n,overhang_depth_e,overhang_depth_s,overhang_depth_w,sidefin_depth,orientation
+vtpair_P01vtA_colombo,vtpair,vt_check,P01vtA,colombo,7335.6,2.9518,4,4.108,6.689,5.128,4.244,205.29,0.8027,0.5190,0.4420,0.1234,0.5803,3.376,0.5270,0.5270,1.178,1.305,1.440,0.679,0.263,32.02
+vtpair_P01vtB_colombo,vtpair,vt_check,P01vtB,colombo,7335.6,2.9518,4,4.108,6.689,5.128,4.244,205.29,0.8027,0.5190,0.4420,0.1234,0.5803,3.376,0.5270,0.2000,1.178,1.305,1.440,0.679,0.263,32.02
+vtpair_P01vtA_minneapolis,vtpair,vt_check,P01vtA,minneapolis,7335.6,2.9518,4,4.108,6.689,5.128,4.244,205.29,0.8027,0.5190,0.4420,0.1234,0.5803,3.376,0.5270,0.5270,1.178,1.305,1.440,0.679,0.263,32.02
+vtpair_P01vtB_minneapolis,vtpair,vt_check,P01vtB,minneapolis,7335.6,2.9518,4,4.108,6.689,5.128,4.244,205.29,0.8027,0.5190,0.4420,0.1234,0.5803,3.376,0.5270,0.2000,1.178,1.305,1.440,0.679,0.263,32.02

@@ -1,0 +1,3 @@
+run_id,batch,design_id,climate_key,status,attempts,returncode,warnings,severe,fatal,build_s,sim_s,wall_s,worker_pid,finished_at,run_dir,message
+main_B0573_chicago,main,B0573,chicago,ok,1,0,1,0,0,0.95,5.22,6.17,99068,2026-10-13T17:31:27+00:00,main_B0573_chicago,
+main_B0600_chicago,main,B0600,chicago,ok,1,0,1,0,0,0.96,5.32,6.28,99069,2026-10-13T17:31:27+00:00,main_B0600_chicago,

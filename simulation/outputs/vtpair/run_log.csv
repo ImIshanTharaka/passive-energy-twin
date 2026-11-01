@@ -1,0 +1,5 @@
+run_id,batch,design_id,climate_key,status,attempts,returncode,warnings,severe,fatal,build_s,sim_s,wall_s,worker_pid,finished_at,run_dir,message
+vtpair_P01vtA_colombo,vtpair,P01vtA,colombo,ok,1,0,0,0,0,1.48,19.70,21.18,73827,2026-10-11T17:16:40+00:00,vtpair_P01vtA_colombo,
+vtpair_P01vtB_colombo,vtpair,P01vtB,colombo,ok,1,0,0,0,0,1.49,19.70,21.20,73828,2026-10-11T17:16:40+00:00,vtpair_P01vtB_colombo,
+vtpair_P01vtB_minneapolis,vtpair,P01vtB,minneapolis,ok,1,0,0,0,0,1.48,20.15,21.63,73830,2026-10-11T17:16:41+00:00,vtpair_P01vtB_minneapolis,
+vtpair_P01vtA_minneapolis,vtpair,P01vtA,minneapolis,ok,1,0,0,0,0,1.46,20.30,21.77,73829,2026-10-11T17:16:41+00:00,vtpair_P01vtA_minneapolis,

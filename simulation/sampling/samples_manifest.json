@@ -1,0 +1,240 @@
+{
+  "manifest_version": 1,
+  "generated_by": "sampling/sampler.py --build",
+  "decisions": {
+    "S1": "hybrid replication: anchors in every training climate + sliced-LHS climate-specific designs",
+    "S2": "glazing_vt not sampled; glazing_vt = glazing_shgc",
+    "S3": "n_floors uniform over integers 1..5 (floor of U[1, 6))",
+    "S4": "out-of-distribution holdout (London) runs the anchor designs"
+  },
+  "master_seed": 20261001,
+  "inputs_sha256": {
+    "config/design_space.yaml": "13cf8ed0f25fad76e5f55c0cece093537790cbdefea8ec323a2e4f787f8711fb",
+    "config/climate_config.yaml": "e4a12868de11024000de9a1aa0f211425d803dd59890fd1832441aeb355a6de6",
+    "climate/climate_metadata.csv": "5cd50b6244329005cc8356a350fd054d5769629e35c49b85317b4a42019c33d3"
+  },
+  "environment": {
+    "python": "3.11.15",
+    "numpy": "2.4.4",
+    "scipy": "1.17.1"
+  },
+  "parameters": {
+    "model_inputs": [
+      "floor_area",
+      "aspect_ratio",
+      "n_floors",
+      "floor_height",
+      "wall_r_value",
+      "roof_r_value",
+      "floor_r_value",
+      "wall_thermal_mass",
+      "infiltration_ach",
+      "wwr_north",
+      "wwr_east",
+      "wwr_south",
+      "wwr_west",
+      "glazing_u",
+      "glazing_shgc",
+      "overhang_depth_n",
+      "overhang_depth_e",
+      "overhang_depth_s",
+      "overhang_depth_w",
+      "sidefin_depth",
+      "orientation"
+    ],
+    "idf_columns": [
+      "floor_area",
+      "aspect_ratio",
+      "n_floors",
+      "floor_height",
+      "wall_r_value",
+      "roof_r_value",
+      "floor_r_value",
+      "wall_thermal_mass",
+      "infiltration_ach",
+      "wwr_north",
+      "wwr_east",
+      "wwr_south",
+      "wwr_west",
+      "glazing_u",
+      "glazing_shgc",
+      "glazing_vt",
+      "overhang_depth_n",
+      "overhang_depth_e",
+      "overhang_depth_s",
+      "overhang_depth_w",
+      "sidefin_depth",
+      "orientation"
+    ],
+    "derived": {
+      "glazing_vt": "= glazing_shgc"
+    }
+  },
+  "climates": {
+    "training": [
+      "atlanta",
+      "chennai",
+      "chicago",
+      "colombo",
+      "denver",
+      "miami",
+      "minneapolis",
+      "new_york",
+      "phoenix",
+      "san_francisco"
+    ],
+    "holdout_ood": [
+      "london"
+    ],
+    "pilot": [
+      "colombo",
+      "phoenix",
+      "san_francisco",
+      "minneapolis"
+    ],
+    "slice_to_climate": {
+      "atlanta": {
+        "B": "B0001..B0200",
+        "C": "C001..C030"
+      },
+      "chennai": {
+        "B": "B0201..B0400",
+        "C": "C031..C060"
+      },
+      "chicago": {
+        "B": "B0401..B0600",
+        "C": "C061..C090"
+      },
+      "colombo": {
+        "B": "B0601..B0800",
+        "C": "C091..C120"
+      },
+      "denver": {
+        "B": "B0801..B1000",
+        "C": "C121..C150"
+      },
+      "miami": {
+        "B": "B1001..B1200",
+        "C": "C151..C180"
+      },
+      "minneapolis": {
+        "B": "B1201..B1400",
+        "C": "C181..C210"
+      },
+      "new_york": {
+        "B": "B1401..B1600",
+        "C": "C211..C240"
+      },
+      "phoenix": {
+        "B": "B1601..B1800",
+        "C": "C241..C270"
+      },
+      "san_francisco": {
+        "B": "B1801..B2000",
+        "C": "C271..C300"
+      }
+    }
+  },
+  "design_sets": {
+    "A": {
+      "label": "anchor",
+      "n_designs": 100,
+      "n_slices": 1,
+      "per_slice": 100,
+      "seed": [
+        20261001,
+        1
+      ],
+      "n_candidates": 50,
+      "chosen_candidate": 26,
+      "centred_discrepancy_whole": 0.739152,
+      "centred_discrepancy_slices_mean": 0.739152,
+      "decorrelate_iterations": 100000,
+      "max_abs_corr_before_decorrelation": 0.301,
+      "max_abs_corr_after_decorrelation": 0.0016,
+      "design_ids": "A001..A100"
+    },
+    "B": {
+      "label": "specific",
+      "n_designs": 2000,
+      "n_slices": 10,
+      "per_slice": 200,
+      "seed": [
+        20261001,
+        2
+      ],
+      "n_candidates": 50,
+      "chosen_candidate": 43,
+      "centred_discrepancy_whole": 0.037585,
+      "centred_discrepancy_slices_mean": 0.378192,
+      "decorrelate_iterations": 100000,
+      "max_abs_corr_before_decorrelation": 0.2386,
+      "max_abs_corr_after_decorrelation": 0.0088,
+      "design_ids": "B0001..B2000"
+    },
+    "C": {
+      "label": "holdout",
+      "n_designs": 300,
+      "n_slices": 10,
+      "per_slice": 30,
+      "seed": [
+        20261001,
+        3
+      ],
+      "n_candidates": 50,
+      "chosen_candidate": 24,
+      "centred_discrepancy_whole": 0.239197,
+      "centred_discrepancy_slices_mean": 2.406819,
+      "decorrelate_iterations": 100000,
+      "max_abs_corr_before_decorrelation": 0.6245,
+      "max_abs_corr_after_decorrelation": 0.0659,
+      "design_ids": "C001..C300"
+    },
+    "P": {
+      "label": "pilot_lhs",
+      "n_designs": 42,
+      "n_slices": 1,
+      "per_slice": 42,
+      "seed": [
+        20261001,
+        4
+      ],
+      "n_candidates": 50,
+      "chosen_candidate": 9,
+      "centred_discrepancy_whole": 1.689199,
+      "centred_discrepancy_slices_mean": 1.689199,
+      "decorrelate_iterations": 100000,
+      "max_abs_corr_before_decorrelation": 0.5381,
+      "max_abs_corr_after_decorrelation": 0.0078,
+      "design_ids": "P01..P42"
+    },
+    "E": {
+      "label": "edge",
+      "n_designs": 8,
+      "cases": {
+        "E01": "every parameter at its minimum",
+        "E02": "every parameter at its maximum",
+        "E03": "most slender: smallest footprint, aspect 3, 5 tall floors (narrowest core)",
+        "E04": "largest: biggest square footprint, 5 floors",
+        "E05": "single storey (roof and ground coupling dominate)",
+        "E06": "max glazing + deepest overhangs and fins at the lowest floor height",
+        "E07": "min glazing, no shading",
+        "E08": "reference: every parameter mid-range"
+      }
+    }
+  },
+  "outputs": {
+    "samples_main.csv": {
+      "rows": 3000,
+      "sha256": "c608bd9419eee9ddb22d465fed55f92cb5db00f566f5fc44bdc124229f22bb35"
+    },
+    "samples_holdout.csv": {
+      "rows": 400,
+      "sha256": "39515682c0f3505748c269904dbc458405a71a4d3432cf1e1dfbd12e7c0ad972"
+    },
+    "samples_pilot.csv": {
+      "rows": 200,
+      "sha256": "0a5018dd891d6b3436faac228ca46eb96dc26ad141202a10df2242a7e6011840"
+    }
+  }
+}

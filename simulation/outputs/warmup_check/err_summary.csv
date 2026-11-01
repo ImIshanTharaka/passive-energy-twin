@@ -1,0 +1,3 @@
+run_id,version,completed,terminated_fatal,reported_warnings,reported_severe,n_fatal,n_nonbenign_warnings,clean,elapsed_s,categories
+main_B0573_chicago,24.1.0,1,0,1,0,0,0,1,3.45,unused_construction:1
+main_B0600_chicago,24.1.0,1,0,1,0,0,0,1,3.57,unused_construction:1

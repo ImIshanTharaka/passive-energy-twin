@@ -1,0 +1,36 @@
+# .gitignore - whole Project repository (Phase 3 plan §4.3)
+# Rule: track code, configs, tests, docs, the frozen dataset, reports and figures;
+# skip environments, raw EnergyPlus run folders and anything regenerable or large.
+
+# ── Python environments and caches ────────────────────────────────────────────
+venv/
+simulation/venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# ── macOS ──────────────────────────────────────────────────────────────────────
+.DS_Store
+
+# ── Archives and superseded outputs ───────────────────────────────────────────
+_archive/
+simulation/outputs/_previous/
+
+# ── Raw EnergyPlus run folders (≈ 5 GB) ───────────────────────────────────────
+# Each batch folder keeps its summary files (results.csv, run_log.csv, err_*.csv,
+# run_meta.json, *_report.md); only the per-run subfolders are skipped.
+simulation/outputs/main/*/
+simulation/outputs/holdout/*/
+simulation/outputs/pilot/*/
+simulation/outputs/oat/*/
+simulation/outputs/vtpair/*/
+simulation/outputs/check_G1/*/
+simulation/outputs/warmup_check/*/
+simulation/outputs/smoke_*/*/
+simulation/outputs/raw/
+# single smoke-test runs and their IDFs (regenerable)
+simulation/outputs/smoke_orient_*/
+simulation/outputs/smoke_*.idf
+
+# ── Phase 3+ outputs that are large or regenerable ────────────────────────────
+surrogate/outputs/tuning/*.db

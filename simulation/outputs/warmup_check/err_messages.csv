@@ -1,0 +1,3 @@
+run_id,level,category,benign,recurring,count,signature,text,details
+main_B0573_chicago,Warning,unused_construction,1,0,1,CheckUsedConstructions: There are <n> nominally unused constructions in input.,CheckUsedConstructions: There are 2 nominally unused constructions in input.,"For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;"
+main_B0600_chicago,Warning,unused_construction,1,0,1,CheckUsedConstructions: There are <n> nominally unused constructions in input.,CheckUsedConstructions: There are 2 nominally unused constructions in input.,"For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;"

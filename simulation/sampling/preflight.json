@@ -1,0 +1,11 @@
+{
+  "n_designs": 2450,
+  "n_passed": 2450,
+  "n_failed": 0,
+  "failures": [],
+  "idd": "/Applications/EnergyPlus-24-1-0/Energy+.idd",
+  "idd_version": "!IDD_Version 24.1.0",
+  "build_seconds_mean": 0.568,
+  "wall_seconds": 179.1,
+  "workers": 8
+}

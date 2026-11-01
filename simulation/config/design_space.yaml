@@ -1,0 +1,227 @@
+# Design Space Configuration
+# Phase 2 - Parametric EnergyPlus Simulation
+# All parameter bounds for Latin Hypercube Sampling
+#
+# Units and notes are documented inline.
+# Parameters are grouped by category.
+#
+# Read by sampling/transform.py (the single consumer). Per-parameter fields:
+#   min, max   closed bounds of the sampled range
+#   decimals   rounding applied before a value is written to the sample CSV,
+#              so the CSV holds exactly what EnergyPlus and the surrogate see
+#   type       "integer" -> uniform over the integers min..max (Decision S3):
+#              value = min + floor(u * (max - min + 1)). Plain rounding of a
+#              continuous draw would give the end values half the probability
+#              of the interior ones.
+#
+# The ORDER of continuous_parameters is the column order of the unit-cube
+# design and of the sample CSVs. Changing order, bounds or decimals changes
+# every sample: rebuild with  python sampling/sampler.py --build
+
+metadata:
+  schema_version: 2       # 2 (1 Oct 2026): decimals added, glazing_vt derived,
+                          #   integer sampling rule, orientation text corrected
+
+continuous_parameters:
+
+  # ── Geometry ──────────────────────────────────────────────────────────────
+  floor_area:
+    min: 1500
+    max: 10000
+    decimals: 1
+    unit: "m²"
+    description: "Floor area PER STOREY (footprint), not total building area"
+    # DECISION (27 Sep 2026): per storey, matching idf_generator/geometry.py.
+    # Total building area = floor_area x n_floors, so the sampled range is
+    # 1,500-50,000 m2 total - wider than the DOE Medium Office (~5,000 m2).
+    # Chosen over a total-area definition because every sampled combination
+    # then yields valid geometry; with total area, small tall narrow
+    # buildings (1,500 m2 / 5 floors / 1:3) would have cores < 1 m wide.
+    # State this definition explicitly in the methodology chapter.
+
+  aspect_ratio:
+    min: 1.0
+    max: 3.0
+    decimals: 4
+    unit: "dimensionless"
+    description: "Building footprint length:width ratio (long axis / short axis)"
+
+  n_floors:
+    min: 1
+    max: 5
+    decimals: 0
+    unit: "count"
+    type: "integer"         # S3: uniform over 1..5 (20% each)
+    description: "Number of above-ground floors"
+
+  floor_height:
+    min: 3.0
+    max: 4.5
+    decimals: 3
+    unit: "m"
+    description: "Floor-to-floor height (same for all floors)"
+
+  # ── Envelope ──────────────────────────────────────────────────────────────
+  wall_r_value:
+    min: 1.0
+    max: 8.0
+    decimals: 3
+    unit: "m²·K/W"
+    description: "Effective wall insulation R-value (U = 1/R)"
+
+  roof_r_value:
+    min: 2.0
+    max: 12.0
+    decimals: 3
+    unit: "m²·K/W"
+    description: "Effective roof insulation R-value"
+
+  floor_r_value:
+    min: 0.5
+    max: 5.0
+    decimals: 3
+    unit: "m²·K/W"
+    description: "Ground floor / slab insulation R-value"
+
+  wall_thermal_mass:
+    min: 50
+    max: 400
+    decimals: 2
+    unit: "kJ/m²·K"
+    description: "Effective wall heat capacity (lightweight steel=~50 to heavy concrete=~400)"
+
+  infiltration_ach:
+    min: 0.1
+    max: 2.0
+    decimals: 4
+    unit: "ACH at 50 Pa"
+    description: "Air infiltration rate at 50 Pa pressure differential"
+
+  # ── Fenestration — per façade (N / E / S / W) ─────────────────────────────
+  wwr_north:
+    min: 0.10
+    max: 0.80
+    decimals: 4
+    unit: "fraction"
+    description: "Window-to-wall ratio on the North façade"
+
+  wwr_east:
+    min: 0.10
+    max: 0.80
+    decimals: 4
+    unit: "fraction"
+    description: "Window-to-wall ratio on the East façade"
+
+  wwr_south:
+    min: 0.10
+    max: 0.80
+    decimals: 4
+    unit: "fraction"
+    description: "Window-to-wall ratio on the South façade"
+
+  wwr_west:
+    min: 0.10
+    max: 0.80
+    decimals: 4
+    unit: "fraction"
+    description: "Window-to-wall ratio on the West façade"
+
+  glazing_u:
+    min: 0.8
+    max: 5.8
+    decimals: 3
+    unit: "W/m²·K"
+    description: "Glazing U-value (same all façades). Range: triple low-e (0.8) to single-pane (5.8)"
+
+  glazing_shgc:
+    min: 0.10
+    max: 0.80
+    decimals: 4
+    unit: "fraction"
+    description: "Solar heat gain coefficient (same all façades)"
+
+  # ── Shading — per façade ───────────────────────────────────────────────────
+  overhang_depth_n:
+    min: 0.0
+    max: 1.5
+    decimals: 3
+    unit: "m"
+    description: "Horizontal overhang depth above windows on North façade"
+
+  overhang_depth_e:
+    min: 0.0
+    max: 1.5
+    decimals: 3
+    unit: "m"
+    description: "Horizontal overhang depth above windows on East façade"
+
+  overhang_depth_s:
+    min: 0.0
+    max: 1.5
+    decimals: 3
+    unit: "m"
+    description: "Horizontal overhang depth above windows on South façade"
+
+  overhang_depth_w:
+    min: 0.0
+    max: 1.5
+    decimals: 3
+    unit: "m"
+    description: "Horizontal overhang depth above windows on West façade"
+
+  sidefin_depth:
+    min: 0.0
+    max: 1.0
+    decimals: 3
+    unit: "m"
+    description: "Side-fin depth on all façades (single value, symmetric)"
+
+  # ── Orientation ────────────────────────────────────────────────────────────
+  orientation:
+    min: 0
+    max: 180
+    decimals: 2
+    unit: "degrees"
+    description: "Building North Axis (deg, clockwise). 0 = long axis E-W, long facades facing N and S; 90 = long axis N-S"
+    # Facade parameters (wwr_north, overhang_depth_n, ...) are BUILDING-RELATIVE:
+    # "north" is the facade that faces north when orientation = 0; at 90 it
+    # faces east. 0-180 covers every configuration because the four facades
+    # are sampled independently (a 180-degree turn = swapping N<->S and E<->W).
+    # Phase 3: consider features combining orientation with facade direction.
+
+
+# ── Fixed parameters (not sampled) ─────────────────────────────────────────
+# These are held constant at DOE Medium Office reference values across all runs.
+fixed_parameters:
+  # DOCUMENTATION ONLY - no code reads this block. The values actually used
+  # live in idf_generator/internal_loads/internal_loads.py (loads, schedules,
+  # setpoints) and idf_generator/geometry/geometry.py (perimeter depth).
+  # Corrected 27 Sep 2026: lighting/equipment previously read 10.76 W/m2
+  # (the old 1 W/ft2 figure), but the generator has always used the values
+  # below. Report THESE in the methodology chapter.
+  perimeter_zone_depth_m: 4.57        # DOE standard (15 ft)
+  people_density_m2_per_person: 18.58 # DOE Medium Office (200 ft²/person)
+  lighting_w_per_m2: 6.9              # internal_loads.LIGHTING_POWER_DENSITY
+  equipment_w_per_m2: 6.78            # internal_loads.EQUIPMENT_POWER_DENSITY
+  heating_setpoint_c: 21.0            # °C occupied
+  cooling_setpoint_c: 24.0            # °C occupied
+  heating_setback_c: 15.6             # °C unoccupied
+  cooling_setup_c: 26.7               # °C unoccupied
+  simulation_year: 2013               # EnergyPlus default reference year
+
+
+# ── Derived parameters (inputs to the IDF, NOT sampled, NOT model inputs) ──
+derived_parameters:
+  glazing_vt:
+    equal_to: glazing_shgc
+    unit: "fraction"
+    description: "Visible transmittance, written to WindowMaterial:SimpleGlazingSystem"
+    # DECISION S2 (1 Oct 2026). The generator has no Daylighting:Controls and
+    # lighting follows a fixed schedule, so VT affects no heating, cooling or
+    # EUI target; sampling it would add a dimension the surrogate must learn
+    # to ignore and a Phase 5 control that changes nothing. VT = SHGC (light-
+    # to-solar-gain ratio 1, typical of clear/tinted double glazing) keeps the
+    # IDF realistic. The old rule "VT <= SHGC" was physically backwards:
+    # spectrally selective low-e glass has VT > SHGC (e.g. 0.70 / 0.27).
+    # The generator still clips VT to SHGC; with VT = SHGC that is a no-op.
+    # Future work: add daylighting controls and sample VT (and LSG) properly.

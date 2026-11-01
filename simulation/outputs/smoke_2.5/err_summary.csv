@@ -1,0 +1,5 @@
+run_id,version,completed,terminated_fatal,reported_warnings,reported_severe,n_fatal,n_nonbenign_warnings,clean,elapsed_s,categories
+pilot_P01_colombo,24.1.0,1,0,0,0,0,0,1,17.84,
+pilot_P01_minneapolis,24.1.0,1,0,0,0,0,0,1,18.59,
+pilot_P01_phoenix,24.1.0,1,0,0,0,0,0,1,18.60,
+pilot_P01_san_francisco,24.1.0,1,0,0,0,0,0,1,18.22,

@@ -1,0 +1,9 @@
+run_id,version,completed,terminated_fatal,reported_warnings,reported_severe,n_fatal,n_nonbenign_warnings,clean,elapsed_s,categories
+pilot_P01_colombo,24.1.0,1,0,0,0,0,0,1,20.20,
+pilot_P01_minneapolis,24.1.0,1,0,0,0,0,0,1,20.77,
+pilot_P01_phoenix,24.1.0,1,0,0,0,0,0,1,20.72,
+pilot_P01_san_francisco,24.1.0,1,0,0,0,0,0,1,20.53,
+pilot_P15_colombo,24.1.0,1,0,0,0,0,0,1,18.35,
+pilot_P15_minneapolis,24.1.0,1,0,0,0,0,0,1,19.02,
+pilot_P15_phoenix,24.1.0,1,0,0,0,0,0,1,19.19,
+pilot_P15_san_francisco,24.1.0,1,0,0,0,0,0,1,19.16,

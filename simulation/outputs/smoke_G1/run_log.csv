@@ -1,0 +1,9 @@
+run_id,batch,design_id,climate_key,status,attempts,returncode,warnings,severe,fatal,build_s,sim_s,wall_s,worker_pid,finished_at,run_dir,message
+pilot_P01_colombo,pilot,P01,colombo,ok,1,0,0,0,0,7.80,22.12,29.92,72703,2026-10-11T11:01:21+00:00,pilot_P01_colombo,
+pilot_P01_san_francisco,pilot,P01,san_francisco,ok,1,0,0,0,0,7.81,22.40,30.22,72705,2026-10-11T11:01:21+00:00,pilot_P01_san_francisco,
+pilot_P01_phoenix,pilot,P01,phoenix,ok,1,0,0,0,0,7.76,22.62,30.39,72704,2026-10-11T11:01:21+00:00,pilot_P01_phoenix,
+pilot_P01_minneapolis,pilot,P01,minneapolis,ok,1,0,0,0,0,7.83,22.60,30.42,72706,2026-10-11T11:01:21+00:00,pilot_P01_minneapolis,
+pilot_P15_colombo,pilot,P15,colombo,ok,1,0,0,0,0,7.90,18.99,26.89,72754,2026-10-11T11:01:50+00:00,pilot_P15_colombo,
+pilot_P15_minneapolis,pilot,P15,minneapolis,ok,1,0,0,0,0,7.86,19.69,27.56,72757,2026-10-11T11:01:51+00:00,pilot_P15_minneapolis,
+pilot_P15_san_francisco,pilot,P15,san_francisco,ok,1,0,0,0,0,7.88,19.80,27.69,72756,2026-10-11T11:01:51+00:00,pilot_P15_san_francisco,
+pilot_P15_phoenix,pilot,P15,phoenix,ok,1,0,0,0,0,7.90,19.79,27.69,72755,2026-10-11T11:01:51+00:00,pilot_P15_phoenix,

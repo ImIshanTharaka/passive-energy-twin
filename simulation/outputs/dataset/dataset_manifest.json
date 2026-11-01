@@ -1,0 +1,352 @@
+{
+  "schema_version": 1,
+  "generated_by": "dataset/assemble.py",
+  "created_utc": "2026-10-14T04:26:59Z",
+  "gate": "GO",
+  "columns": {
+    "id": [
+      "run_id",
+      "batch",
+      "design_set",
+      "design_id",
+      "climate_key"
+    ],
+    "meta": [
+      "ashrae_zone"
+    ],
+    "design_inputs": [
+      "floor_area",
+      "aspect_ratio",
+      "n_floors",
+      "floor_height",
+      "wall_r_value",
+      "roof_r_value",
+      "floor_r_value",
+      "wall_thermal_mass",
+      "infiltration_ach",
+      "wwr_north",
+      "wwr_east",
+      "wwr_south",
+      "wwr_west",
+      "glazing_u",
+      "glazing_shgc",
+      "overhang_depth_n",
+      "overhang_depth_e",
+      "overhang_depth_s",
+      "overhang_depth_w",
+      "sidefin_depth",
+      "orientation"
+    ],
+    "climate_inputs": [
+      "hdd18",
+      "cdd10",
+      "annual_ghi",
+      "mean_dbt",
+      "mean_rh",
+      "latitude",
+      "mean_wind"
+    ],
+    "inputs": [
+      "floor_area",
+      "aspect_ratio",
+      "n_floors",
+      "floor_height",
+      "wall_r_value",
+      "roof_r_value",
+      "floor_r_value",
+      "wall_thermal_mass",
+      "infiltration_ach",
+      "wwr_north",
+      "wwr_east",
+      "wwr_south",
+      "wwr_west",
+      "glazing_u",
+      "glazing_shgc",
+      "overhang_depth_n",
+      "overhang_depth_e",
+      "overhang_depth_s",
+      "overhang_depth_w",
+      "sidefin_depth",
+      "orientation",
+      "hdd18",
+      "cdd10",
+      "annual_ghi",
+      "mean_dbt",
+      "mean_rh",
+      "latitude",
+      "mean_wind"
+    ],
+    "targets": [
+      "heating_demand_kwh_m2",
+      "cooling_demand_kwh_m2",
+      "eui_kwh_m2",
+      "peak_heating_w_m2",
+      "peak_cooling_w_m2",
+      "zone_cooling_core_kwh_m2",
+      "zone_cooling_south_kwh_m2",
+      "zone_cooling_east_kwh_m2",
+      "zone_cooling_north_kwh_m2",
+      "zone_cooling_west_kwh_m2"
+    ],
+    "group": "design_id",
+    "all": [
+      "run_id",
+      "batch",
+      "design_set",
+      "design_id",
+      "climate_key",
+      "ashrae_zone",
+      "floor_area",
+      "aspect_ratio",
+      "n_floors",
+      "floor_height",
+      "wall_r_value",
+      "roof_r_value",
+      "floor_r_value",
+      "wall_thermal_mass",
+      "infiltration_ach",
+      "wwr_north",
+      "wwr_east",
+      "wwr_south",
+      "wwr_west",
+      "glazing_u",
+      "glazing_shgc",
+      "overhang_depth_n",
+      "overhang_depth_e",
+      "overhang_depth_s",
+      "overhang_depth_w",
+      "sidefin_depth",
+      "orientation",
+      "hdd18",
+      "cdd10",
+      "annual_ghi",
+      "mean_dbt",
+      "mean_rh",
+      "latitude",
+      "mean_wind",
+      "heating_demand_kwh_m2",
+      "cooling_demand_kwh_m2",
+      "eui_kwh_m2",
+      "peak_heating_w_m2",
+      "peak_cooling_w_m2",
+      "zone_cooling_core_kwh_m2",
+      "zone_cooling_south_kwh_m2",
+      "zone_cooling_east_kwh_m2",
+      "zone_cooling_north_kwh_m2",
+      "zone_cooling_west_kwh_m2"
+    ]
+  },
+  "units": {
+    "floor_area": "m²",
+    "aspect_ratio": "dimensionless",
+    "n_floors": "count",
+    "floor_height": "m",
+    "wall_r_value": "m²·K/W",
+    "roof_r_value": "m²·K/W",
+    "floor_r_value": "m²·K/W",
+    "wall_thermal_mass": "kJ/m²·K",
+    "infiltration_ach": "ACH at 50 Pa",
+    "wwr_north": "fraction",
+    "wwr_east": "fraction",
+    "wwr_south": "fraction",
+    "wwr_west": "fraction",
+    "glazing_u": "W/m²·K",
+    "glazing_shgc": "fraction",
+    "overhang_depth_n": "m",
+    "overhang_depth_e": "m",
+    "overhang_depth_s": "m",
+    "overhang_depth_w": "m",
+    "sidefin_depth": "m",
+    "orientation": "degrees",
+    "hdd18": "°C·day (base 18 °C)",
+    "cdd10": "°C·day (base 10 °C)",
+    "annual_ghi": "kWh/m²·yr",
+    "mean_dbt": "°C",
+    "mean_rh": "%",
+    "latitude": "° N",
+    "mean_wind": "m/s",
+    "heating_demand_kwh_m2": "kWh/m²·yr",
+    "cooling_demand_kwh_m2": "kWh/m²·yr",
+    "eui_kwh_m2": "kWh/m²·yr",
+    "peak_heating_w_m2": "W/m²",
+    "peak_cooling_w_m2": "W/m²",
+    "zone_cooling_core_kwh_m2": "kWh/m²·yr",
+    "zone_cooling_south_kwh_m2": "kWh/m²·yr",
+    "zone_cooling_east_kwh_m2": "kWh/m²·yr",
+    "zone_cooling_north_kwh_m2": "kWh/m²·yr",
+    "zone_cooling_west_kwh_m2": "kWh/m²·yr"
+  },
+  "target_sources": {
+    "heating_demand_kwh_m2": "outputs/<batch>/results.csv:heat_sens_kwh_m2",
+    "cooling_demand_kwh_m2": "outputs/<batch>/results.csv:cool_sens_kwh_m2",
+    "eui_kwh_m2": "outputs/<batch>/results.csv:eui_site_kwh_m2",
+    "peak_heating_w_m2": "outputs/<batch>/results.csv:peak_heat_steady_w_m2",
+    "peak_cooling_w_m2": "outputs/<batch>/results.csv:peak_cool_steady_w_m2",
+    "zone_cooling_core_kwh_m2": "outputs/<batch>/results.csv:zone_cool_sens_core_kwh_m2",
+    "zone_cooling_south_kwh_m2": "outputs/<batch>/results.csv:zone_cool_sens_south_kwh_m2",
+    "zone_cooling_east_kwh_m2": "outputs/<batch>/results.csv:zone_cool_sens_east_kwh_m2",
+    "zone_cooling_north_kwh_m2": "outputs/<batch>/results.csv:zone_cool_sens_north_kwh_m2",
+    "zone_cooling_west_kwh_m2": "outputs/<batch>/results.csv:zone_cool_sens_west_kwh_m2"
+  },
+  "splits": {
+    "training": {
+      "rows": 3000,
+      "by_batch": {
+        "main": 3000
+      },
+      "by_design_set": {
+        "anchor": 1000,
+        "specific": 2000
+      },
+      "climates": [
+        "atlanta",
+        "chennai",
+        "chicago",
+        "colombo",
+        "denver",
+        "miami",
+        "minneapolis",
+        "new_york",
+        "phoenix",
+        "san_francisco"
+      ],
+      "n_designs": 2100
+    },
+    "holdout": {
+      "rows": 400,
+      "by_batch": {
+        "holdout_id": 300,
+        "holdout_ood": 100
+      },
+      "by_design_set": {
+        "anchor": 100,
+        "holdout": 300
+      },
+      "climates": [
+        "atlanta",
+        "chennai",
+        "chicago",
+        "colombo",
+        "denver",
+        "london",
+        "miami",
+        "minneapolis",
+        "new_york",
+        "phoenix",
+        "san_francisco"
+      ],
+      "n_designs": 400
+    }
+  },
+  "files": {
+    "training": {
+      "path": "dataset_training.csv",
+      "rows": 3000,
+      "sha256": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e"
+    },
+    "holdout": {
+      "path": "dataset_holdout.csv",
+      "rows": 400,
+      "sha256": "d14bc0b03d1e2e804f09b32b6d10e4c73a2f794cfde416dbf3ed8fcd6d501ea4"
+    },
+    "diagnostics": {
+      "path": "dataset_diagnostics.csv",
+      "rows": 3400,
+      "sha256": "5b913667d987cd5687994ea45bd53f8cc22b0ecd7494c1347b34744d68df9743"
+    }
+  },
+  "sources_sha256": {
+    "sampling/samples_main.csv": "c608bd9419eee9ddb22d465fed55f92cb5db00f566f5fc44bdc124229f22bb35",
+    "outputs/main/results.csv": "738ce818ae7198fe9725c3bbe5a973b406c4bbc75fec8c844ed6d72c770d3dd8",
+    "outputs/main/run_log.csv": "22d52212d3a62e2021a4a46df4f704f4f6920b5b2f3a74d8b5014f6efd708bd6",
+    "outputs/main/err_summary.csv": "b2fd35c4ef80512f47ada2d3ae0435df6f0acc881c50db222ca92f151a6ee592",
+    "sampling/samples_holdout.csv": "39515682c0f3505748c269904dbc458405a71a4d3432cf1e1dfbd12e7c0ad972",
+    "outputs/holdout/results.csv": "b17d92207ae46b620e543b69426ab919b1a76bf6ef091d449b14a4a770dfcdb8",
+    "outputs/holdout/run_log.csv": "812729ba885a532c54cd93529b2a53bb4faf380650d21081627c35525d6ae2f2",
+    "outputs/holdout/err_summary.csv": "600bc6416d6fe8558216689089d9852a36d6a648609bbd349f01a920cbc31398",
+    "outputs/accepted_exceptions.csv": "13ad243df3d4b029ced225f0848e9025503f6e4dec8eda5a96681d579c4aaeed",
+    "climate/climate_metadata.csv": "5cd50b6244329005cc8356a350fd054d5769629e35c49b85317b4a42019c33d3",
+    "config/design_space.yaml": "13cf8ed0f25fad76e5f55c0cece093537790cbdefea8ec323a2e4f787f8711fb",
+    "sampling/samples_manifest.json": "7ff809f063fdca0b64371ac455e2f812ff9ca19a8f00ae38e47349373b3fb27b"
+  },
+  "checks": [
+    {
+      "id": "P1",
+      "name": "provenance",
+      "status": "PASS",
+      "detail": "samples sha256 = samples_manifest; every run_meta entry ran these samples; climate_metadata unchanged since sampling; results.csv newer than run_log.csv"
+    },
+    {
+      "id": "C1",
+      "name": "completeness",
+      "status": "PASS",
+      "detail": "every sampled run logged ok once and parsed once; no extra results (training 3000/3000, holdout 400/400)"
+    },
+    {
+      "id": "S1",
+      "name": "schema",
+      "status": "PASS",
+      "detail": "44 columns = 5 id + 1 meta + 21 design + 7 climate + 10 targets; no glazing_vt, no diagnostics; all values finite"
+    },
+    {
+      "id": "L1",
+      "name": "split isolation",
+      "status": "PASS",
+      "detail": "training = training climates only; holdout_id designs disjoint from training; London only in holdout_ood. holdout_ood reuses the 100 anchors by design (S4) - unseen climate, seen designs"
+    },
+    {
+      "id": "I1",
+      "name": "input bounds",
+      "status": "PASS",
+      "detail": "all 21 design inputs inside design_space.yaml bounds; integers integral"
+    },
+    {
+      "id": "G1",
+      "name": "geometry consistency",
+      "status": "PASS",
+      "detail": "simulated n_floors = sampled; n_zones = 5 x n_floors; conditioned area = floor_area x n_floors (max deviation 0.000 %)"
+    },
+    {
+      "id": "Q1",
+      "name": "simulation quality",
+      "status": "PASS",
+      "detail": "3398/3400 runs clean (only benign W1/unused-construction warnings); 2 reviewed exceptions kept (W2): main_B0573_chicago, main_B0600_chicago"
+    },
+    {
+      "id": "T1",
+      "name": "targets non-negative",
+      "status": "PASS",
+      "detail": "all 10 targets >= 0 in every row"
+    },
+    {
+      "id": "T2",
+      "name": "climate physics",
+      "status": "PASS",
+      "detail": "median heating chennai 0.55, colombo 0.46, miami 0.29; highest median heating minneapolis (15.5); highest median cooling chennai (90.9)"
+    },
+    {
+      "id": "T3",
+      "name": "EUI vs literature",
+      "status": "INFO",
+      "detail": "training: 100.0 % within 50-350 (range 65.1-304.9); holdout: 100.0 % within 50-350 (range 66.2-281.9). Site EUI with ideal loads (no plant efficiency, Decision A) - not directly comparable to metered office EUI"
+    },
+    {
+      "id": "T4",
+      "name": "outliers > 4 sigma",
+      "status": "INFO",
+      "detail": "66 runs flagged, kept (DS4); by target: zone_cooling_west_kwh_m2 17, zone_cooling_core_kwh_m2 12, zone_cooling_north_kwh_m2 10, zone_cooling_south_kwh_m2 9, heating_demand_kwh_m2 9, eui_kwh_m2 6, peak_cooling_w_m2 6, peak_heating_w_m2 6, zone_cooling_east_kwh_m2 5, cooling_demand_kwh_m2 4 - see dataset_diagnostics.csv"
+    }
+  ],
+  "notes": {
+    "cv": "split and cross-validate by design_id (GroupKFold): anchors appear in all 10 training climates",
+    "ashrae_zone": "metadata only, not a model input (D2)",
+    "glazing_vt": "excluded: identical to glazing_shgc (S2)",
+    "london": "holdout_ood = extrapolation test (CDD10, GHI, latitude outside the training range)",
+    "heating": "near zero in chennai/colombo/miami - report heating error per climate group or in absolute units"
+  },
+  "environment": {
+    "python": "3.10.12",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6"
+  }
+}
