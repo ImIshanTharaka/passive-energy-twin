@@ -6,7 +6,7 @@ then checks on the real training split (read-only): config matches the 2.8 libra
 manifest, folds are identical to 2.8, and the harness reproduces eda_lib.cv_grouped exactly on a
 small forest. The holdout split is never read.
 
-Run:  ./venv/bin/python surrogate/test_cv.py
+Run:  ./venv/bin/python surrogate/tests/test_cv.py   (or all suites: surrogate/run_tests.py)
 """
 
 from __future__ import annotations

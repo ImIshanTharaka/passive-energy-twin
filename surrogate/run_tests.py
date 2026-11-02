@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_tests.py - run every surrogate test suite (surrogate/test_*.py) and summarise.
+run_tests.py - run every surrogate test suite (surrogate/tests/test_*.py) and summarise.
 
 Same format as simulation/run_tests.py; each suite runs in its own interpreter.
 Run with the shared venv (the suites import `surrogate` and the Phase 2 packages):
@@ -18,7 +18,8 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-SUITES = sorted(ROOT.glob("test_*.py"))
+TESTS = ROOT / "tests"
+SUITES = sorted(TESTS.glob("test_*.py"))
 
 
 def main() -> int:
@@ -46,7 +47,7 @@ def main() -> int:
             status = "CRASH" + (f"  ({errors[-1].strip()[:60]})" if errors else "")
         ok = proc.returncode == 0 and bool(match)
         all_ok &= ok
-        print(f"{'surrogate/' + suite.name:52}{status:>16}{elapsed:7.1f}s")
+        print(f"{'surrogate/tests/' + suite.name:52}{status:>16}{elapsed:7.1f}s")
         if not ok:
             for line in out.splitlines():
                 if line.strip().startswith(("FAIL", "ERROR")) or "Error" in line:
