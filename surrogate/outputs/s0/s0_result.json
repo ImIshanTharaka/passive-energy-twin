@@ -1,0 +1,144 @@
+{
+  "check": "S0",
+  "status": "PASS",
+  "tolerance": 0.002,
+  "created_utc": "2026-11-02T14:53:54.779347+00:00",
+  "dataset_sha256_training": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e",
+  "rf_params": {
+    "n_estimators": 300,
+    "min_samples_leaf": 2,
+    "max_features": 0.3333333333333333,
+    "n_jobs": -1,
+    "random_state": 42
+  },
+  "heating_climates": [
+    "atlanta",
+    "chicago",
+    "denver",
+    "minneapolis",
+    "new_york",
+    "phoenix",
+    "san_francisco"
+  ],
+  "runtime_s": 24.2,
+  "results": [
+    {
+      "target": "heating_demand_kwh_m2",
+      "role": "primary",
+      "skill_2_8": 0.704321,
+      "skill_new": 0.7043208071954214,
+      "diff": -1.9280457852488553e-07,
+      "pass": true,
+      "pooled_r2": 0.8907731258129642,
+      "spearman_median": 0.9001242236024845,
+      "top_hit_mean": 0.6904761904761905
+    },
+    {
+      "target": "cooling_demand_kwh_m2",
+      "role": "primary",
+      "skill_2_8": 0.74889,
+      "skill_new": 0.7488901088825812,
+      "diff": 1.0888258128449735e-07,
+      "pass": true,
+      "pooled_r2": 0.8858441852594758,
+      "spearman_median": 0.9190737674863054,
+      "top_hit_mean": 0.7266666666666667
+    },
+    {
+      "target": "eui_kwh_m2",
+      "role": "primary",
+      "skill_2_8": 0.679843,
+      "skill_new": 0.6798426931935093,
+      "diff": -3.068064906575074e-07,
+      "pass": true,
+      "pooled_r2": 0.9774691917382868,
+      "spearman_median": 0.8858176299147295,
+      "top_hit_mean": 0.6799999999999999
+    },
+    {
+      "target": "peak_heating_w_m2",
+      "role": "secondary",
+      "skill_2_8": 0.764403,
+      "skill_new": 0.7644026854481436,
+      "diff": -3.145518564506844e-07,
+      "pass": true,
+      "pooled_r2": 0.9302068617578128,
+      "spearman_median": 0.9198866654073934,
+      "top_hit_mean": 0.7285714285714285
+    },
+    {
+      "target": "peak_cooling_w_m2",
+      "role": "secondary",
+      "skill_2_8": 0.744728,
+      "skill_new": 0.744727500227091,
+      "diff": -4.997729089462055e-07,
+      "pass": true,
+      "pooled_r2": 0.7759138655169053,
+      "spearman_median": 0.9017982422026911,
+      "top_hit_mean": 0.69
+    },
+    {
+      "target": "zone_cooling_core_kwh_m2",
+      "role": "secondary",
+      "skill_2_8": 0.868029,
+      "skill_new": 0.8680288047111208,
+      "diff": -1.9528887928998984e-07,
+      "pass": true,
+      "pooled_r2": 0.9648115658260585,
+      "spearman_median": 0.9457654497385011,
+      "top_hit_mean": 0.7833333333333334
+    },
+    {
+      "target": "zone_cooling_south_kwh_m2",
+      "role": "secondary",
+      "skill_2_8": 0.830055,
+      "skill_new": 0.8300547873542166,
+      "diff": -2.1264578342616858e-07,
+      "pass": true,
+      "pooled_r2": 0.8806422536856015,
+      "spearman_median": 0.9549879443104923,
+      "top_hit_mean": 0.7433333333333334
+    },
+    {
+      "target": "zone_cooling_east_kwh_m2",
+      "role": "secondary",
+      "skill_2_8": 0.85222,
+      "skill_new": 0.8522200178283734,
+      "diff": 1.7828373444217505e-08,
+      "pass": true,
+      "pooled_r2": 0.8882907454056239,
+      "spearman_median": 0.9589430993677707,
+      "top_hit_mean": 0.7233333333333334
+    },
+    {
+      "target": "zone_cooling_north_kwh_m2",
+      "role": "secondary",
+      "skill_2_8": 0.825538,
+      "skill_new": 0.8255378783733578,
+      "diff": -1.2162664220216612e-07,
+      "pass": true,
+      "pooled_r2": 0.8856608360659032,
+      "spearman_median": 0.9534283714263492,
+      "top_hit_mean": 0.7233333333333334
+    },
+    {
+      "target": "zone_cooling_west_kwh_m2",
+      "role": "secondary",
+      "skill_2_8": 0.766184,
+      "skill_new": 0.7661839895689657,
+      "diff": -1.043103425857339e-08,
+      "pass": true,
+      "pooled_r2": 0.8757776248572695,
+      "spearman_median": 0.928323203591151,
+      "top_hit_mean": 0.6966666666666667
+    }
+  ],
+  "environment": {
+    "python": "3.13.9",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1"
+  }
+}
