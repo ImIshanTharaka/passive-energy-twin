@@ -1,0 +1,14 @@
+# surrogate/requirements.txt - Phase 3 direct dependencies, exact versions (Sub-task 3.1 step 4).
+# Recorded 2026-11-02 on Darwin arm64, Python 3.13.9.
+# Full environment: pip install -r simulation/requirements.txt -c surrogate/phase2_lock.txt, then this file.
+numpy==2.5.3
+pandas==3.0.6
+scipy==1.18.1
+scikit-learn==1.9.1
+shap==0.52.0
+pyyaml==6.0.3
+matplotlib==3.11.2
+lightgbm==4.7.0
+xgboost==3.4.1
+optuna==5.0.0
+torch==2.15.0

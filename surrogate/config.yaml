@@ -1,0 +1,74 @@
+# surrogate/config.yaml - Phase 3 evaluation protocol and go/no-go gate, FROZEN BEFORE ANY TUNING.
+# Source: claude/Phase3_Execution_Plan.md Rev 2 (M1, M2, M6, M7, M10 and gate §6),
+# signed off by Ishan on 30 Oct 2026. Do not edit after Sub-task 3.1 without a dated note here
+# and in the plan; test_cv.py checks these values against the Phase 2.8 library.
+
+signed_off: "2026-10-30"
+frozen_in_code: "2026-11-02"
+
+dataset_sha256:                      # frozen Phase 2 dataset (2.7 manifest)
+  training: b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e
+  holdout: d14bc0b03d1e2e804f09b32b6d10e4c73a2f794cfde416dbf3ed8fcd6d501ea4
+
+protocol:                            # M1
+  seed: 42
+  grouped_cv: {n_folds: 5, shuffle: true, group: design_id}   # development: all selection and tuning
+  loco: {group: climate_key}                                   # diagnostic only, never used for tuning
+  holdout: {in_distribution: 300, london: 100, scored_once_in: "3.7"}
+
+targets:
+  primary: [heating_demand_kwh_m2, cooling_demand_kwh_m2, eui_kwh_m2]
+  secondary: [peak_heating_w_m2, peak_cooling_w_m2, zone_cooling_core_kwh_m2, zone_cooling_south_kwh_m2,
+              zone_cooling_east_kwh_m2, zone_cooling_north_kwh_m2, zone_cooling_west_kwh_m2]
+  heating: [heating_demand_kwh_m2, peak_heating_w_m2]   # scored over the heating climates only
+  heating_climate_min_median: 1.0                       # kWh/m2, as 2.8 (E4)
+
+metrics:                             # M2 definitions
+  top_fraction: 0.10                 # top-10 % hit rate: share of the truly best 10 % (lowest) designs
+  mape_min_y: 1.0                    # MAPE uses rows with |y| >= this (avoids dividing by near-zero heating)
+
+target_forms:                        # M6 constants, fixed from archetype physics (not tuned)
+  hdd_base_c: 15
+  hdd_offset: 50
+  eui_constant_kwh_m2: 48.87         # plug + lighting electricity of the archetype
+  index_setpoints: {heating_c: 21, cooling_c: 24, room_rh: 0.50}
+
+selection:                           # M10, pre-registered
+  primary_skill_min: 0.90
+  secondary_skill_min: 0.85
+  primary_rule: lowest_loco_mape
+  secondary_rule: highest_grouped_skill
+  tie_mape_points: 0.5
+  tie_skill: 0.005
+  tie_break: lightgbm
+
+m7_trigger:                          # propose Sub-task 2.9 if exceeded after 3.4
+  loco_median_abs_bias_pct: 10.0
+  targets: [heating_demand_kwh_m2, eui_kwh_m2]
+
+reference_2_8:                       # S0: untuned RF on the 28 raw inputs (outputs/eda/eda_metrics.json)
+  rf_params: {n_estimators: 300, min_samples_leaf: 2, max_features: 0.3333333333333333, n_jobs: -1, random_state: 42}
+  design_skill:
+    heating_demand_kwh_m2: 0.704321
+    cooling_demand_kwh_m2: 0.748890
+    eui_kwh_m2: 0.679843
+    peak_heating_w_m2: 0.764403
+    peak_cooling_w_m2: 0.744728
+    zone_cooling_core_kwh_m2: 0.868029
+    zone_cooling_south_kwh_m2: 0.830055
+    zone_cooling_east_kwh_m2: 0.852220
+    zone_cooling_north_kwh_m2: 0.825538
+    zone_cooling_west_kwh_m2: 0.766184
+  tolerance: 0.002
+
+gate:                                # §6: NO-GO on any FAIL, REVIEW on any WARN, else GO
+  S0: {check: "RF raw reproduces 2.8", tolerance: 0.002, severity: FAIL}
+  S1: {check: "primary, grouped CV", design_skill_min: 0.90, pooled_r2_min: 0.95, severity: FAIL}
+  S2: {check: "secondary, grouped CV", design_skill_min: 0.85, severity: WARN}
+  S3: {check: "in-distribution holdout vs CV", design_skill_min: 0.88, pooled_r2_max_drop: 0.03, severity: FAIL}
+  S4: {check: "London", cooling_eui_mape_max_pct: 10, heating_mape_max_pct: 25, spearman_min: 0.90, severity: WARN}
+  S5: {check: "OAT sign agreement", strong_params_all_correct: true, share_sign_correct_min: 0.90,
+       min_abs_delta_pct: 2, severity: FAIL}
+  S6: {check: "monotonic sweeps", max_share_reversals: 0.01, severity: WARN}
+  S7: {check: "conformal 90 % coverage, holdout", coverage_min: 0.85, coverage_max: 0.95, severity: WARN}
+  S8: {check: "speed on the Mac", single_design_ms_max: 50, batch_designs_per_s_min: 10000, severity: FAIL}
