@@ -1,0 +1,214 @@
+{
+  "step": "3.2 feature ablation",
+  "official": true,
+  "dev": false,
+  "created_utc": "2026-11-04T13:44:02.115634+00:00",
+  "runtime_s": 479.2,
+  "dataset_sha256_training": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e",
+  "rows": 3000,
+  "heating_climates": [
+    "atlanta",
+    "chicago",
+    "denver",
+    "minneapolis",
+    "new_york",
+    "phoenix",
+    "san_francisco"
+  ],
+  "feature_sets": [
+    "R",
+    "G",
+    "S",
+    "U",
+    "C",
+    "C-G",
+    "C-S",
+    "C-U"
+  ],
+  "models": [
+    "rf",
+    "lgbm"
+  ],
+  "protocols": [
+    "grouped",
+    "loco"
+  ],
+  "targets": [
+    "heating_demand_kwh_m2",
+    "cooling_demand_kwh_m2",
+    "eui_kwh_m2"
+  ],
+  "n_fits": 720,
+  "params": {
+    "rf": {
+      "n_estimators": 300,
+      "min_samples_leaf": 2,
+      "max_features": 0.3333333333333333,
+      "n_jobs": -1,
+      "random_state": 42
+    },
+    "lgbm": {
+      "n_estimators": 100,
+      "learning_rate": 0.1,
+      "num_leaves": 31,
+      "max_depth": -1,
+      "min_child_samples": 20,
+      "subsample": 1.0,
+      "colsample_bytree": 1.0,
+      "reg_alpha": 0.0,
+      "reg_lambda": 0.0,
+      "random_state": 42,
+      "n_jobs": -1,
+      "deterministic": true,
+      "force_col_wise": true,
+      "verbose": -1
+    }
+  },
+  "selection_rule": {
+    "score": "mean_grouped_design_skill_over_primary_targets_and_models",
+    "tie_skill": 0.005,
+    "tie_break": "fewest_features"
+  },
+  "scores": [
+    {
+      "feature_set": "R",
+      "score": 0.7861594848510123,
+      "n_features": 28,
+      "n": 6,
+      "tied_with_best": false,
+      "winner": false
+    },
+    {
+      "feature_set": "G",
+      "score": 0.8046739001290569,
+      "n_features": 36,
+      "n": 6,
+      "tied_with_best": false,
+      "winner": false
+    },
+    {
+      "feature_set": "S",
+      "score": 0.8827963613293818,
+      "n_features": 60,
+      "n": 6,
+      "tied_with_best": false,
+      "winner": false
+    },
+    {
+      "feature_set": "U",
+      "score": 0.9308784773472879,
+      "n_features": 66,
+      "n": 6,
+      "tied_with_best": false,
+      "winner": false
+    },
+    {
+      "feature_set": "C",
+      "score": 0.9367111007621752,
+      "n_features": 71,
+      "n": 6,
+      "tied_with_best": true,
+      "winner": false
+    },
+    {
+      "feature_set": "C-G",
+      "score": 0.9367646746984538,
+      "n_features": 63,
+      "n": 6,
+      "tied_with_best": true,
+      "winner": true
+    },
+    {
+      "feature_set": "C-S",
+      "score": 0.9284761215824537,
+      "n_features": 47,
+      "n": 6,
+      "tied_with_best": false,
+      "winner": false
+    },
+    {
+      "feature_set": "C-U",
+      "score": 0.9263679357619786,
+      "n_features": 65,
+      "n": 6,
+      "tied_with_best": false,
+      "winner": false
+    }
+  ],
+  "winner": "C-G",
+  "winner_features": [
+    "floor_area",
+    "aspect_ratio",
+    "n_floors",
+    "floor_height",
+    "wall_r_value",
+    "roof_r_value",
+    "floor_r_value",
+    "wall_thermal_mass",
+    "infiltration_ach",
+    "wwr_north",
+    "wwr_east",
+    "wwr_south",
+    "wwr_west",
+    "glazing_u",
+    "glazing_shgc",
+    "overhang_depth_n",
+    "overhang_depth_e",
+    "overhang_depth_s",
+    "overhang_depth_w",
+    "sidefin_depth",
+    "orientation",
+    "hdd18",
+    "cdd10",
+    "annual_ghi",
+    "mean_dbt",
+    "mean_rh",
+    "latitude",
+    "mean_wind",
+    "sol_glazed_ratio_n",
+    "sol_glazed_ratio_e",
+    "sol_glazed_ratio_s",
+    "sol_glazed_ratio_w",
+    "sol_glazed_ratio",
+    "sol_aperture_n",
+    "sol_aperture_e",
+    "sol_aperture_s",
+    "sol_aperture_w",
+    "sol_aperture",
+    "sol_orient_sin",
+    "sol_orient_cos",
+    "sol_aperture_true_N",
+    "sol_aperture_true_E",
+    "sol_aperture_true_S",
+    "sol_aperture_true_W",
+    "sol_pf_overhang_n",
+    "sol_pf_overhang_e",
+    "sol_pf_overhang_s",
+    "sol_pf_overhang_w",
+    "sol_pf_fin_n",
+    "sol_pf_fin_e",
+    "sol_pf_fin_s",
+    "sol_pf_fin_w",
+    "ua_wall",
+    "ua_roof",
+    "ua_glass",
+    "ua_ground",
+    "ua_infiltration",
+    "ua_total",
+    "cx_ua_hdd",
+    "cx_aperture_ghi",
+    "cx_aperture_cdd",
+    "cx_infil_hdd",
+    "cx_infil_rh"
+  ],
+  "environment": {
+    "python": "3.13.9",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "matplotlib": "3.11.2"
+  }
+}

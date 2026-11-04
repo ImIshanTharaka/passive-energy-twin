@@ -72,3 +72,20 @@ gate:                                # §6: NO-GO on any FAIL, REVIEW on any WAR
   S6: {check: "monotonic sweeps", max_share_reversals: 0.01, severity: WARN}
   S7: {check: "conformal 90 % coverage, holdout", coverage_min: 0.85, coverage_max: 0.95, severity: WARN}
   S8: {check: "speed on the Mac", single_design_ms_max: 50, batch_designs_per_s_min: 10000, severity: FAIL}
+
+# ── Added 3 Nov 2026 (Sub-task 3.2, claude/Phase3.2_Execution_Plan.md D2-D4), BEFORE any 3.2 run. ──
+# Nothing above this line was changed. Untuned ("default") settings for the feature ablation:
+# RF = the 2.8/S0 forest (reference_2_8.rf_params); LightGBM = the library defaults of 4.7.0,
+# written out so they cannot drift with a library update, plus a seed and determinism flags.
+ablation_3_2:
+  feature_sets: [R, G, S, U, C, C-G, C-S, C-U]        # D2: ladder + leave-one-group-out
+  models: [rf, lgbm]
+  targets: primary                                     # 3 primary targets, direct form
+  protocols: [grouped, loco]                           # LOCO reported only, never used to select (D3)
+  lgbm_params: {n_estimators: 100, learning_rate: 0.1, num_leaves: 31, max_depth: -1, min_child_samples: 20,
+                subsample: 1.0, colsample_bytree: 1.0, reg_alpha: 0.0, reg_lambda: 0.0,
+                random_state: 42, n_jobs: -1, deterministic: true, force_col_wise: true, verbose: -1}
+  selection:                                           # D3 + D4
+    score: mean_grouped_design_skill_over_primary_targets_and_models
+    tie_skill: 0.005
+    tie_break: fewest_features

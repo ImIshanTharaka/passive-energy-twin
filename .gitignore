@@ -34,3 +34,5 @@ simulation/outputs/smoke_*.idf
 
 # ── Phase 3+ outputs that are large or regenerable ────────────────────────────
 surrogate/outputs/tuning/*.db
+# dev runs of surrogate/ablation.py (--dev); the official run writes surrogate/outputs/ablation/
+surrogate/outputs/ablation_dev/
