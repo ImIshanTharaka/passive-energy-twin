@@ -9,6 +9,9 @@ Two protocols on the TRAINING split only:
     df, cols = load_training()
     oof = cross_val_predict(df, df[cols["inputs"]], targets, factory, grouped_folds(df), "grouped")
 
+Multi-output models (the MLP, Sub-task 3.3) use cross_val_predict_multi: one fit per fold for all
+targets, same folds, guards and output frame.
+
 `factory(target)` returns a fresh, unfitted estimator with fit(X, y) and predict(X), so any
 model family (RF, XGBoost, LightGBM, GPR, MLP, a target-transform wrapper) runs through the same
 code. The output is one long frame of out-of-fold predictions (same columns as eda_lib, plus
@@ -137,6 +140,49 @@ def cross_val_predict(df: pd.DataFrame, X, targets: list[str], factory: ModelFac
                                        "climate_key": climate[f.test], "target": t, "fold": f.name,
                                        "y": y[f.test], "yhat": yhat, "fit_s": fit_s}))
     out = pd.concat(parts, ignore_index=True)
+    out["scheme"] = scheme
+    return out
+
+
+def cross_val_predict_multi(df: pd.DataFrame, X, targets: list[str], factory: Callable[[], object],
+                            folds: list[Fold], scheme: str) -> pd.DataFrame:
+    """Out-of-fold predictions from ONE multi-output model per fold (added 5 Nov 2026, Sub-task 3.3).
+
+    factory() returns a fresh estimator with fit(X, Y[n, k]) and predict(X) -> (n, k), columns in
+    `targets` order. If its fit accepts `groups`, it receives the training rows' design_id (the MLP
+    uses it for a grouped early-stopping split). Same folds, guards and output frame as
+    cross_val_predict; fit_s is the time of the one fit, repeated on every target of that fold.
+    """
+    import inspect
+    L.require_training(df)
+    if len(X) != len(df):
+        raise ValueError(f"X has {len(X)} rows, df has {len(df)}")
+    if isinstance(X, pd.DataFrame):
+        X = X.reset_index(drop=True)
+    else:
+        X = np.asarray(X, dtype=float)
+    run_id = df["run_id"].to_numpy()
+    design = df["design_id"].astype(str).to_numpy()
+    climate = df["climate_key"].astype(str).to_numpy()
+    Y = df[list(targets)].to_numpy(dtype=float, copy=True)
+    parts = []
+    for f in folds:
+        model = factory()
+        kw = {"groups": design[f.train]} if "groups" in inspect.signature(model.fit).parameters else {}
+        t0 = time.perf_counter()
+        model.fit(_rows(X, f.train), Y[f.train], **kw)
+        fit_s = time.perf_counter() - t0
+        yhat = np.asarray(model.predict(_rows(X, f.test)), dtype=float).reshape(len(f.test), -1)
+        if yhat.shape != (len(f.test), len(targets)):
+            raise ValueError(f"fold {f.name}: model returned shape {yhat.shape}, expected {(len(f.test), len(targets))}")
+        for j, t in enumerate(targets):
+            parts.append(pd.DataFrame({"run_id": run_id[f.test], "design_id": design[f.test],
+                                       "climate_key": climate[f.test], "target": t, "fold": f.name,
+                                       "y": Y[f.test, j], "yhat": yhat[:, j], "fit_s": fit_s}))
+    out = pd.concat(parts, ignore_index=True)
+    # same row order as cross_val_predict: target-major, then fold
+    order = {t: i for i, t in enumerate(targets)}
+    out = out.sort_values("target", key=lambda c: c.map(order), kind="stable").reset_index(drop=True)
     out["scheme"] = scheme
     return out
 

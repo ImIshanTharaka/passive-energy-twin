@@ -269,6 +269,69 @@ def check_real_heating_climates_match_2_8():
     assert M.heating_climates(df) == eda["heating_climates"]
 
 
+# ── multi-output path (added 5 Nov 2026, Sub-task 3.3) ───────────────────────
+
+class MultiLinear:
+    """Multi-output linear model that records the groups it was given."""
+    def fit(self, X, Y, groups=None):
+        self.groups = groups
+        self.m = LinearRegression().fit(X, Y)
+        return self
+
+    def predict(self, X):
+        return self.m.predict(X)
+
+
+def check_multi_output_matches_single_target_path():
+    """One multi-output linear fit per fold = separate linear fits per target (same frame layout)."""
+    df = _frame()
+    df["y2"] = 2 * df["y"] - 5 * df["x1"]
+    X = pd.get_dummies(df["climate_key"], dtype=float).join(df[["x1", "x2"]])
+    folds = cv.grouped_folds(df)
+    single = cv.cross_val_predict(df, X, ["y", "y2"], lambda t: LinearRegression(), folds, "grouped")
+    multi = cv.cross_val_predict_multi(df, X, ["y", "y2"], MultiLinear, folds, "grouped")
+    assert list(single.columns) == list(multi.columns)
+    for c in ("run_id", "design_id", "climate_key", "target", "fold", "scheme"):
+        assert (single[c].to_numpy() == multi[c].to_numpy()).all(), c
+    np.testing.assert_allclose(multi["y"], single["y"], rtol=0, atol=0)
+    np.testing.assert_allclose(multi["yhat"], single["yhat"], rtol=0, atol=1e-8)
+
+
+def check_multi_output_passes_training_groups_and_guards():
+    df = _frame()
+    X = df[["x1", "x2"]]
+    seen = []
+
+    class Spy(MultiLinear):
+        def fit(self, X, Y, groups=None):
+            seen.append(groups)
+            return super().fit(X, Y, groups)
+
+    folds = cv.grouped_folds(df)
+    cv.cross_val_predict_multi(df, X, ["y"], Spy, folds, "grouped")
+    d = df["design_id"].astype(str).to_numpy()
+    for f, g in zip(folds, seen):
+        assert (g == d[f.train]).all()
+    bad = df.copy()
+    bad.loc[0, "batch"] = "holdout_id"
+    try:
+        cv.cross_val_predict_multi(bad, X, ["y"], Spy, folds, "grouped")
+    except cv.HoldoutLeakError:
+        pass
+    else:
+        raise AssertionError("holdout row accepted by the multi-output path")
+
+    class WrongShape(MultiLinear):
+        def predict(self, X):
+            return np.zeros((len(X), 3))
+
+    try:
+        cv.cross_val_predict_multi(df, X, ["y"], WrongShape, folds, "grouped")
+    except ValueError:
+        return
+    raise AssertionError("wrong output shape accepted")
+
+
 ALL_CHECKS = [check_config_matches_eda_lib, check_config_matches_dataset_and_2_8_results, check_gate_thresholds_frozen,
               check_grouped_folds_isolate_designs, check_loco_never_trains_on_held_out_climate,
               check_holdout_rows_rejected_everywhere, check_x_must_align_with_df, check_harness_is_model_agnostic,
@@ -276,13 +339,14 @@ ALL_CHECKS = [check_config_matches_eda_lib, check_config_matches_dataset_and_2_8
               check_mape_skips_near_zero_truth, check_heating_targets_scored_on_heating_climates,
               check_m7_trigger_logic, check_summarise_adds_ranking_columns,
               check_real_folds_identical_to_2_8, check_real_harness_reproduces_eda_lib_exactly,
-              check_real_heating_climates_match_2_8]
+              check_real_heating_climates_match_2_8, check_multi_output_matches_single_target_path,
+              check_multi_output_passes_training_groups_and_guards]
 
 
 def main():
     total = failed = 0
     print("=" * 72)
-    print("SURROGATE CV HARNESS (3.1) - CHECKS")
+    print("SURROGATE CV HARNESS (3.1, multi-output 3.3) - CHECKS")
     print("=" * 72)
     for chk in ALL_CHECKS:
         total += 1

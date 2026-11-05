@@ -89,3 +89,77 @@ ablation_3_2:
     score: mean_grouped_design_skill_over_primary_targets_and_models
     tie_skill: 0.005
     tie_break: fewest_features
+
+# ── Added 5 Nov 2026 (Sub-task 3.3, claude/Phase3.3_Execution_Plan.md Rev 1.1, E1-E6 agreed 5 Nov),
+# BEFORE any 3.3 run. Nothing above this line was changed. Model benchmark and tuning (M4, M5, M10).
+benchmark_3_3:
+  feature_set: C-G                                     # 3.2 winner (63 features)
+  reference_set: R                                     # untuned reference rows (E2)
+  models: [rf, xgb, lgbm, gpr, mlp]
+  targets: primary                                     # direct form only (E1); secondary in run D
+  defaults:                                            # untuned settings (E2); written out, cannot drift
+    rf: reference_2_8                                  # = reference_2_8.rf_params (the 2.8/S0 forest)
+    lgbm: ablation_3_2                                 # = ablation_3_2.lgbm_params (LightGBM 4.7.0 defaults)
+    xgb: {n_estimators: 100, learning_rate: 0.3, max_depth: 6, min_child_weight: 1.0, subsample: 1.0,
+          colsample_bytree: 1.0, reg_lambda: 1.0, reg_alpha: 0.0, tree_method: hist, max_bin: 256,
+          random_state: 42, n_jobs: -1}                # XGBoost 3.4.1 library defaults
+    gpr: {nu: 2.5, length_scale_init: 1.0, length_scale_bounds: [0.01, 1000.0], constant_init: 1.0,
+          constant_bounds: [0.001, 1000.0], noise_init: 0.01, noise_bounds: [1.0e-6, 10.0],
+          normalize_y: true, n_restarts_optimizer: 0, random_state: 42, top_k: null}   # E5
+    mlp: {n_layers: 3, width: 128, dropout: 0.0, lr: 1.0e-3, weight_decay: 1.0e-4, batch_size: 128}
+  mlp_fixed: {activation: silu, optimizer: adamw, max_epochs: 1000, patience: 50, val_fraction: 0.10,
+              device: cpu, seed: 42, targets: all}      # E6: one multi-output net over all 10 targets
+  fixed:                                               # always set, tuned or not
+    rf: {n_jobs: -1, random_state: 42}
+    lgbm: {random_state: 42, n_jobs: -1, deterministic: true, force_col_wise: true, verbose: -1, subsample_freq: 1}
+    xgb: {tree_method: hist, random_state: 42, n_jobs: -1}
+  tuning:                                              # M5
+    sampler: tpe
+    seed: 42
+    n_startup_trials: 10
+    pruning: false                                     # every trial is a full 5-fold CV (equal budgets)
+    trials: {rf: 60, xgb: 60, lgbm: 60, mlp: 30, gpr: 0}   # gpr: marginal likelihood instead (E5)
+    objective: grouped_cv_rmse_on_scored_rows           # heating climates for heating targets
+    mlp_objective: mean_primary_rmse_over_sd            # E6: mean of RMSE / SD(y) over the 3 primary targets
+  search_spaces:                                       # int/float: [low, high], log; categorical: choices
+    rf:
+      n_estimators: {type: fixed, value: 500}
+      max_features: {type: float, low: 0.1, high: 1.0}
+      min_samples_leaf: {type: int, low: 1, high: 10}
+      max_depth: {type: categorical, choices: [null, 10, 15, 20, 30, 40]}
+      max_samples: {type: float, low: 0.5, high: 1.0}
+    lgbm:
+      n_estimators: {type: int, low: 100, high: 2000, log: true}
+      learning_rate: {type: float, low: 0.01, high: 0.2, log: true}
+      num_leaves: {type: int, low: 8, high: 128, log: true}
+      min_child_samples: {type: int, low: 5, high: 60}
+      subsample: {type: float, low: 0.5, high: 1.0}
+      colsample_bytree: {type: float, low: 0.3, high: 1.0}
+      reg_alpha: {type: float, low: 1.0e-8, high: 10.0, log: true}
+      reg_lambda: {type: float, low: 1.0e-8, high: 10.0, log: true}
+    xgb:
+      n_estimators: {type: int, low: 100, high: 2000, log: true}
+      learning_rate: {type: float, low: 0.01, high: 0.2, log: true}
+      max_depth: {type: int, low: 3, high: 10}
+      min_child_weight: {type: float, low: 1.0, high: 20.0, log: true}
+      subsample: {type: float, low: 0.5, high: 1.0}
+      colsample_bytree: {type: float, low: 0.3, high: 1.0}
+      reg_alpha: {type: float, low: 1.0e-8, high: 10.0, log: true}
+      reg_lambda: {type: float, low: 1.0e-8, high: 10.0, log: true}
+    mlp:
+      n_layers: {type: int, low: 2, high: 4}
+      width: {type: categorical, choices: [64, 128, 256, 512]}
+      dropout: {type: float, low: 0.0, high: 0.3}
+      lr: {type: float, low: 1.0e-4, high: 3.0e-3, log: true}
+      weight_decay: {type: float, low: 1.0e-6, high: 1.0e-2, log: true}
+      batch_size: {type: categorical, choices: [64, 128, 256]}
+  fresh_fold_seed: 7                                   # E4: tuned params re-scored once on GroupKFold(5, seed 7)
+  gpr_fallback: {max_fit_minutes: 10, top_k: 15, ranker: lgbm_gain_in_training_fold}   # E5
+  d5:                                                  # E3, applied after the untuned grid, before tuning
+    models: [xgb, gpr, mlp]
+    score: mean_untuned_grouped_design_skill_over_primary_targets
+    rule: feature_set_must_score_higher_than_reference_set
+  secondary:
+    models: [lgbm, best_other]
+    best_other_rule: highest_mean_tuned_primary_design_skill_excluding_lgbm
+  selection_status: {primary: provisional_until_3_4, secondary: final}   # E1; rule = selection (M10)
