@@ -36,3 +36,7 @@ simulation/outputs/smoke_*.idf
 surrogate/outputs/tuning/*.db
 # dev runs of surrogate/ablation.py (--dev); the official run writes surrogate/outputs/ablation/
 surrogate/outputs/ablation_dev/
+# 3.3 (5 Nov 2026): dev runs of tune.py / benchmark.py; Optuna SQLite journals
+surrogate/outputs/tuning_dev/
+surrogate/outputs/benchmark_dev/
+surrogate/outputs/tuning/*.db-journal
