@@ -118,6 +118,33 @@ def check_refuses_missing_or_mismatched_tuned_settings():
             tune.OUT = old
 
 
+def check_gpr_fallback_read_from_probe():
+    with tempfile.TemporaryDirectory() as tmp:
+        old = B.OUT
+        B.OUT = Path(tmp)
+        try:
+            try:
+                B.resolve_gpr_top_k(dev=False)
+            except SystemExit:
+                pass
+            else:
+                raise AssertionError("official stage ran without the timing probe")
+            probe = B.out_dir(False) / "timing_probe.json"
+            probe.write_text(json.dumps({"gpr_fallback_needed": True}))
+            assert B.resolve_gpr_top_k(False) == 15 and B.resolve_gpr_top_k(False, 15) == 15
+            assert B.default_for("gpr", False, 15)["top_k"] == 15 and "top_k" not in B.default_for("lgbm", False, 15)
+            probe.write_text(json.dumps({"gpr_fallback_needed": False}))
+            assert B.resolve_gpr_top_k(False) is None
+            try:
+                B.resolve_gpr_top_k(False, 15)
+            except SystemExit:
+                pass
+            else:
+                raise AssertionError("flag disagreeing with the probe accepted")
+        finally:
+            B.OUT = old
+
+
 def check_small_real_oof_shapes():
     df, _ = cv.load_training()
     keep = set(df["design_id"].astype(str).unique()[:60])
@@ -137,7 +164,7 @@ def check_small_real_oof_shapes():
 ALL_CHECKS = [check_primary_lowest_loco_mape_wins, check_primary_tie_goes_to_lightgbm,
               check_primary_skill_bar_filters_first, check_secondary_highest_skill_and_tie, check_gate_cv_stage,
               check_d5_rule, check_best_other_excludes_lightgbm, check_refuses_missing_or_mismatched_tuned_settings,
-              check_small_real_oof_shapes]
+              check_gpr_fallback_read_from_probe, check_small_real_oof_shapes]
 
 
 def main():

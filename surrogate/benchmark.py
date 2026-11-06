@@ -17,7 +17,7 @@ Stages (run in this order; each writes its own files, `select` combines them):
 
     ./venv/bin/python surrogate/benchmark.py --stage probe
     ./venv/bin/python surrogate/benchmark.py --stage untuned
-    ./venv/bin/python surrogate/benchmark.py --stage tuned [--gpr-top-k 15]
+    ./venv/bin/python surrogate/benchmark.py --stage tuned          # GPR top-k read from timing_probe.json
     ./venv/bin/python surrogate/benchmark.py --stage secondary
     ./venv/bin/python surrogate/benchmark.py --stage select
     ./venv/bin/python surrogate/benchmark.py --stage untuned --dev     # small: 25 % of designs, small models
@@ -220,6 +220,32 @@ def gate_cv_stage(sel: dict, table: pd.DataFrame) -> dict:
     return out
 
 
+# ── GPR fallback (plan E5) ──────────────────────────────────────────────────────────────────
+
+def resolve_gpr_top_k(dev: bool, flag: int | None = None) -> int | None:
+    """Top-k features for GPR in every stage, decided once by the timing probe (E5 rule, frozen in config):
+    one full GPR fit > gpr_fallback.max_fit_minutes -> top_k = gpr_fallback.top_k for ALL GPR fits
+    (R and C-G alike, so the D5 comparison stays on equal terms). Official runs need the probe first;
+    a --gpr-top-k flag must agree with it. Dev runs use the flag (dev_params forces 5 anyway)."""
+    if dev:
+        return flag
+    path = out_dir(dev) / "timing_probe.json"
+    if not path.exists():
+        raise SystemExit("run `benchmark.py --stage probe` first: it decides the GPR fallback (E5)")
+    needed = bool(json.loads(path.read_text(encoding="utf-8"))["gpr_fallback_needed"])
+    k = int(CFG["gpr_fallback"]["top_k"]) if needed else None
+    if flag is not None and flag != k:
+        raise SystemExit(f"--gpr-top-k {flag} disagrees with the timing probe (fallback needed: {needed})")
+    return k
+
+
+def default_for(model: str, dev: bool, gpr_top_k: int | None) -> dict:
+    p = models.default_params(model)
+    if model == "gpr" and gpr_top_k:
+        p["top_k"] = int(gpr_top_k)
+    return dev_params(model, p, dev)
+
+
 # ── stages ──────────────────────────────────────────────────────────────────────────────────
 
 def stage_probe(dev: bool, log=print) -> dict:
@@ -279,12 +305,12 @@ def stage_probe(dev: bool, log=print) -> dict:
     return info
 
 
-def stage_untuned(dev: bool, log=print):
+def stage_untuned(dev: bool, gpr_top_k=None, log=print):
     df, F, heat = load(dev)
     folds = cv.grouped_folds(df)
     rows, pcs = [], []
     for m in models.MODELS:
-        p = dev_params(m, models.default_params(m), dev)
+        p = default_for(m, dev, gpr_top_k)
         pbt = {None: p} if m in models.MULTI_OUTPUT else {t: p for t in PRIMARY_TARGETS}
         for fs in (CFG["reference_set"], CFG["feature_set"]):
             X = F[FE.feature_set(fs)]
@@ -305,18 +331,19 @@ def stage_untuned(dev: bool, log=print):
     (d / "feature_sets.json").write_text(json.dumps({"feature_sets": fsets, "d5": d5,
                                                      "note": "D5 triggered models get their own set from --stage d5"},
                                                     indent=2), encoding="utf-8")
-    record_stage(d, "untuned", {"d5": d5, "params": {m: dev_params(m, models.default_params(m), dev) for m in models.MODELS}}, dev)
+    record_stage(d, "untuned", {"d5": d5, "gpr_top_k": gpr_top_k,
+                                "params": {m: default_for(m, dev, gpr_top_k) for m in models.MODELS}}, dev)
     for m, r in d5.items():
         log(f"  D5 {m}: C-G {r[CFG['feature_set']]:.4f} vs R {r[CFG['reference_set']]:.4f} -> "
             f"{'TRIGGERED: run --stage d5 --model ' + m if r['triggered'] else 'ok (C-G transfers)'}")
     return table, d5
 
 
-def stage_d5(model: str, dev: bool, log=print):
+def stage_d5(model: str, dev: bool, gpr_top_k=None, log=print):
     from surrogate.ablation import choose_winner
     df, F, heat = load(dev)
     folds = cv.grouped_folds(df)
-    p = dev_params(model, models.default_params(model), dev)
+    p = default_for(model, dev, gpr_top_k)
     pbt = {None: p} if model in models.MULTI_OUTPUT else {t: p for t in PRIMARY_TARGETS}
     rows = []
     for fs in FE.FEATURE_SETS:
@@ -333,7 +360,7 @@ def stage_d5(model: str, dev: bool, log=print):
     data["feature_sets"][model] = winner
     data.setdefault("d5_winners", {})[model] = {"winner": winner, "scores": scores.to_dict(orient="records")}
     path.write_text(json.dumps(data, indent=2, default=float), encoding="utf-8")
-    record_stage(d, f"d5_{model}", {"winner": winner}, dev)
+    record_stage(d, f"d5_{model}", {"winner": winner, "gpr_top_k": gpr_top_k}, dev)
     log(f"  D5 ablation for {model}: winner {winner}")
     return winner
 
@@ -444,7 +471,7 @@ def stage_secondary(dev: bool, gpr_top_k=None, log=print):
     table.to_csv(d / "secondary_table.csv", index=False)
     pd.concat(pcs, ignore_index=True).to_csv(d / "secondary_per_climate.csv", index=False)
     pd.concat(oofs, ignore_index=True).to_csv(d / "oof_secondary_grouped.csv.gz", index=False)
-    record_stage(d, "secondary", {"models": ["lgbm", other], "best_other": other}, dev)
+    record_stage(d, "secondary", {"models": ["lgbm", other], "best_other": other, "gpr_top_k": gpr_top_k}, dev)
     return table
 
 
@@ -634,7 +661,7 @@ def main(argv=None) -> int:
     ap.add_argument("--stage", required=True, choices=["probe", "untuned", "d5", "tuned", "secondary", "select"])
     ap.add_argument("--model", choices=list(CFG["d5"]["models"]), help="for --stage d5")
     ap.add_argument("--gpr-top-k", type=int, default=None,
-                    help=f"E5 fallback: GPR on the top-{CFG['gpr_fallback']['top_k']} features (only if the probe says so)")
+                    help="optional check; official stages read the GPR fallback from timing_probe.json (E5)")
     ap.add_argument("--dev", action="store_true", help="25 %% of designs, small models; writes outputs/benchmark_dev")
     a = ap.parse_args(argv)
     if a.gpr_top_k not in (None, CFG["gpr_fallback"]["top_k"]):
@@ -644,16 +671,21 @@ def main(argv=None) -> int:
     print(f"Benchmark stage '{a.stage}'{'  [DEV]' if a.dev else ''}", flush=True)
     if a.stage == "probe":
         stage_probe(a.dev, log)
-    elif a.stage == "untuned":
-        stage_untuned(a.dev, log)
+        return 0
+    k = resolve_gpr_top_k(a.dev, a.gpr_top_k) if a.stage != "select" else None
+    if a.stage != "select":
+        print(f"GPR features: {'top 5 (dev)' if a.dev else 'top ' + str(k) + ' (E5 fallback, from timing probe)' if k else 'all'}",
+              flush=True)
+    if a.stage == "untuned":
+        stage_untuned(a.dev, k, log)
     elif a.stage == "d5":
         if not a.model:
             ap.error("--stage d5 needs --model")
-        stage_d5(a.model, a.dev, log)
+        stage_d5(a.model, a.dev, k, log)
     elif a.stage == "tuned":
-        stage_tuned(a.dev, a.gpr_top_k, log)
+        stage_tuned(a.dev, k, log)
     elif a.stage == "secondary":
-        stage_secondary(a.dev, a.gpr_top_k, log)
+        stage_secondary(a.dev, k, log)
     else:
         stage_select(a.dev, log)
     print(f"{'DEV' if a.dev else 'OFFICIAL'} stage '{a.stage}' done in {time.time() - t0:.0f} s -> "
