@@ -120,6 +120,20 @@ def check_feature_set_follows_d5_file():
         assert tune.feature_set_for("mlp") == "C-S" and tune.feature_set_for("lgbm") == "C-G"
 
 
+def check_sensitivity_study_names_and_feature_set():
+    """sensitivity_3_3: studies on raw inputs are stored apart from the 3.3 studies (no overwrite)."""
+    assert tune.study_name("xgb", "eui_kwh_m2") == tune.study_name("xgb", "eui_kwh_m2", "C-G") == "xgb__eui_kwh_m2"
+    assert tune.study_name("xgb", "eui_kwh_m2", "R") == "xgb__eui_kwh_m2__R"
+    assert tune.SENS["feature_set"] == "R" and tune.SENS["selection_effect"] == "none"
+    df, _, heat = _real()
+    XR = FE.engineer(df)[FE.feature_set("R")]
+    with _TmpOut():
+        st = tune.run_study("lgbm", "eui_kwh_m2", df, XR, heat, dev=True, log=lambda s: None, feature_set="R")
+        tune.save_study(st, dev=True)
+        best = tune.load_best(dev=True)
+        assert set(best) == {"lgbm__eui_kwh_m2__R"} and best["lgbm__eui_kwh_m2__R"]["feature_set"] == "R"
+
+
 def check_edge_flags():
     f = tune.edge_flags("lgbm", {"n_estimators": 2000, "learning_rate": 0.05, "num_leaves": 8, "subsample": 0.75})
     assert any("n_estimators at high end" in x for x in f) and any("num_leaves at low end" in x for x in f)
@@ -129,7 +143,7 @@ def check_edge_flags():
 ALL_CHECKS = [check_budgets_from_config, check_scored_rmse_uses_heating_climates_for_heating_targets,
               check_objective_equals_independent_cv_rmse, check_mlp_objective_is_mean_normalised_primary_rmse,
               check_study_resumes_without_repeating_and_saves_outputs, check_feature_set_follows_d5_file,
-              check_edge_flags]
+              check_sensitivity_study_names_and_feature_set, check_edge_flags]
 
 
 def main():

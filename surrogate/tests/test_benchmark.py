@@ -145,6 +145,32 @@ def check_gpr_fallback_read_from_probe():
             B.OUT = old
 
 
+def check_factorial_table_both_orders():
+    """2 x 2 cells -> absolute and relative effects in both orders; GPR has no tuned cells."""
+    def tab(rows, fs_col=True):
+        out = []
+        for m, fs, t, sk in rows:
+            r = {"model": m, "target": t, "grouped_design_skill": sk}
+            if fs_col:
+                r["feature_set"] = fs
+            out.append(r)
+        return pd.DataFrame(out)
+    untuned = tab([(m, fs, t, sk) for t in PRIMARY_TARGETS for m, fs, sk in
+                   (("xgb", "R", 0.80), ("xgb", "C-G", 0.95), ("gpr", "R", 0.90), ("gpr", "C-G", 0.95))])
+    tuned_cg = tab([("xgb", "C-G", t, 0.98) for t in PRIMARY_TARGETS] + [("gpr", "C-G", t, 0.95) for t in PRIMARY_TARGETS])
+    tuned_r = tab([("xgb", "R", t, 0.90) for t in PRIMARY_TARGETS])
+    f = B.factorial_table(untuned, tuned_cg, tuned_r)
+    x = f[(f.model == "xgb") & (f.target == H)].iloc[0]
+    assert np.isclose(x.features_gain_untuned, 0.15) and np.isclose(x.features_gain_tuned, 0.08)
+    assert np.isclose(x.tuning_gain_R, 0.10) and np.isclose(x.tuning_gain_CG, 0.03)
+    assert np.isclose(x.features_rel_untuned, 0.75) and np.isclose(x.features_rel_tuned, 0.8)    # 0.08 / 0.10
+    assert np.isclose(x.tuning_rel_R, 0.5) and np.isclose(x.tuning_rel_CG, 0.6)                  # 0.03 / 0.05
+    assert np.isclose(x.both_rel, 0.9)
+    g = f[(f.model == "gpr") & (f.target == H)].iloc[0]
+    assert not g.tuned_by_optuna and np.isnan(g.R_tuned) and np.isnan(g.CG_tuned) and np.isclose(g.features_gain_untuned, 0.05)
+    assert np.isclose(B.rel_gain(0.704, 0.942), 0.238 / 0.296)
+
+
 def check_small_real_oof_shapes():
     df, _ = cv.load_training()
     keep = set(df["design_id"].astype(str).unique()[:60])
@@ -164,7 +190,7 @@ def check_small_real_oof_shapes():
 ALL_CHECKS = [check_primary_lowest_loco_mape_wins, check_primary_tie_goes_to_lightgbm,
               check_primary_skill_bar_filters_first, check_secondary_highest_skill_and_tie, check_gate_cv_stage,
               check_d5_rule, check_best_other_excludes_lightgbm, check_refuses_missing_or_mismatched_tuned_settings,
-              check_gpr_fallback_read_from_probe, check_small_real_oof_shapes]
+              check_gpr_fallback_read_from_probe, check_factorial_table_both_orders, check_small_real_oof_shapes]
 
 
 def main():

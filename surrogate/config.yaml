@@ -163,3 +163,19 @@ benchmark_3_3:
     models: [lgbm, best_other]
     best_other_rule: highest_mean_tuned_primary_design_skill_excluding_lgbm
   selection_status: {primary: provisional_until_3_4, secondary: final}   # E1; rule = selection (M10)
+
+# ── Added 7 Nov 2026 (after Sub-task 3.3 was complete), BEFORE any run that uses it. Nothing above
+# this line was changed. Sensitivity analysis requested by Ishan: the 3.3 grid measured feature gains
+# before tuning and tuning gains after features, so the two are confounded by order and by the skill
+# ceiling. Adding the missing cell (tuned on R) completes a 2 x 2 factorial {R, C-G} x {untuned, tuned}.
+# Same budgets, search spaces, sampler, objective and folds as benchmark_3_3. Reported only:
+# it does NOT change the 3.3 selection or any gate.
+sensitivity_3_3:
+  name: factorial_features_x_tuning
+  feature_set: R
+  models: [rf, xgb, lgbm, mlp]                         # GPR has no Optuna tuning (E5): its R cell = untuned
+  targets: primary
+  protocol: grouped                                    # seed-42 folds, as the RQ1 grid
+  budgets: benchmark_3_3.tuning.trials                 # 60 per target (rf, xgb, lgbm), 30 (mlp, one study)
+  relative_measure: share_of_remaining_error_removed   # (skill_after - skill_before) / (1 - skill_before)
+  selection_effect: none

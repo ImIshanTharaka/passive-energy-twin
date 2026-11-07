@@ -14,6 +14,9 @@ Stages (run in this order; each writes its own files, `select` combines them):
     secondary run D: 7 secondary targets, tuned LightGBM + best other family -> secondary_table.csv
     select    M10 per target (primary provisional, secondary final), CV-stage S1/S2,
               report + figures -> selection.json, benchmark_report.md, *.png/.pdf
+    factorial sensitivity_3_3 (added 7 Nov): models tuned on raw inputs (tune.py --feature-set R) scored on
+              the seed-42 folds -> 2 x 2 {R, C-G} x {untuned, tuned}: factorial_table.csv,
+              factorial_report.md, factorial.png/.pdf. No effect on the selection
 
     ./venv/bin/python surrogate/benchmark.py --stage probe
     ./venv/bin/python surrogate/benchmark.py --stage untuned
@@ -373,7 +376,7 @@ def feature_sets(dev: bool) -> dict:
 
 
 def tuned_params_for(model: str, targets: list[str], dev: bool, gpr_top_k=None, allow_missing=False,
-                     feature_set: str | None = None) -> dict:
+                     feature_set: str | None = None, study_set: str | None = None) -> dict:
     """{target: params} (or {None: params} for the MLP) from tuning/best_params.json; GPR = defaults (E5)."""
     from surrogate.tune import load_best, study_name, MULTI_STUDY
     if model == "gpr":
@@ -384,9 +387,9 @@ def tuned_params_for(model: str, targets: list[str], dev: bool, gpr_top_k=None, 
         return {t: p for t in targets}
     best = load_best(dev)
     if model in models.MULTI_OUTPUT:
-        keys = {None: study_name(model, MULTI_STUDY)}
+        keys = {None: study_name(model, MULTI_STUDY, study_set)}
     else:
-        keys = {t: study_name(model, t) for t in targets}
+        keys = {t: study_name(model, t, study_set) for t in targets}
     out = {}
     for t, k in keys.items():
         if k not in best:
@@ -394,7 +397,8 @@ def tuned_params_for(model: str, targets: list[str], dev: bool, gpr_top_k=None, 
                 out[t] = dev_params(model, models.default_params(model), dev)
                 continue
             raise SystemExit(f"no tuned settings for {k}: run surrogate/tune.py --model {model}"
-                             f"{' --targets secondary' if t in SECONDARY_TARGETS else ''} first")
+                             f"{' --targets secondary' if t in SECONDARY_TARGETS else ''}"
+                             f"{' --feature-set ' + study_set if study_set else ''} first")
         if feature_set and best[k].get("feature_set") != feature_set:
             msg = (f"{k} was tuned on {best[k].get('feature_set')} but {model} is scored on {feature_set} "
                    "(feature_sets.json); re-tune after the D5 ablation")
@@ -498,6 +502,147 @@ def stage_select(dev: bool, log=print):
     for t, r in sel.items():
         log(f"  {SHORT[t]:13s} -> {models.LABEL[r['model']]:22s} ({r['status']}; {gate[t]['check']} {gate[t]['result']})")
     return result
+
+
+# ── sensitivity_3_3: 2 x 2 factorial {R, C-G} x {untuned, tuned} ────────────────────────────
+
+SENS = CONFIG.get("sensitivity_3_3", {})
+
+
+def rel_gain(before, after):
+    """Share of the remaining error removed: (after - before) / (1 - before). Puts gains made from
+    different starting points on equal terms (a +0.02 step from 0.96 removes half of what was left)."""
+    before, after = np.asarray(before, float), np.asarray(after, float)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return (after - before) / (1.0 - before)
+
+
+def factorial_table(untuned: pd.DataFrame, tuned_cg: pd.DataFrame, tuned_r: pd.DataFrame) -> pd.DataFrame:
+    """One row per model x primary target: the four cells and both orders of the two effects."""
+    fs, ref = CFG["feature_set"], CFG["reference_set"]
+
+    def cell(tab, m, t, fs_=None):
+        q = tab[(tab.model == m) & (tab.target == t)]
+        if fs_ is not None:
+            q = q[q.feature_set == fs_]
+        return float(q["grouped_design_skill"].iloc[0]) if len(q) else np.nan
+
+    rows = []
+    for m in models.MODELS:
+        for t in PRIMARY_TARGETS:
+            ru, cu = cell(untuned, m, t, ref), cell(untuned, m, t, fs)
+            tuned = m in models.TUNABLE
+            ct = cell(tuned_cg, m, t) if tuned else np.nan
+            rt = cell(tuned_r, m, t) if tuned and not tuned_r.empty else np.nan
+            rows.append({"model": m, "target": t, "tuned_by_optuna": tuned,
+                         "R_untuned": ru, "R_tuned": rt, "CG_untuned": cu, "CG_tuned": ct,
+                         "features_gain_untuned": cu - ru, "features_gain_tuned": ct - rt,
+                         "tuning_gain_R": rt - ru, "tuning_gain_CG": ct - cu,
+                         "features_rel_untuned": float(rel_gain(ru, cu)), "features_rel_tuned": float(rel_gain(rt, ct)),
+                         "tuning_rel_R": float(rel_gain(ru, rt)), "tuning_rel_CG": float(rel_gain(cu, ct)),
+                         "both_gain": ct - ru, "both_rel": float(rel_gain(ru, ct))})
+    return pd.DataFrame(rows)
+
+
+def stage_factorial(dev: bool, log=print):
+    d = out_dir(dev)
+    untuned, tuned_cg = pd.read_csv(d / "untuned_table.csv"), pd.read_csv(d / "tuned_table.csv")
+    df, F, heat = load(dev)
+    folds = cv.grouped_folds(df)
+    fs_r = SENS["feature_set"]
+    X = F[FE.feature_set(fs_r)]
+    rows, oofs, params_used = [], [], {}
+    for m in SENS["models"]:
+        pbt = tuned_params_for(m, PRIMARY_TARGETS, dev, allow_missing=dev, feature_set=fs_r, study_set=fs_r)
+        params_used[m] = {str(k): v for k, v in pbt.items()}
+        t0 = time.time()
+        oof = oof_for(m, pbt, df, X, PRIMARY_TARGETS, folds, "grouped")
+        g, _ = grouped_rows(oof, heat)
+        oofs.append(oof.assign(model=m))
+        rows += [{"model": m, "feature_set": fs_r, "tuned": True, "target": t, "n_features": X.shape[1], **g[t]}
+                 for t in PRIMARY_TARGETS]
+        log(f"  {m:5s} tuned on {fs_r}  skill " + "  ".join(f"{SHORT[t]} {g[t]['grouped_design_skill']:.3f}"
+                                                         for t in PRIMARY_TARGETS) + f"   {time.time() - t0:6.0f} s")
+    tuned_r = pd.DataFrame(rows)
+    tuned_r.to_csv(d / "tuned_R_table.csv", index=False)
+    pd.concat(oofs, ignore_index=True).to_csv(d / "oof_tuned_R_grouped.csv.gz", index=False)
+    fac = factorial_table(untuned, tuned_cg, tuned_r)
+    fac.to_csv(d / "factorial_table.csv", index=False)
+    write_factorial_report(d, fac, dev)
+    factorial_figure(d, fac)
+    record_stage(d, "factorial", {"analysis": SENS.get("name"), "selection_effect": SENS.get("selection_effect"),
+                                  "params": params_used}, dev)
+    return fac
+
+
+def write_factorial_report(d: Path, fac: pd.DataFrame, dev: bool):
+    P = PRIMARY_TARGETS
+    L = [f"# Features x tuning — 2 x 2 factorial (sensitivity analysis after 3.3){' — DEV RUN' if dev else ''}", "",
+         "Added 7 Nov 2026 (config `sensitivity_3_3`, frozen before the run). The 3.3 grid measured the feature gain "
+         "before tuning and the tuning gain after the features, so the two are confounded by order and by the skill "
+         "ceiling. Adding 'tuned on R' gives both orders. Same budgets, search spaces, sampler, objective and folds as "
+         "3.3. Reported only — no effect on the 3.3 selection or the gate.", "",
+         "**Relative gain** = share of the remaining error removed = (skill after − skill before) / (1 − skill before).", "",
+         "## 1. Grouped-CV design skill — the four cells", "",
+         "| model | target | R untuned | R tuned | C-G untuned | C-G tuned |", "|---|---|---|---|---|---|"]
+    for _, r in fac.iterrows():
+        L.append(f"| {models.LABEL[r.model]} | {SHORT[r.target]} | {_f(r.R_untuned)} | {_f(r.R_tuned)} | "
+                 f"{_f(r.CG_untuned)} | {_f(r.CG_tuned)} |")
+    L += ["", "GPR has no Optuna tuning (E5), so only its untuned cells exist.", "",
+          "## 2. Feature effect, both orders", "",
+          "| model | target | gain untuned | gain tuned | rel. untuned | rel. tuned |", "|---|---|---|---|---|---|"]
+    for _, r in fac.iterrows():
+        L.append(f"| {models.LABEL[r.model]} | {SHORT[r.target]} | {_f(r.features_gain_untuned)} | {_f(r.features_gain_tuned)} | "
+                 f"{_f(100 * r.features_rel_untuned, 0)} % | {_f(100 * r.features_rel_tuned, 0)} % |")
+    L += ["", "## 3. Tuning effect, both orders", "",
+          "| model | target | gain on R | gain on C-G | rel. on R | rel. on C-G |", "|---|---|---|---|---|---|"]
+    for _, r in fac[fac.tuned_by_optuna].iterrows():
+        L.append(f"| {models.LABEL[r.model]} | {SHORT[r.target]} | {_f(r.tuning_gain_R)} | {_f(r.tuning_gain_CG)} | "
+                 f"{_f(100 * r.tuning_rel_R, 0)} % | {_f(100 * r.tuning_rel_CG, 0)} % |")
+    tuned = fac[fac.tuned_by_optuna]
+    L += ["", "## 4. Means over the 3 primary targets (models tuned by Optuna)", "",
+          "| model | features rel. (untuned → tuned order) | tuning rel. (on R → on C-G) | both together rel. |",
+          "|---|---|---|---|"]
+    for m, g in tuned.groupby("model", sort=False):
+        L.append(f"| {models.LABEL[m]} | {_f(100 * g.features_rel_untuned.mean(), 0)} % → {_f(100 * g.features_rel_tuned.mean(), 0)} % | "
+                 f"{_f(100 * g.tuning_rel_R.mean(), 0)} % → {_f(100 * g.tuning_rel_CG.mean(), 0)} % | {_f(100 * g.both_rel.mean(), 0)} % |")
+    (d / "factorial_report.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+
+
+def factorial_figure(d: Path, fac: pd.DataFrame):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    tuned = [m for m in models.MODELS if m in models.TUNABLE]
+    fig, axes = plt.subplots(len(tuned), 3, figsize=(9.5, 2.1 * len(tuned)), squeeze=False)
+    for i, m in enumerate(tuned):
+        for j, t in enumerate(PRIMARY_TARGETS):
+            ax = axes[i][j]
+            _style(ax)
+            r = fac[(fac.model == m) & (fac.target == t)].iloc[0]
+            lo = np.nanmin([r.R_untuned, r.R_tuned, r.CG_untuned, r.CG_tuned])
+            gap = 0.08 * (1 - lo + 0.15 * (1 - lo))          # min label separation (axis units)
+            yr, yc = r.R_tuned, r.CG_tuned
+            if np.isfinite(yr) and np.isfinite(yc) and abs(yc - yr) < gap:
+                mid = (yr + yc) / 2
+                yr, yc = (mid - gap / 2, mid + gap / 2) if r.CG_tuned >= r.R_tuned else (mid + gap / 2, mid - gap / 2)
+            for cells, ls, mfc, lab, ylab in (((r.R_untuned, r.R_tuned), "--", "white", "R", yr),
+                                              ((r.CG_untuned, r.CG_tuned), "-", COLORS[m], "C-G", yc)):
+                ax.plot([0, 1], cells, ls, color=COLORS[m], lw=2)
+                ax.plot([0, 1], cells, MARKERS[m], color=COLORS[m], mfc=mfc, mec=COLORS[m], mew=1.5, ms=7)
+                ax.text(1.06, ylab, lab, fontsize=7.5, va="center", color="#3a3a36")
+            ax.set_xticks([0, 1], ["untuned", "tuned"], fontsize=7.5)
+            ax.set_xlim(-0.2, 1.3)
+            ax.set_ylim(lo - 0.15 * (1 - lo), 1.0)
+            if i == 0:
+                ax.set_title(SHORT[t], fontsize=10, loc="left", color="#22221f")
+            if j == 0:
+                ax.set_ylabel(models.LABEL[m].replace(" (MLP)", ""), fontsize=8.5, color="#3a3a36")
+    fig.text(0.01, 0.5, "Grouped-CV design skill", rotation=90, va="center", fontsize=8.5, color="#3a3a36")
+    fig.tight_layout(rect=(0.02, 0, 1, 1))
+    for ext in ("png", "pdf"):
+        fig.savefig(d / f"factorial.{ext}", dpi=200, bbox_inches="tight")
+    plt.close(fig)
 
 
 # ── report and figures ──────────────────────────────────────────────────────────────────────
@@ -658,7 +803,7 @@ def figures(d: Path, untuned, tuned, sel):
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Sub-task 3.3 model benchmark")
-    ap.add_argument("--stage", required=True, choices=["probe", "untuned", "d5", "tuned", "secondary", "select"])
+    ap.add_argument("--stage", required=True, choices=["probe", "untuned", "d5", "tuned", "secondary", "select", "factorial"])
     ap.add_argument("--model", choices=list(CFG["d5"]["models"]), help="for --stage d5")
     ap.add_argument("--gpr-top-k", type=int, default=None,
                     help="optional check; official stages read the GPR fallback from timing_probe.json (E5)")
@@ -671,6 +816,10 @@ def main(argv=None) -> int:
     print(f"Benchmark stage '{a.stage}'{'  [DEV]' if a.dev else ''}", flush=True)
     if a.stage == "probe":
         stage_probe(a.dev, log)
+        return 0
+    if a.stage == "factorial":
+        stage_factorial(a.dev, log)
+        print(f"{'DEV' if a.dev else 'OFFICIAL'} stage 'factorial' done in {time.time() - t0:.0f} s", flush=True)
         return 0
     k = resolve_gpr_top_k(a.dev, a.gpr_top_k) if a.stage != "select" else None
     if a.stage != "select":

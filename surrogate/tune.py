@@ -11,6 +11,7 @@ start-up trials, no pruning, no time limit. All settings come from config.yaml `
     ./venv/bin/python surrogate/tune.py --model lgbm                      # 3 primary targets, 60 trials each
     ./venv/bin/python surrogate/tune.py --model lgbm --targets secondary  # run D (7 secondary targets)
     ./venv/bin/python surrogate/tune.py --model mlp                       # one 30-trial study
+    ./venv/bin/python surrogate/tune.py --model xgb --feature-set R       # sensitivity_3_3: tune on raw inputs
     ./venv/bin/python surrogate/tune.py --report                          # rebuild report + figures only
     ./venv/bin/python surrogate/tune.py --model rf --dev                  # 3 small trials, tuning_dev/
 
@@ -58,8 +59,13 @@ def out_dir(dev: bool) -> Path:
     return OUT / ("tuning_dev" if dev else "tuning")
 
 
-def study_name(model: str, target: str) -> str:
-    return f"{model}__{target}"
+SENS = CONFIG.get("sensitivity_3_3", {})
+
+
+def study_name(model: str, target: str, feature_set: str | None = None) -> str:
+    """'<model>__<target>'; studies on another feature set (sensitivity_3_3, raw inputs R) get '__<set>'."""
+    base = f"{model}__{target}"
+    return base if feature_set in (None, CFG["feature_set"]) else f"{base}__{feature_set}"
 
 
 def budget(model: str, dev: bool) -> int:
@@ -139,16 +145,17 @@ def _storage(dev: bool) -> str:
     return f"sqlite:///{(d / 'optuna.db').as_posix()}"
 
 
-def run_study(model: str, target: str, df, X, heat, dev: bool, log=print):
+def run_study(model: str, target: str, df, X, heat, dev: bool, log=print, feature_set: str | None = None):
     import optuna
     optuna.logging.set_verbosity(optuna.logging.WARNING)
     n_total = budget(model, dev)
     sampler = optuna.samplers.TPESampler(seed=int(TUNE["seed"]), n_startup_trials=int(TUNE["n_startup_trials"]))
-    study = optuna.create_study(study_name=study_name(model, target), storage=_storage(dev), direction="minimize",
+    fs = feature_set or (feature_set_for(model) if not dev else CFG["feature_set"])
+    study = optuna.create_study(study_name=study_name(model, target, fs), storage=_storage(dev), direction="minimize",
                                 sampler=sampler, load_if_exists=True)
     study.set_user_attr("model", model)
     study.set_user_attr("target", target)
-    study.set_user_attr("feature_set", feature_set_for(model) if not dev else CFG["feature_set"])
+    study.set_user_attr("feature_set", fs)
     done = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
     todo = n_total - len(done)
     if todo <= 0:
@@ -309,7 +316,10 @@ def figures(d: Path, studies, imp_all):
         ax.plot(tf["trial"] + 1, tf["value"], "o", ms=3, color="#b5b4ad", label="trial")
         ax.plot(tf["trial"] + 1, tf["value"].cummin(), "-", lw=2, color=COLORS[model], label="best so far")
         tgt = by[name].user_attrs["target"]
-        ax.set_title(f"{models.LABEL[model]} · {SHORT.get(tgt, 'all targets')}", fontsize=8.5, loc="left", color="#22221f")
+        fs_tag = by[name].user_attrs.get("feature_set", CFG["feature_set"])
+        ax.set_title(f"{models.LABEL[model]} · {SHORT.get(tgt, 'all targets')}"
+                     + (f" · {fs_tag} inputs" if fs_tag != CFG["feature_set"] else ""),
+                     fontsize=8.5, loc="left", color="#22221f")
         ax.xaxis.get_major_locator().set_params(integer=True)
         ax.set_xlabel("trial", fontsize=8, color="#3a3a36")
         lo, hi = tf["value"].min(), tf["value"].quantile(0.9)
@@ -366,6 +376,8 @@ def main(argv=None) -> int:
     ap.add_argument("--targets", nargs="+", default=["primary"], help="primary | secondary | target names")
     ap.add_argument("--dev", action="store_true", help=f"{DEV_TRIALS} small trials per study, writes outputs/tuning_dev")
     ap.add_argument("--report", action="store_true", help="only rebuild report, best_params.json and figures")
+    ap.add_argument("--feature-set", choices=[SENS.get("feature_set", "R")], default=None,
+                    help="sensitivity_3_3 only: tune on the raw inputs (studies named <model>__<target>__R)")
     a = ap.parse_args(argv)
     if a.report:
         report(a.dev)
@@ -374,7 +386,9 @@ def main(argv=None) -> int:
         ap.error("--model is required (or --report)")
     df, _ = cv.load_training()
     heat = M.heating_climates(df)
-    fs = CFG["feature_set"] if a.dev else feature_set_for(a.model)
+    if a.feature_set and a.model not in SENS.get("models", []):
+        ap.error(f"--feature-set {a.feature_set} is only for {SENS.get('models')} (config sensitivity_3_3)")
+    fs = a.feature_set or (CFG["feature_set"] if a.dev else feature_set_for(a.model))
     X = FE.engineer(df)[FE.feature_set(fs)]
     targets = resolve_targets(a.model, a.targets)
     n = budget(a.model, a.dev)
@@ -382,7 +396,7 @@ def main(argv=None) -> int:
           f"stud{'y' if len(targets) == 1 else 'ies'} x {n} trials x 5 folds{'  [DEV]' if a.dev else ''}", flush=True)
     t0 = time.time()
     for t in targets:
-        st = run_study(a.model, t, df, X, heat, a.dev, log=lambda s: print(s, flush=True))
+        st = run_study(a.model, t, df, X, heat, a.dev, log=lambda s: print(s, flush=True), feature_set=fs)
         save_study(st, a.dev)
     print(f"done in {time.time() - t0:.0f} s", flush=True)
     report(a.dev, log=lambda s: print(s, flush=True))
