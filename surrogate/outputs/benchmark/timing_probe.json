@@ -1,0 +1,57 @@
+{
+  "fold": "grouped fold 0",
+  "target": "eui_kwh_m2",
+  "train_rows": 2391,
+  "times": {
+    "rf_default": {
+      "fit_s": 1.17,
+      "predict_s": 0.045
+    },
+    "xgb_default": {
+      "fit_s": 0.36,
+      "predict_s": 0.005
+    },
+    "lgbm_default": {
+      "fit_s": 0.52,
+      "predict_s": 0.003
+    },
+    "gpr_default": {
+      "fit_s": 929.04,
+      "predict_s": 0.154
+    },
+    "mlp_default": {
+      "fit_s": 6.34,
+      "predict_s": 0.002
+    },
+    "rf_mid": {
+      "fit_s": 1.79,
+      "predict_s": 0.052
+    },
+    "lgbm_mid": {
+      "fit_s": 4.54,
+      "predict_s": 0.02
+    },
+    "xgb_mid": {
+      "fit_s": 3.06,
+      "predict_s": 0.007
+    },
+    "mlp_mid": {
+      "fit_s": 10.6,
+      "predict_s": 0.002
+    },
+    "gpr_top15": {
+      "fit_s": 37.89,
+      "predict_s": 0.022
+    }
+  },
+  "gpr_fallback_rule_s": 600,
+  "gpr_fallback_needed": true,
+  "estimate_hours": {
+    "A_untuned": 0.35,
+    "B_tuning": 2.79,
+    "C_tuned": 0.91,
+    "D_secondary": 2.69,
+    "total": 6.74
+  },
+  "note": "rough: mid-range settings stand for an average tuning trial; real trials vary 0.2x-3x"
+}

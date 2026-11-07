@@ -1,0 +1,652 @@
+{
+  "studies": {
+    "lgbm__heating_demand_kwh_m2": {
+      "model": "lgbm",
+      "target": "heating_demand_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 0.7777179009088668,
+      "best_trial": 51,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1432,
+        "learning_rate": 0.03174425874090165,
+        "num_leaves": 23,
+        "min_child_samples": 8,
+        "subsample": 0.8700365210347909,
+        "colsample_bytree": 0.7712256747207896,
+        "reg_alpha": 0.15695851113232542,
+        "reg_lambda": 0.19836602892700966,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1432,
+        "learning_rate": 0.03174425874090165,
+        "num_leaves": 23,
+        "min_child_samples": 8,
+        "subsample": 0.8700365210347909,
+        "colsample_bytree": 0.7712256747207896,
+        "reg_alpha": 0.15695851113232542,
+        "reg_lambda": 0.19836602892700966
+      },
+      "scores": {
+        "rmse__heating_demand_kwh_m2": 0.7777179009088668,
+        "skill__heating_demand_kwh_m2": 0.9766200840085155
+      },
+      "dev": false
+    },
+    "lgbm__cooling_demand_kwh_m2": {
+      "model": "lgbm",
+      "target": "cooling_demand_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 2.4771689307786398,
+      "best_trial": 58,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1710,
+        "learning_rate": 0.054311571511651675,
+        "num_leaves": 8,
+        "min_child_samples": 29,
+        "subsample": 0.9176675424561407,
+        "colsample_bytree": 0.527485302536462,
+        "reg_alpha": 2.3203063455932465e-05,
+        "reg_lambda": 0.0011811256656253427,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1710,
+        "learning_rate": 0.054311571511651675,
+        "num_leaves": 8,
+        "min_child_samples": 29,
+        "subsample": 0.9176675424561407,
+        "colsample_bytree": 0.527485302536462,
+        "reg_alpha": 2.3203063455932465e-05,
+        "reg_lambda": 0.0011811256656253427
+      },
+      "scores": {
+        "rmse__cooling_demand_kwh_m2": 2.4771689307786398,
+        "skill__cooling_demand_kwh_m2": 0.967108551698142
+      },
+      "dev": false
+    },
+    "lgbm__eui_kwh_m2": {
+      "model": "lgbm",
+      "target": "eui_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 2.51605240649036,
+      "best_trial": 59,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1228,
+        "learning_rate": 0.049945013413646766,
+        "num_leaves": 8,
+        "min_child_samples": 10,
+        "subsample": 0.7796485909351296,
+        "colsample_bytree": 0.3640824525036778,
+        "reg_alpha": 1.1110915741851335e-05,
+        "reg_lambda": 0.18869600312847112,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1228,
+        "learning_rate": 0.049945013413646766,
+        "num_leaves": 8,
+        "min_child_samples": 10,
+        "subsample": 0.7796485909351296,
+        "colsample_bytree": 0.3640824525036778,
+        "reg_alpha": 1.1110915741851335e-05,
+        "reg_lambda": 0.18869600312847112
+      },
+      "scores": {
+        "rmse__eui_kwh_m2": 2.51605240649036,
+        "skill__eui_kwh_m2": 0.9685193843427401
+      },
+      "dev": false
+    },
+    "xgb__heating_demand_kwh_m2": {
+      "model": "xgb",
+      "target": "heating_demand_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 0.7126566403773258,
+      "best_trial": 45,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1849,
+        "learning_rate": 0.04171560023976343,
+        "max_depth": 3,
+        "min_child_weight": 2.8592892096700324,
+        "subsample": 0.7161380017295483,
+        "colsample_bytree": 0.7086789501293335,
+        "reg_alpha": 1.6409634565334437e-08,
+        "reg_lambda": 5.848585752517994e-06,
+        "tree_method": "hist",
+        "random_state": 42,
+        "n_jobs": -1
+      },
+      "searched": {
+        "n_estimators": 1849,
+        "learning_rate": 0.04171560023976343,
+        "max_depth": 3,
+        "min_child_weight": 2.8592892096700324,
+        "subsample": 0.7161380017295483,
+        "colsample_bytree": 0.7086789501293335,
+        "reg_alpha": 1.6409634565334437e-08,
+        "reg_lambda": 5.848585752517994e-06
+      },
+      "scores": {
+        "rmse__heating_demand_kwh_m2": 0.7126566403773258,
+        "skill__heating_demand_kwh_m2": 0.9803682313273252
+      },
+      "dev": false
+    },
+    "xgb__cooling_demand_kwh_m2": {
+      "model": "xgb",
+      "target": "cooling_demand_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 2.2860040714913725,
+      "best_trial": 19,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1948,
+        "learning_rate": 0.053655771434125844,
+        "max_depth": 3,
+        "min_child_weight": 7.306874574621904,
+        "subsample": 0.8160529553248514,
+        "colsample_bytree": 0.6692228871284733,
+        "reg_alpha": 5.7912390248524755e-08,
+        "reg_lambda": 1.4115487033955495e-06,
+        "tree_method": "hist",
+        "random_state": 42,
+        "n_jobs": -1
+      },
+      "searched": {
+        "n_estimators": 1948,
+        "learning_rate": 0.053655771434125844,
+        "max_depth": 3,
+        "min_child_weight": 7.306874574621904,
+        "subsample": 0.8160529553248514,
+        "colsample_bytree": 0.6692228871284733,
+        "reg_alpha": 5.7912390248524755e-08,
+        "reg_lambda": 1.4115487033955495e-06
+      },
+      "scores": {
+        "rmse__cooling_demand_kwh_m2": 2.2860040714913725,
+        "skill__cooling_demand_kwh_m2": 0.971989184850448
+      },
+      "dev": false
+    },
+    "xgb__eui_kwh_m2": {
+      "model": "xgb",
+      "target": "eui_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 2.464868758638408,
+      "best_trial": 52,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1680,
+        "learning_rate": 0.043841548189916466,
+        "max_depth": 3,
+        "min_child_weight": 8.403504781897686,
+        "subsample": 0.7699019437922897,
+        "colsample_bytree": 0.6164758034942013,
+        "reg_alpha": 5.169313881440804e-05,
+        "reg_lambda": 5.98620081845263e-08,
+        "tree_method": "hist",
+        "random_state": 42,
+        "n_jobs": -1
+      },
+      "searched": {
+        "n_estimators": 1680,
+        "learning_rate": 0.043841548189916466,
+        "max_depth": 3,
+        "min_child_weight": 8.403504781897686,
+        "subsample": 0.7699019437922897,
+        "colsample_bytree": 0.6164758034942013,
+        "reg_alpha": 5.169313881440804e-05,
+        "reg_lambda": 5.98620081845263e-08
+      },
+      "scores": {
+        "rmse__eui_kwh_m2": 2.464868758638408,
+        "skill__eui_kwh_m2": 0.9697871668481979
+      },
+      "dev": false
+    },
+    "rf__heating_demand_kwh_m2": {
+      "model": "rf",
+      "target": "heating_demand_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 1.168172385486188,
+      "best_trial": 58,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 500,
+        "max_features": 0.5792115093248682,
+        "min_samples_leaf": 1,
+        "max_depth": null,
+        "max_samples": 0.9769640971603216,
+        "n_jobs": -1,
+        "random_state": 42
+      },
+      "searched": {
+        "max_features": 0.5792115093248682,
+        "min_samples_leaf": 1,
+        "max_depth": null,
+        "max_samples": 0.9769640971603216
+      },
+      "scores": {
+        "rmse__heating_demand_kwh_m2": 1.168172385486188,
+        "skill__heating_demand_kwh_m2": 0.9472511947876169
+      },
+      "dev": false
+    },
+    "rf__cooling_demand_kwh_m2": {
+      "model": "rf",
+      "target": "cooling_demand_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 3.9999146944578143,
+      "best_trial": 36,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 500,
+        "max_features": 0.5809115418850935,
+        "min_samples_leaf": 1,
+        "max_depth": 15,
+        "max_samples": 0.9850933914373798,
+        "n_jobs": -1,
+        "random_state": 42
+      },
+      "searched": {
+        "max_features": 0.5809115418850935,
+        "min_samples_leaf": 1,
+        "max_depth": 15,
+        "max_samples": 0.9850933914373798
+      },
+      "scores": {
+        "rmse__cooling_demand_kwh_m2": 3.9999146944578143,
+        "skill__cooling_demand_kwh_m2": 0.9142422837773804
+      },
+      "dev": false
+    },
+    "rf__eui_kwh_m2": {
+      "model": "rf",
+      "target": "eui_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 4.039704290310612,
+      "best_trial": 42,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 500,
+        "max_features": 0.47109391863271183,
+        "min_samples_leaf": 1,
+        "max_depth": 40,
+        "max_samples": 0.9939069990048981,
+        "n_jobs": -1,
+        "random_state": 42
+      },
+      "searched": {
+        "max_features": 0.47109391863271183,
+        "min_samples_leaf": 1,
+        "max_depth": 40,
+        "max_samples": 0.9939069990048981
+      },
+      "scores": {
+        "rmse__eui_kwh_m2": 4.039704290310612,
+        "skill__eui_kwh_m2": 0.9188472945500323
+      },
+      "dev": false
+    },
+    "mlp__all": {
+      "model": "mlp",
+      "target": "all",
+      "feature_set": "C-G",
+      "objective": "mean_primary_rmse_over_sd",
+      "best_value": 0.03931000008366083,
+      "best_trial": 26,
+      "n_trials": 30,
+      "params": {
+        "n_layers": 3,
+        "width": 512,
+        "dropout": 0.0006709767534828354,
+        "lr": 0.00013516326176301048,
+        "weight_decay": 0.000563088290117349,
+        "batch_size": 64
+      },
+      "searched": {
+        "n_layers": 3,
+        "width": 512,
+        "dropout": 0.0006709767534828354,
+        "lr": 0.00013516326176301048,
+        "weight_decay": 0.000563088290117349,
+        "batch_size": 64
+      },
+      "scores": {
+        "rmse__cooling_demand_kwh_m2": 0.8982880829403178,
+        "rmse__eui_kwh_m2": 1.6429034947786585,
+        "rmse__heating_demand_kwh_m2": 0.31724752984476823,
+        "rmse__peak_cooling_w_m2": 0.7805895391589069,
+        "rmse__peak_heating_w_m2": 0.5414155211489672,
+        "rmse__zone_cooling_core_kwh_m2": 0.2719414286306612,
+        "rmse__zone_cooling_east_kwh_m2": 6.590005851276027,
+        "rmse__zone_cooling_north_kwh_m2": 5.191286962284366,
+        "rmse__zone_cooling_south_kwh_m2": 4.664365747406139,
+        "rmse__zone_cooling_west_kwh_m2": 4.994325576471602,
+        "skill__cooling_demand_kwh_m2": 0.995674831565816,
+        "skill__eui_kwh_m2": 0.9865776685644211,
+        "skill__heating_demand_kwh_m2": 0.9961095910629584,
+        "skill__peak_cooling_w_m2": 0.9795504022834975,
+        "skill__peak_heating_w_m2": 0.9822854749367415,
+        "skill__zone_cooling_core_kwh_m2": 0.9942115135004318,
+        "skill__zone_cooling_east_kwh_m2": 0.991661150321902,
+        "skill__zone_cooling_north_kwh_m2": 0.9922928390061211,
+        "skill__zone_cooling_south_kwh_m2": 0.993658040460838,
+        "skill__zone_cooling_west_kwh_m2": 0.9883653280979781
+      },
+      "dev": false
+    },
+    "lgbm__peak_heating_w_m2": {
+      "model": "lgbm",
+      "target": "peak_heating_w_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 0.663247656184626,
+      "best_trial": 56,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1748,
+        "learning_rate": 0.043223007697474475,
+        "num_leaves": 9,
+        "min_child_samples": 6,
+        "subsample": 0.7173948413309112,
+        "colsample_bytree": 0.5831115491352389,
+        "reg_alpha": 0.0010269699919858663,
+        "reg_lambda": 5.585574991498157e-08,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1748,
+        "learning_rate": 0.043223007697474475,
+        "num_leaves": 9,
+        "min_child_samples": 6,
+        "subsample": 0.7173948413309112,
+        "colsample_bytree": 0.5831115491352389,
+        "reg_alpha": 0.0010269699919858663,
+        "reg_lambda": 5.585574991498157e-08
+      },
+      "scores": {
+        "rmse__peak_heating_w_m2": 0.663247656184626,
+        "skill__peak_heating_w_m2": 0.9734160471925858
+      },
+      "dev": false
+    },
+    "lgbm__peak_cooling_w_m2": {
+      "model": "lgbm",
+      "target": "peak_cooling_w_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 1.1275187272914617,
+      "best_trial": 45,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1694,
+        "learning_rate": 0.06708551174943088,
+        "num_leaves": 10,
+        "min_child_samples": 13,
+        "subsample": 0.7489532752556269,
+        "colsample_bytree": 0.5438830845187341,
+        "reg_alpha": 1.954374309052448e-06,
+        "reg_lambda": 5.6838585991919954e-06,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1694,
+        "learning_rate": 0.06708551174943088,
+        "num_leaves": 10,
+        "min_child_samples": 13,
+        "subsample": 0.7489532752556269,
+        "colsample_bytree": 0.5438830845187341,
+        "reg_alpha": 1.954374309052448e-06,
+        "reg_lambda": 5.6838585991919954e-06
+      },
+      "scores": {
+        "rmse__peak_cooling_w_m2": 1.1275187272914617,
+        "skill__peak_cooling_w_m2": 0.9573335172331703
+      },
+      "dev": false
+    },
+    "lgbm__zone_cooling_core_kwh_m2": {
+      "model": "lgbm",
+      "target": "zone_cooling_core_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 0.4385774021597609,
+      "best_trial": 57,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1430,
+        "learning_rate": 0.04296908405063297,
+        "num_leaves": 17,
+        "min_child_samples": 8,
+        "subsample": 0.7689910927860341,
+        "colsample_bytree": 0.9110692039647691,
+        "reg_alpha": 0.004267535081589535,
+        "reg_lambda": 0.00014461630037405844,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1430,
+        "learning_rate": 0.04296908405063297,
+        "num_leaves": 17,
+        "min_child_samples": 8,
+        "subsample": 0.7689910927860341,
+        "colsample_bytree": 0.9110692039647691,
+        "reg_alpha": 0.004267535081589535,
+        "reg_lambda": 0.00014461630037405844
+      },
+      "scores": {
+        "rmse__zone_cooling_core_kwh_m2": 0.4385774021597609,
+        "skill__zone_cooling_core_kwh_m2": 0.984944098087469
+      },
+      "dev": false
+    },
+    "lgbm__zone_cooling_south_kwh_m2": {
+      "model": "lgbm",
+      "target": "zone_cooling_south_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 12.061740594212383,
+      "best_trial": 53,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1524,
+        "learning_rate": 0.06800987160214167,
+        "num_leaves": 9,
+        "min_child_samples": 44,
+        "subsample": 0.8894535421956823,
+        "colsample_bytree": 0.566930814930533,
+        "reg_alpha": 5.1678105573152483e-05,
+        "reg_lambda": 1.130601868885165e-08,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1524,
+        "learning_rate": 0.06800987160214167,
+        "num_leaves": 9,
+        "min_child_samples": 44,
+        "subsample": 0.8894535421956823,
+        "colsample_bytree": 0.566930814930533,
+        "reg_alpha": 5.1678105573152483e-05,
+        "reg_lambda": 1.130601868885165e-08
+      },
+      "scores": {
+        "rmse__zone_cooling_south_kwh_m2": 12.061740594212383,
+        "skill__zone_cooling_south_kwh_m2": 0.9575909796658386
+      },
+      "dev": false
+    },
+    "lgbm__zone_cooling_east_kwh_m2": {
+      "model": "lgbm",
+      "target": "zone_cooling_east_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 14.301228800071422,
+      "best_trial": 54,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1564,
+        "learning_rate": 0.07128891375460022,
+        "num_leaves": 8,
+        "min_child_samples": 35,
+        "subsample": 0.9140090478219374,
+        "colsample_bytree": 0.5612442934177784,
+        "reg_alpha": 2.659958412906658e-07,
+        "reg_lambda": 5.728455505152192e-07,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1564,
+        "learning_rate": 0.07128891375460022,
+        "num_leaves": 8,
+        "min_child_samples": 35,
+        "subsample": 0.9140090478219374,
+        "colsample_bytree": 0.5612442934177784,
+        "reg_alpha": 2.659958412906658e-07,
+        "reg_lambda": 5.728455505152192e-07
+      },
+      "scores": {
+        "rmse__zone_cooling_east_kwh_m2": 14.301228800071422,
+        "skill__zone_cooling_east_kwh_m2": 0.9607281595900199
+      },
+      "dev": false
+    },
+    "lgbm__zone_cooling_north_kwh_m2": {
+      "model": "lgbm",
+      "target": "zone_cooling_north_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 12.033313820279412,
+      "best_trial": 42,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1422,
+        "learning_rate": 0.06937019787745095,
+        "num_leaves": 8,
+        "min_child_samples": 51,
+        "subsample": 0.9338454607066462,
+        "colsample_bytree": 0.6470901384113554,
+        "reg_alpha": 6.883149710958349e-08,
+        "reg_lambda": 3.391009598171221e-06,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1422,
+        "learning_rate": 0.06937019787745095,
+        "num_leaves": 8,
+        "min_child_samples": 51,
+        "subsample": 0.9338454607066462,
+        "colsample_bytree": 0.6470901384113554,
+        "reg_alpha": 6.883149710958349e-08,
+        "reg_lambda": 3.391009598171221e-06
+      },
+      "scores": {
+        "rmse__zone_cooling_north_kwh_m2": 12.033313820279412,
+        "skill__zone_cooling_north_kwh_m2": 0.9585890833216231
+      },
+      "dev": false
+    },
+    "lgbm__zone_cooling_west_kwh_m2": {
+      "model": "lgbm",
+      "target": "zone_cooling_west_kwh_m2",
+      "feature_set": "C-G",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 9.199082362474655,
+      "best_trial": 22,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1467,
+        "learning_rate": 0.04959970301357431,
+        "num_leaves": 11,
+        "min_child_samples": 19,
+        "subsample": 0.6036515506108714,
+        "colsample_bytree": 0.6119794773379468,
+        "reg_alpha": 0.0016701572775216895,
+        "reg_lambda": 1.812001789133585e-07,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1467,
+        "learning_rate": 0.04959970301357431,
+        "num_leaves": 11,
+        "min_child_samples": 19,
+        "subsample": 0.6036515506108714,
+        "colsample_bytree": 0.6119794773379468,
+        "reg_alpha": 0.0016701572775216895,
+        "reg_lambda": 1.812001789133585e-07
+      },
+      "scores": {
+        "rmse__zone_cooling_west_kwh_m2": 9.199082362474655,
+        "skill__zone_cooling_west_kwh_m2": 0.9605279706893106
+      },
+      "dev": false
+    }
+  },
+  "updated_utc": "2026-11-06T19:08:04.777153+00:00",
+  "dataset_sha256_training": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e"
+}

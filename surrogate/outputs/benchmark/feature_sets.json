@@ -1,0 +1,27 @@
+{
+  "feature_sets": {
+    "rf": "C-G",
+    "xgb": "C-G",
+    "lgbm": "C-G",
+    "gpr": "C-G",
+    "mlp": "C-G"
+  },
+  "d5": {
+    "xgb": {
+      "C-G": 0.9397221696310121,
+      "R": 0.8233051126559753,
+      "triggered": false
+    },
+    "gpr": {
+      "C-G": 0.9552928036995859,
+      "R": 0.9251006719559527,
+      "triggered": false
+    },
+    "mlp": {
+      "C-G": 0.9891836352075446,
+      "R": 0.9785505991751832,
+      "triggered": false
+    }
+  },
+  "note": "D5 triggered models get their own set from --stage d5"
+}
