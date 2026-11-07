@@ -408,6 +408,159 @@
         "zone_cooling_north_kwh_m2": "mlp",
         "zone_cooling_west_kwh_m2": "mlp"
       }
+    },
+    "factorial": {
+      "official": true,
+      "dev": false,
+      "created_utc": "2026-11-07T08:49:08.755834+00:00",
+      "dataset_sha256_training": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e",
+      "environment": {
+        "python": "3.13.9",
+        "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scipy": "1.18.1",
+        "scikit-learn": "1.9.1",
+        "lightgbm": "4.7.0",
+        "xgboost": "3.4.1",
+        "optuna": "5.0.0",
+        "torch": "2.15.0",
+        "matplotlib": "3.11.2"
+      },
+      "analysis": "factorial_features_x_tuning",
+      "selection_effect": "none",
+      "params": {
+        "rf": {
+          "heating_demand_kwh_m2": {
+            "n_estimators": 500,
+            "max_features": 0.7747176291373018,
+            "min_samples_leaf": 2,
+            "max_depth": 20,
+            "max_samples": 0.9312441865005099,
+            "n_jobs": -1,
+            "random_state": 42
+          },
+          "cooling_demand_kwh_m2": {
+            "n_estimators": 500,
+            "max_features": 0.7056056076714123,
+            "min_samples_leaf": 1,
+            "max_depth": null,
+            "max_samples": 0.8964524699903867,
+            "n_jobs": -1,
+            "random_state": 42
+          },
+          "eui_kwh_m2": {
+            "n_estimators": 500,
+            "max_features": 0.6916416734471655,
+            "min_samples_leaf": 1,
+            "max_depth": 30,
+            "max_samples": 0.9751243633950881,
+            "n_jobs": -1,
+            "random_state": 42
+          }
+        },
+        "xgb": {
+          "heating_demand_kwh_m2": {
+            "n_estimators": 1717,
+            "learning_rate": 0.11732187806065446,
+            "max_depth": 3,
+            "min_child_weight": 18.71172953442939,
+            "subsample": 0.8455022535927259,
+            "colsample_bytree": 0.8260867815358757,
+            "reg_alpha": 4.925782896224e-05,
+            "reg_lambda": 2.4405983874131326e-08,
+            "tree_method": "hist",
+            "random_state": 42,
+            "n_jobs": -1
+          },
+          "cooling_demand_kwh_m2": {
+            "n_estimators": 1691,
+            "learning_rate": 0.07106734687519241,
+            "max_depth": 4,
+            "min_child_weight": 18.89110893292134,
+            "subsample": 0.7324708481348238,
+            "colsample_bytree": 0.6859459646965335,
+            "reg_alpha": 0.008065479967314161,
+            "reg_lambda": 9.055603507888546e-08,
+            "tree_method": "hist",
+            "random_state": 42,
+            "n_jobs": -1
+          },
+          "eui_kwh_m2": {
+            "n_estimators": 1848,
+            "learning_rate": 0.08015156114674793,
+            "max_depth": 4,
+            "min_child_weight": 15.063626959348804,
+            "subsample": 0.8262102367464712,
+            "colsample_bytree": 0.4704613365521157,
+            "reg_alpha": 0.0003811593972582134,
+            "reg_lambda": 4.6647300431125826e-07,
+            "tree_method": "hist",
+            "random_state": 42,
+            "n_jobs": -1
+          }
+        },
+        "lgbm": {
+          "heating_demand_kwh_m2": {
+            "n_estimators": 1156,
+            "learning_rate": 0.09760874957249509,
+            "num_leaves": 8,
+            "min_child_samples": 46,
+            "subsample": 0.9715740976333178,
+            "colsample_bytree": 0.6290501529766752,
+            "reg_alpha": 3.3427768679212476e-05,
+            "reg_lambda": 6.90421148591381e-07,
+            "random_state": 42,
+            "n_jobs": -1,
+            "deterministic": true,
+            "force_col_wise": true,
+            "verbose": -1,
+            "subsample_freq": 1
+          },
+          "cooling_demand_kwh_m2": {
+            "n_estimators": 1919,
+            "learning_rate": 0.06853359775027994,
+            "num_leaves": 8,
+            "min_child_samples": 51,
+            "subsample": 0.9043055301140898,
+            "colsample_bytree": 0.5384065224610062,
+            "reg_alpha": 5.797085765776052e-08,
+            "reg_lambda": 2.0057707188307244e-06,
+            "random_state": 42,
+            "n_jobs": -1,
+            "deterministic": true,
+            "force_col_wise": true,
+            "verbose": -1,
+            "subsample_freq": 1
+          },
+          "eui_kwh_m2": {
+            "n_estimators": 1840,
+            "learning_rate": 0.04801540319625633,
+            "num_leaves": 9,
+            "min_child_samples": 56,
+            "subsample": 0.7929890095080503,
+            "colsample_bytree": 0.5572675513254863,
+            "reg_alpha": 3.317293650092328e-06,
+            "reg_lambda": 8.067640413923657e-05,
+            "random_state": 42,
+            "n_jobs": -1,
+            "deterministic": true,
+            "force_col_wise": true,
+            "verbose": -1,
+            "subsample_freq": 1
+          }
+        },
+        "mlp": {
+          "None": {
+            "n_layers": 3,
+            "width": 512,
+            "dropout": 0.000856063555835904,
+            "lr": 0.0010915592140371875,
+            "weight_decay": 1.0259434820659042e-05,
+            "batch_size": 256
+          }
+        }
+      }
     }
   }
 }

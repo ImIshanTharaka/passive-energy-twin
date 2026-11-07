@@ -645,8 +645,374 @@
         "skill__zone_cooling_west_kwh_m2": 0.9605279706893106
       },
       "dev": false
+    },
+    "lgbm__heating_demand_kwh_m2__R": {
+      "model": "lgbm",
+      "target": "heating_demand_kwh_m2",
+      "feature_set": "R",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 1.564625677561502,
+      "best_trial": 51,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1156,
+        "learning_rate": 0.09760874957249509,
+        "num_leaves": 8,
+        "min_child_samples": 46,
+        "subsample": 0.9715740976333178,
+        "colsample_bytree": 0.6290501529766752,
+        "reg_alpha": 3.3427768679212476e-05,
+        "reg_lambda": 6.90421148591381e-07,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1156,
+        "learning_rate": 0.09760874957249509,
+        "num_leaves": 8,
+        "min_child_samples": 46,
+        "subsample": 0.9715740976333178,
+        "colsample_bytree": 0.6290501529766752,
+        "reg_alpha": 3.3427768679212476e-05,
+        "reg_lambda": 6.90421148591381e-07
+      },
+      "scores": {
+        "rmse__heating_demand_kwh_m2": 1.564625677561502,
+        "skill__heating_demand_kwh_m2": 0.9053719997613789
+      },
+      "dev": false
+    },
+    "lgbm__cooling_demand_kwh_m2__R": {
+      "model": "lgbm",
+      "target": "cooling_demand_kwh_m2",
+      "feature_set": "R",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 3.6497668032638897,
+      "best_trial": 53,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1919,
+        "learning_rate": 0.06853359775027994,
+        "num_leaves": 8,
+        "min_child_samples": 51,
+        "subsample": 0.9043055301140898,
+        "colsample_bytree": 0.5384065224610062,
+        "reg_alpha": 5.797085765776052e-08,
+        "reg_lambda": 2.0057707188307244e-06,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1919,
+        "learning_rate": 0.06853359775027994,
+        "num_leaves": 8,
+        "min_child_samples": 51,
+        "subsample": 0.9043055301140898,
+        "colsample_bytree": 0.5384065224610062,
+        "reg_alpha": 5.797085765776052e-08,
+        "reg_lambda": 2.0057707188307244e-06
+      },
+      "scores": {
+        "rmse__cooling_demand_kwh_m2": 3.6497668032638897,
+        "skill__cooling_demand_kwh_m2": 0.9285993801871235
+      },
+      "dev": false
+    },
+    "lgbm__eui_kwh_m2__R": {
+      "model": "lgbm",
+      "target": "eui_kwh_m2",
+      "feature_set": "R",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 4.027241128661821,
+      "best_trial": 58,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1840,
+        "learning_rate": 0.04801540319625633,
+        "num_leaves": 9,
+        "min_child_samples": 56,
+        "subsample": 0.7929890095080503,
+        "colsample_bytree": 0.5572675513254863,
+        "reg_alpha": 3.317293650092328e-06,
+        "reg_lambda": 8.067640413923657e-05,
+        "random_state": 42,
+        "n_jobs": -1,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbose": -1,
+        "subsample_freq": 1
+      },
+      "searched": {
+        "n_estimators": 1840,
+        "learning_rate": 0.04801540319625633,
+        "num_leaves": 9,
+        "min_child_samples": 56,
+        "subsample": 0.7929890095080503,
+        "colsample_bytree": 0.5572675513254863,
+        "reg_alpha": 3.317293650092328e-06,
+        "reg_lambda": 8.067640413923657e-05
+      },
+      "scores": {
+        "rmse__eui_kwh_m2": 4.027241128661821,
+        "skill__eui_kwh_m2": 0.9193472613867482
+      },
+      "dev": false
+    },
+    "xgb__heating_demand_kwh_m2__R": {
+      "model": "xgb",
+      "target": "heating_demand_kwh_m2",
+      "feature_set": "R",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 1.5596982448508225,
+      "best_trial": 36,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1717,
+        "learning_rate": 0.11732187806065446,
+        "max_depth": 3,
+        "min_child_weight": 18.71172953442939,
+        "subsample": 0.8455022535927259,
+        "colsample_bytree": 0.8260867815358757,
+        "reg_alpha": 4.925782896224e-05,
+        "reg_lambda": 2.4405983874131326e-08,
+        "tree_method": "hist",
+        "random_state": 42,
+        "n_jobs": -1
+      },
+      "searched": {
+        "n_estimators": 1717,
+        "learning_rate": 0.11732187806065446,
+        "max_depth": 3,
+        "min_child_weight": 18.71172953442939,
+        "subsample": 0.8455022535927259,
+        "colsample_bytree": 0.8260867815358757,
+        "reg_alpha": 4.925782896224e-05,
+        "reg_lambda": 2.4405983874131326e-08
+      },
+      "scores": {
+        "rmse__heating_demand_kwh_m2": 1.5596982448508225,
+        "skill__heating_demand_kwh_m2": 0.9059670799775011
+      },
+      "dev": false
+    },
+    "xgb__cooling_demand_kwh_m2__R": {
+      "model": "xgb",
+      "target": "cooling_demand_kwh_m2",
+      "feature_set": "R",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 3.7563165754968493,
+      "best_trial": 56,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1691,
+        "learning_rate": 0.07106734687519241,
+        "max_depth": 4,
+        "min_child_weight": 18.89110893292134,
+        "subsample": 0.7324708481348238,
+        "colsample_bytree": 0.6859459646965335,
+        "reg_alpha": 0.008065479967314161,
+        "reg_lambda": 9.055603507888546e-08,
+        "tree_method": "hist",
+        "random_state": 42,
+        "n_jobs": -1
+      },
+      "searched": {
+        "n_estimators": 1691,
+        "learning_rate": 0.07106734687519241,
+        "max_depth": 4,
+        "min_child_weight": 18.89110893292134,
+        "subsample": 0.7324708481348238,
+        "colsample_bytree": 0.6859459646965335,
+        "reg_alpha": 0.008065479967314161,
+        "reg_lambda": 9.055603507888546e-08
+      },
+      "scores": {
+        "rmse__cooling_demand_kwh_m2": 3.7563165754968493,
+        "skill__cooling_demand_kwh_m2": 0.9243696479899498
+      },
+      "dev": false
+    },
+    "xgb__eui_kwh_m2__R": {
+      "model": "xgb",
+      "target": "eui_kwh_m2",
+      "feature_set": "R",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 4.2595368254337265,
+      "best_trial": 22,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 1848,
+        "learning_rate": 0.08015156114674793,
+        "max_depth": 4,
+        "min_child_weight": 15.063626959348804,
+        "subsample": 0.8262102367464712,
+        "colsample_bytree": 0.4704613365521157,
+        "reg_alpha": 0.0003811593972582134,
+        "reg_lambda": 4.6647300431125826e-07,
+        "tree_method": "hist",
+        "random_state": 42,
+        "n_jobs": -1
+      },
+      "searched": {
+        "n_estimators": 1848,
+        "learning_rate": 0.08015156114674793,
+        "max_depth": 4,
+        "min_child_weight": 15.063626959348804,
+        "subsample": 0.8262102367464712,
+        "colsample_bytree": 0.4704613365521157,
+        "reg_alpha": 0.0003811593972582134,
+        "reg_lambda": 4.6647300431125826e-07
+      },
+      "scores": {
+        "rmse__eui_kwh_m2": 4.2595368254337265,
+        "skill__eui_kwh_m2": 0.9097746436111278
+      },
+      "dev": false
+    },
+    "rf__heating_demand_kwh_m2__R": {
+      "model": "rf",
+      "target": "heating_demand_kwh_m2",
+      "feature_set": "R",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 2.617834050535291,
+      "best_trial": 37,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 500,
+        "max_features": 0.7747176291373018,
+        "min_samples_leaf": 2,
+        "max_depth": 20,
+        "max_samples": 0.9312441865005099,
+        "n_jobs": -1,
+        "random_state": 42
+      },
+      "searched": {
+        "max_features": 0.7747176291373018,
+        "min_samples_leaf": 2,
+        "max_depth": 20,
+        "max_samples": 0.9312441865005099
+      },
+      "scores": {
+        "rmse__heating_demand_kwh_m2": 2.617834050535291,
+        "skill__heating_demand_kwh_m2": 0.7350993765936155
+      },
+      "dev": false
+    },
+    "rf__cooling_demand_kwh_m2__R": {
+      "model": "rf",
+      "target": "cooling_demand_kwh_m2",
+      "feature_set": "R",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 6.561721386690824,
+      "best_trial": 53,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 500,
+        "max_features": 0.7056056076714123,
+        "min_samples_leaf": 1,
+        "max_depth": null,
+        "max_samples": 0.8964524699903867,
+        "n_jobs": -1,
+        "random_state": 42
+      },
+      "searched": {
+        "max_features": 0.7056056076714123,
+        "min_samples_leaf": 1,
+        "max_depth": null,
+        "max_samples": 0.8964524699903867
+      },
+      "scores": {
+        "rmse__cooling_demand_kwh_m2": 6.561721386690824,
+        "skill__cooling_demand_kwh_m2": 0.7692151368595879
+      },
+      "dev": false
+    },
+    "rf__eui_kwh_m2__R": {
+      "model": "rf",
+      "target": "eui_kwh_m2",
+      "feature_set": "R",
+      "objective": "grouped_cv_rmse_on_scored_rows",
+      "best_value": 7.636442187251647,
+      "best_trial": 37,
+      "n_trials": 60,
+      "params": {
+        "n_estimators": 500,
+        "max_features": 0.6916416734471655,
+        "min_samples_leaf": 1,
+        "max_depth": 30,
+        "max_samples": 0.9751243633950881,
+        "n_jobs": -1,
+        "random_state": 42
+      },
+      "searched": {
+        "max_features": 0.6916416734471655,
+        "min_samples_leaf": 1,
+        "max_depth": 30,
+        "max_samples": 0.9751243633950881
+      },
+      "scores": {
+        "rmse__eui_kwh_m2": 7.636442187251647,
+        "skill__eui_kwh_m2": 0.7100080194083705
+      },
+      "dev": false
+    },
+    "mlp__all__R": {
+      "model": "mlp",
+      "target": "all",
+      "feature_set": "R",
+      "objective": "mean_primary_rmse_over_sd",
+      "best_value": 0.06794874573575489,
+      "best_trial": 28,
+      "n_trials": 30,
+      "params": {
+        "n_layers": 3,
+        "width": 512,
+        "dropout": 0.000856063555835904,
+        "lr": 0.0010915592140371875,
+        "weight_decay": 1.0259434820659042e-05,
+        "batch_size": 256
+      },
+      "searched": {
+        "n_layers": 3,
+        "width": 512,
+        "dropout": 0.000856063555835904,
+        "lr": 0.0010915592140371875,
+        "weight_decay": 1.0259434820659042e-05,
+        "batch_size": 256
+      },
+      "scores": {
+        "rmse__cooling_demand_kwh_m2": 1.5130006236050453,
+        "rmse__eui_kwh_m2": 2.2393262628826456,
+        "rmse__heating_demand_kwh_m2": 0.6460522659853387,
+        "rmse__peak_cooling_w_m2": 0.9944638353047688,
+        "rmse__peak_heating_w_m2": 0.6539219689262769,
+        "rmse__zone_cooling_core_kwh_m2": 0.5918265804879308,
+        "rmse__zone_cooling_east_kwh_m2": 7.362959330158344,
+        "rmse__zone_cooling_north_kwh_m2": 5.565732782545359,
+        "rmse__zone_cooling_south_kwh_m2": 5.697116420827183,
+        "rmse__zone_cooling_west_kwh_m2": 5.637940882756615,
+        "skill__cooling_demand_kwh_m2": 0.9877298474423888,
+        "skill__eui_kwh_m2": 0.9750633219206621,
+        "skill__heating_demand_kwh_m2": 0.9838662967793651,
+        "skill__peak_cooling_w_m2": 0.9668092318549845,
+        "skill__peak_heating_w_m2": 0.9741583663410636,
+        "skill__zone_cooling_core_kwh_m2": 0.9725840557468262,
+        "skill__zone_cooling_east_kwh_m2": 0.9895902728136821,
+        "skill__zone_cooling_north_kwh_m2": 0.9911409110686099,
+        "skill__zone_cooling_south_kwh_m2": 0.9905387512519412,
+        "skill__zone_cooling_west_kwh_m2": 0.9851734032614297
+      },
+      "dev": false
     }
   },
-  "updated_utc": "2026-11-06T19:08:04.777153+00:00",
+  "updated_utc": "2026-11-07T08:47:19.087936+00:00",
   "dataset_sha256_training": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e"
 }
