@@ -283,7 +283,39 @@ def check_mlp_physics_outputs_and_forms():
     assert len(out) == len(sub) * len(ALL_TARGETS) and np.isfinite(out["yhat"]).all()
 
 
-ALL_CHECKS = [check_constants_match_config_and_indices, check_feature_matrix_is_cg_plus_indices,
+def check_config_block_matches_code_and_earlier_blocks_unchanged():
+    import hashlib
+    from surrogate import features as FE
+    from surrogate.config import CONFIG_PATH
+    text = CONFIG_PATH.read_text(encoding="utf-8")
+    marker = "\n# ── Added 8 Nov 2026 (Sub-task 3.4"
+    assert text.count(marker) == 1
+    prefix = text[: text.index(marker)]
+    assert hashlib.md5(prefix.encode("utf-8")).hexdigest() == "84de1aef3f00a28427044ee4b31cecab", \
+        "config.yaml above the 3.4 block differs from the frozen 7 Nov file"
+    c = CONFIG["climate_gen_3_4"]
+    assert c["indices"] == CI.INDEX_COLUMNS and c["feature_set"] == CI.FEATURE_SET
+    assert c["base_feature_set"] == CI.BASE_FEATURE_SET
+    assert c["decomposed_eui"]["oa_level"]["x"] == CI.OA_LEVEL_INDICES
+    assert c["mlp_outputs"]["extra"] == [n for n, _, _ in models.MLP_EXTRA]
+    assert c["decomposed_eui"]["heating_form"] == "ratio"
+    allowed = set(models.FORMS) | {"decomposed"}
+    for t, v in c["forms"].items():
+        forms = v["forms"] if isinstance(v, dict) else v
+        assert t in ALL_TARGETS and set(forms) <= allowed, (t, forms)
+    assert set(c["models"]) == set(models.MODELS)
+    occ = c["index_definition"]["occupied_hours_ending"]
+    assert list(CI.OCC_HOURS[1]) == list(range(occ["mon_fri"][0], occ["mon_fri"][1] + 1))
+    assert list(CI.OCC_HOURS[6]) == list(range(occ["sat"][0], occ["sat"][1] + 1)) and 0 not in CI.OCC_HOURS
+    # fix 4 drops raw climate inputs that no engineered feature of C-G needs
+    dropped = set(c["fix4"]["drop_climate_inputs"])
+    assert dropped <= set(FE.CLIMATE_INPUTS)
+    for name in FE.feature_set("C-G"):
+        if name not in FE.RAW_INPUTS:
+            assert not (set(FE.RAW_PARENTS[name]) & dropped), name
+
+
+ALL_CHECKS = [check_config_block_matches_code_and_earlier_blocks_unchanged, check_constants_match_config_and_indices, check_feature_matrix_is_cg_plus_indices,
               check_forms_convert_back_exactly, check_target_form_equals_manual_fit,
               check_decomposition_identity_exact, check_decomposed_eui_wiring_with_exact_submodels,
               check_oa_line_uses_training_climates_only_and_equals_lstsq, check_cv_passes_training_rows_only_as_context,

@@ -179,3 +179,73 @@ sensitivity_3_3:
   budgets: benchmark_3_3.tuning.trials                 # 60 per target (rf, xgb, lgbm), 30 (mlp, one study)
   relative_measure: share_of_remaining_error_removed   # (skill_after - skill_before) / (1 - skill_before)
   selection_effect: none
+
+# ── Added 8 Nov 2026 (Sub-task 3.4, claude/Phase3.4_Execution_Plan.md Rev 1.3, F1-F6 agreed 7 Nov),
+# BEFORE any 3.4 run. Nothing above this line was changed. Climate generalisation (M6, M7, M10).
+# Constants of the target forms (HDD base 15 C, offset 50, 48.87 kWh/m2, setpoints 21/24 C, 50 % RH)
+# are the `target_forms` block above (frozen 30 Oct), used unchanged.
+climate_gen_3_4:
+  feature_set: C-G+I                                   # F1: C-G (63) + the 7 indices = 70 columns
+  base_feature_set: C-G
+  indices: [occ_enth_excess, occ_latent_excess, occ_band_dh, occ_cool_dh, occ_heat_dh, hdd15, hdd12]
+  index_definition:                                    # surrogate/climate_indices.py (step 1)
+    occupied_hours_ending: {mon_fri: [7, 22], sat: [7, 18], sun: none}   # year starts Sunday 1 Jan
+    room_reference: {temperature_c: 24, rh: 0.50, pressure: hourly_epw_station}
+    psychrometrics: ashrae_fundamentals_2017_ch1   # Hyland-Wexler saturation pressure; W from dew point
+    band: clip(24 - T, 0, 3)
+    degree_days: daily_mean_of_24_hourly_values      # as Phase 2.3
+    holdout_indices: final_test_only                 # London computed only in final_test.py (3.7)
+  models: [rf, xgb, lgbm, gpr, mlp]                    # F2: every family gets every form
+  forms:                                               # F2 / M6
+    heating_demand_kwh_m2: [direct, log1p, ratio]      # ratio = y / (HDD15 + 50)
+    cooling_demand_kwh_m2: [direct]
+    eui_kwh_m2: [direct, decomposed]
+    peak_heating_w_m2: {forms: [direct, ratio], models: [lgbm, mlp]}   # secondary
+  decomposed_eui:                                      # F3
+    identity: eui = 48.87 + heating + cooling + oa_level + oa_dev
+    heating_form: ratio
+    oa_level: {model: ols_with_intercept, x: [occ_enth_excess, occ_band_dh, occ_heat_dh],
+               y: per_climate_mean_oa_term, fitted_on: training_climates_of_each_fold}
+    oa_dev: {target: oa_term_minus_training_climate_mean, model: same_family_as_candidate,
+             params: family_tuned_eui_settings}
+  hyperparameters:                                     # F2: no re-tuning (E1)
+    source: surrogate/outputs/tuning/best_params.json  # 3.3 studies, tuned on C-G
+    rule: same_family_and_original_target              # heating forms -> heating settings, etc.
+    gpr: {params: benchmark_3_3.defaults.gpr, top_k: 15}   # E5 fallback, as 3.3
+    mlp: mlp__all                                      # the one 3.3 MLP study
+    tuned_on_feature_set: C-G                          # reused on C-G+I: documented simplification
+  mlp_outputs:                                         # F4: one network, 14 outputs
+    direct: all_10_targets
+    extra: [heating_ratio, heating_log1p, peak_heating_ratio, oa_dev]
+  protocols:
+    grouped: {folds: benchmark grouped folds, seed: 42}  # selection skill (M10 step 1)
+    loco: {folds: 10, group: climate_key}               # M10 step 2 + M7; reported per held-out climate
+  baseline_pool: 3.3 tuned C-G direct candidates (outputs/benchmark/tuned_table.csv)   # stay candidates
+  skew_check:                                          # F2: log1p "where skew > 1" (M6)
+    threshold: 1.0
+    statistic: pandas_skew_on_scored_rows              # heating climates for heating targets
+    model: lgbm
+    targets: secondary_only                            # heating already has log1p in the grid
+    enters_selection: false                            # reported only; secondary picks stay final (F6)
+  fix4:                                                # F5, conditional
+    trigger: selected_primary_candidate_loco_median_abs_bias_pct_gt
+    trigger_value: 5.0
+    drop_climate_inputs: [mean_dbt, latitude, mean_wind]   # none is used by a C-group feature
+    keep: [hdd18, cdd10, annual_ghi, mean_rh, 7_indices]
+    applies_to: the_triggering_selected_candidate_only
+    enters_selection: true
+  selection:                                           # F6: M10 (`selection` block) unchanged
+    pool: baseline_pool + grid + fix4
+    candidate_key: [model, feature_set, form]
+    primary: lowest_loco_mape_among_grouped_skill_ge_0.90
+    tie_break: lightgbm_candidate_with_best_value_within_margin
+    secondary_rechecked: [peak_heating_w_m2]           # highest grouped skill (secondary rule)
+    secondary_unchanged: final_3_3_picks               # all MLP direct
+    record_one_family: true                            # master plan §1 preference (Phase 5)
+  m7: m7_trigger                                       # block above, applied to the selected candidates
+  reporting:
+    climate_distance: {features: phase2_7_climate_inputs, scaling: zscore_over_10_training_climates,
+                       measure: euclidean_to_nearest_other_training_climate}
+    ranking_metrics: [spearman_median, bias_removed_r2, top_hit_mean]   # M2, as 3.3
+    gpr_selected_features_per_fold: true               # open item 5 (handoff §8)
+    save_oof: {grouped: true, loco: true}              # grouped OOF feeds 3.5
