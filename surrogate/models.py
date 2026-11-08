@@ -202,3 +202,295 @@ class GPR(BaseEstimator, RegressorMixin):
         if self.feature_names_in_ is None:
             return None
         return [self.feature_names_in_[i] for i in self.selected_]
+
+
+# ── target forms and decomposed EUI (Sub-task 3.4, claude/Phase3.4_Execution_Plan.md F2-F4) ─────
+#
+# Plain idea: the model learns an easier, physics-shaped quantity and the wrapper converts the
+# answer back to kWh/m2 (or W/m2), so every caller still sees the original target.
+#   direct      y                                 (as in 3.3)
+#   log1p       log(1 + y)                        back: exp(z) - 1
+#   ratio       y / (HDD15 + 50)                  back: z * (HDD15 + 50)   ("per unit of cold", fix 2)
+#   decomposed  EUI = 48.87 + heating + cooling + OA level + OA deviation   (fix 3)
+# Constants come from config.yaml `target_forms` (frozen in 3.1, M6). HDD15 is read from the
+# `hdd15` column of X (feature set C-G+I, surrogate.climate_indices), so X must be a DataFrame.
+
+TF = CONFIG["target_forms"]
+HDD_COL = "hdd15"
+HDD_OFFSET = float(TF["hdd_offset"])                  # 50
+ELEC = float(TF["eui_constant_kwh_m2"])               # 48.87 kWh/m2, lights + equipment
+FORMS: tuple[str, ...] = ("direct", "log1p", "ratio")
+HEAT, COOL, EUI = "heating_demand_kwh_m2", "cooling_demand_kwh_m2", "eui_kwh_m2"
+PEAK_HEAT = "peak_heating_w_m2"
+
+
+def climate_scale(X) -> np.ndarray:
+    """HDD15 + 50 per row (the 'unit of cold'). Needs a DataFrame with an `hdd15` column."""
+    if not isinstance(X, pd.DataFrame) or HDD_COL not in X.columns:
+        raise ValueError(f"the ratio form needs X as a DataFrame with a '{HDD_COL}' column (feature set C-G+I)")
+    s = X[HDD_COL].to_numpy(dtype=float) + HDD_OFFSET
+    if not (np.isfinite(s).all() and (s > 0).all()):
+        raise ValueError("HDD15 + 50 must be finite and positive")
+    return s
+
+
+def to_form(y, form: str, X=None) -> np.ndarray:
+    """Original target -> the quantity the model learns."""
+    y = np.asarray(y, dtype=float)
+    if form == "direct":
+        return y.copy()
+    if form == "log1p":
+        if (y <= -1).any():
+            raise ValueError("log1p form needs y > -1")
+        return np.log1p(y)
+    if form == "ratio":
+        return y / climate_scale(X)
+    raise ValueError(f"unknown target form {form!r}; expected one of {FORMS}")
+
+
+def from_form(z, form: str, X=None) -> np.ndarray:
+    """Model output -> original target units (inverse of to_form)."""
+    z = np.asarray(z, dtype=float)
+    if form == "direct":
+        return z.copy()
+    if form == "log1p":
+        return np.expm1(z)
+    if form == "ratio":
+        return z * climate_scale(X)
+    raise ValueError(f"unknown target form {form!r}; expected one of {FORMS}")
+
+
+class TargetForm(BaseEstimator, RegressorMixin):
+    """Wrap a single-target estimator so it learns `to_form(y)` and predicts in original units."""
+
+    def __init__(self, base=None, form: str = "direct"):
+        self.base = base
+        self.form = form
+
+    def fit(self, X, y):
+        from sklearn.base import clone
+        if self.form not in FORMS:
+            raise ValueError(f"unknown target form {self.form!r}")
+        self.base_ = clone(self.base)
+        self.base_.fit(X, to_form(y, self.form, X))
+        return self
+
+    def predict(self, X):
+        return from_form(np.asarray(self.base_.predict(X), dtype=float).ravel(), self.form, X)
+
+
+def _climate_index_table(X: pd.DataFrame, climate, cols) -> pd.DataFrame:
+    """One row of climate-index values per climate; refuses values that vary within a climate."""
+    missing = [c for c in cols if c not in X.columns]
+    if missing:
+        raise ValueError(f"X lacks climate-index columns {missing} (feature set C-G+I)")
+    frame = X[list(cols)].copy()
+    frame["climate_key"] = np.asarray(climate).astype(str)
+    g = frame.groupby("climate_key", sort=True)
+    if (g.nunique() > 1).any().any():
+        raise ValueError("climate-index values vary within a climate")
+    return g.first()
+
+
+class OALevel:
+    """Straight line for the climate level of the outdoor-air (OA) term (F3).
+
+    Ordinary least squares with intercept, one point per training climate:
+        mean OA term of the climate = b0 + b1*occ_enth_excess + b2*occ_band_dh + b3*occ_heat_dh
+    """
+
+    def __init__(self, cols):
+        self.cols = list(cols)
+
+    def fit(self, index_table: pd.DataFrame, oa_mean: pd.Series):
+        idx = index_table.loc[oa_mean.index, self.cols].to_numpy(dtype=float)
+        A = np.column_stack([np.ones(len(idx)), idx])
+        if len(A) < A.shape[1]:
+            raise ValueError(f"{len(A)} climates cannot fit {A.shape[1]} coefficients")
+        self.coef_, *_ = np.linalg.lstsq(A, oa_mean.to_numpy(dtype=float), rcond=None)
+        self.climates_ = list(oa_mean.index)
+        self.fitted_ = pd.Series(A @ self.coef_, index=oa_mean.index)
+        return self
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        idx = X[self.cols].to_numpy(dtype=float)
+        return self.coef_[0] + idx @ self.coef_[1:]
+
+
+def oa_term(eui, heating, cooling) -> np.ndarray:
+    """OA term = EUI - 48.87 - heating - cooling (exact by definition, Phase 2 reference §2.3)."""
+    return np.asarray(eui, dtype=float) - ELEC - np.asarray(heating, dtype=float) - np.asarray(cooling, dtype=float)
+
+
+def _context(context, n: int, need: list[str]) -> pd.DataFrame:
+    if context is None:
+        raise ValueError("this model needs fit(..., context=<training rows of the dataset>); "
+                         "cv.cross_val_predict passes it automatically")
+    context = context.reset_index(drop=True)
+    if len(context) != n:
+        raise ValueError(f"context has {len(context)} rows, X has {n}")
+    missing = [c for c in need if c not in context.columns]
+    if missing:
+        raise ValueError(f"context lacks columns {missing}")
+    return context
+
+
+class DecomposedEUI(BaseEstimator, RegressorMixin):
+    """EUI = 48.87 + heating + cooling + OA level + OA deviation (fix 3, plan F3).
+
+    heat, cool, dev: unfitted single-target estimators (same family; F3). Heating is learned in the
+    ratio form (heating / (HDD15 + 50), fix 2). OA level: OALevel line on the climate means of the
+    OA term over the TRAINING rows only. OA deviation = OA term - its climate mean (training rows),
+    learned by `dev`. fit() needs `context` = the training rows of the dataset (heating, cooling,
+    climate_key); cv passes it. predict() needs only X.
+    """
+
+    def __init__(self, heat=None, cool=None, dev=None, level_cols=None):
+        self.heat = heat
+        self.cool = cool
+        self.dev = dev
+        self.level_cols = level_cols
+
+    def _level_cols(self):
+        if self.level_cols is not None:
+            return list(self.level_cols)
+        from surrogate.climate_indices import OA_LEVEL_INDICES
+        return list(OA_LEVEL_INDICES)
+
+    def fit(self, X, y, context=None):
+        from sklearn.base import clone
+        ctx = _context(context, len(X), [HEAT, COOL, "climate_key"])
+        heat_y, cool_y = ctx[HEAT].to_numpy(dtype=float), ctx[COOL].to_numpy(dtype=float)
+        climate = ctx["climate_key"].astype(str).to_numpy()
+        oa = oa_term(y, heat_y, cool_y)
+        oa_mean = pd.Series(oa).groupby(climate).mean()
+        table = _climate_index_table(X, climate, self._level_cols())
+        self.level_ = OALevel(self._level_cols()).fit(table, oa_mean)
+        dev_y = oa - oa_mean.loc[climate].to_numpy()
+        self.heat_ = TargetForm(self.heat, "ratio").fit(X, heat_y)
+        self.cool_ = clone(self.cool).fit(X, cool_y)
+        self.dev_ = clone(self.dev).fit(X, dev_y)
+        self.oa_climate_mean_ = oa_mean
+        return self
+
+    def predict_parts(self, X) -> pd.DataFrame:
+        parts = pd.DataFrame({
+            "elec": np.full(len(X), ELEC),
+            "heating": self.heat_.predict(X),
+            "cooling": np.asarray(self.cool_.predict(X), dtype=float).ravel(),
+            "oa_level": self.level_.predict(X),
+            "oa_dev": np.asarray(self.dev_.predict(X), dtype=float).ravel(),
+        })
+        parts["eui"] = parts[["elec", "heating", "cooling", "oa_level", "oa_dev"]].sum(axis=1)
+        return parts
+
+    def predict(self, X):
+        return self.predict_parts(X)["eui"].to_numpy()
+
+
+def make_form(model: str, params: dict, form: str):
+    """factory(target) -> TargetForm(<family estimator>, form). Single-target families only."""
+    base = make(model, params)
+    if model in MULTI_OUTPUT:
+        raise ValueError("the MLP gets its target forms through MLPPhysics (F4)")
+    if form not in FORMS:
+        raise ValueError(f"unknown target form {form!r}")
+    return lambda target: TargetForm(base(target), form)
+
+
+def make_decomposed(model: str, params_by_target: dict):
+    """factory(target) -> DecomposedEUI with heating / cooling / OA-deviation models of one family.
+
+    params_by_target: {heating_demand_kwh_m2: ..., cooling_demand_kwh_m2: ..., eui_kwh_m2: ...}
+    (the 3.3 tuned settings; the OA-deviation model uses the EUI settings, F3).
+    """
+    if model in MULTI_OUTPUT:
+        raise ValueError("the MLP gets the decomposed EUI through MLPPhysics (F4)")
+    h, c, e = (make(model, params_by_target[t]) for t in (HEAT, COOL, EUI))
+
+    def factory(target):
+        if target != EUI:
+            raise ValueError(f"the decomposed form is for {EUI}, not {target}")
+        return DecomposedEUI(heat=h(HEAT), cool=c(COOL), dev=e(EUI))
+    return factory
+
+
+# ── multi-output MLP with the physics forms (F4) ────────────────────────────────────────────
+
+# Extra outputs learned by the one network next to the 10 original targets (F4: 14 outputs).
+MLP_EXTRA = (("heating_ratio", HEAT, "ratio"), ("heating_log1p", HEAT, "log1p"),
+             ("peak_heating_ratio", PEAK_HEAT, "ratio"), ("oa_dev", EUI, "oa_dev"))
+
+
+class MLPPhysics(BaseEstimator, RegressorMixin):
+    """One multi-output MLP (3.3 settings) on 14 outputs: the 10 targets + MLP_EXTRA (F4).
+
+    fit(X, Y, groups, context): Y has the 10 targets in `targets` order; context = training rows
+    (climate_key) for the OA climate means and line. predict(X) -> the 10 direct outputs (same as a
+    3.3 net, so cv.cross_val_predict_multi works). predict_forms(X) -> DataFrame with columns
+    (target, form) for every candidate, all in original units:
+        direct (10), heating ratio, heating log1p, peak heating ratio,
+        EUI decomposed = 48.87 + heating (ratio) + cooling (direct) + OA level + OA deviation.
+    """
+
+    def __init__(self, mlp_params=None, targets=None, level_cols=None):
+        self.mlp_params = mlp_params
+        self.targets = targets
+        self.level_cols = level_cols
+
+    def _targets(self):
+        if self.targets is not None:
+            return list(self.targets)
+        from surrogate.config import ALL_TARGETS
+        return list(ALL_TARGETS)
+
+    def _level_cols(self):
+        if self.level_cols is not None:
+            return list(self.level_cols)
+        from surrogate.climate_indices import OA_LEVEL_INDICES
+        return list(OA_LEVEL_INDICES)
+
+    def extra_outputs(self, X, Y: pd.DataFrame, climate) -> np.ndarray:
+        """The 4 extra training columns (in MLP_EXTRA order) for rows with known targets."""
+        oa = oa_term(Y[EUI], Y[HEAT], Y[COOL])
+        dev = oa - self.oa_climate_mean_.loc[np.asarray(climate).astype(str)].to_numpy()
+        return np.column_stack([to_form(Y[HEAT], "ratio", X), to_form(Y[HEAT], "log1p"),
+                                to_form(Y[PEAK_HEAT], "ratio", X), dev])
+
+    def fit(self, X, Y, groups=None, context=None):
+        targets = self._targets()
+        Y = pd.DataFrame(np.asarray(Y, dtype=float).reshape(len(X), -1), columns=targets)
+        for t in (HEAT, COOL, EUI, PEAK_HEAT):
+            if t not in targets:
+                raise ValueError(f"MLPPhysics needs target {t}")
+        ctx = _context(context, len(X), ["climate_key"])
+        climate = ctx["climate_key"].astype(str).to_numpy()
+        oa = oa_term(Y[EUI], Y[HEAT], Y[COOL])
+        self.oa_climate_mean_ = pd.Series(oa).groupby(climate).mean()
+        table = _climate_index_table(X, climate, self._level_cols())
+        self.level_ = OALevel(self._level_cols()).fit(table, self.oa_climate_mean_)
+        Y14 = np.column_stack([Y.to_numpy(), self.extra_outputs(X, Y, climate)])
+        self.net_ = make_multi("mlp", dict(self.mlp_params or {}))()
+        self.net_.fit(X, Y14, groups=groups)
+        self.output_names_ = targets + [name for name, _, _ in MLP_EXTRA]
+        return self
+
+    def predict_raw(self, X) -> pd.DataFrame:
+        """The 14 network outputs as learned (extra columns in their transformed units)."""
+        return pd.DataFrame(self.net_.predict(X), columns=self.output_names_)
+
+    def predict(self, X):
+        return self.predict_raw(X)[self._targets()].to_numpy()
+
+    def predict_forms(self, X) -> pd.DataFrame:
+        raw = self.predict_raw(X)
+        out = {(t, "direct"): raw[t].to_numpy() for t in self._targets()}
+        heat_ratio = from_form(raw["heating_ratio"], "ratio", X)
+        out[(HEAT, "ratio")] = heat_ratio
+        out[(HEAT, "log1p")] = from_form(raw["heating_log1p"], "log1p")
+        out[(PEAK_HEAT, "ratio")] = from_form(raw["peak_heating_ratio"], "ratio", X)
+        out[(EUI, "decomposed")] = ELEC + heat_ratio + raw[COOL].to_numpy() + self.level_.predict(X) \
+            + raw["oa_dev"].to_numpy()
+        frame = pd.DataFrame(out)
+        frame.columns = pd.MultiIndex.from_tuples(frame.columns, names=["target", "form"])
+        return frame

@@ -17,6 +17,10 @@ model family (RF, XGBoost, LightGBM, GPR, MLP, a target-transform wrapper) runs 
 code. The output is one long frame of out-of-fold predictions (same columns as eda_lib, plus
 design_id and fit time), scored by surrogate.metrics.
 
+Fit context (added 8 Nov 2026, Sub-task 3.4): if a model's fit() accepts `context`, it receives
+the TRAINING rows of df for that fold (targets and metadata such as climate_key) - used by the
+decomposed EUI and the physics MLP (models.py). Test rows are never passed.
+
 Guards (plan §8): every entry point refuses non-training rows (eda_lib.HoldoutLeakError);
 grouped folds never share a design_id; a LOCO fold never trains on its held-out climate;
 every row is predicted exactly once per target.
@@ -108,6 +112,18 @@ def _rows(X, idx):
     return X.iloc[idx] if isinstance(X, pd.DataFrame) else X[idx]
 
 
+def _fit_kwargs(model, df: pd.DataFrame, train: np.ndarray, design: np.ndarray) -> dict:
+    """Optional fit arguments a model asks for: `groups` (design ids) and `context` (training rows)."""
+    import inspect
+    params = inspect.signature(model.fit).parameters
+    kw = {}
+    if "groups" in params:
+        kw["groups"] = design[train]
+    if "context" in params:
+        kw["context"] = df.iloc[train].reset_index(drop=True)
+    return kw
+
+
 def cross_val_predict(df: pd.DataFrame, X, targets: list[str], factory: ModelFactory,
                       folds: list[Fold], scheme: str) -> pd.DataFrame:
     """Out-of-fold predictions for each target and fold.
@@ -130,8 +146,10 @@ def cross_val_predict(df: pd.DataFrame, X, targets: list[str], factory: ModelFac
         y = df[t].to_numpy(dtype=float, copy=True)
         for f in folds:
             model = factory(t)
+            kw = _fit_kwargs(model, df, f.train, design)
+            kw.pop("groups", None)                  # single-target models: groups only via cross_val_predict_multi
             t0 = time.perf_counter()
-            model.fit(_rows(X, f.train), y[f.train])
+            model.fit(_rows(X, f.train), y[f.train], **kw)
             fit_s = time.perf_counter() - t0
             yhat = np.asarray(model.predict(_rows(X, f.test)), dtype=float).ravel()
             if len(yhat) != len(f.test):
@@ -153,7 +171,6 @@ def cross_val_predict_multi(df: pd.DataFrame, X, targets: list[str], factory: Ca
     uses it for a grouped early-stopping split). Same folds, guards and output frame as
     cross_val_predict; fit_s is the time of the one fit, repeated on every target of that fold.
     """
-    import inspect
     L.require_training(df)
     if len(X) != len(df):
         raise ValueError(f"X has {len(X)} rows, df has {len(df)}")
@@ -168,7 +185,7 @@ def cross_val_predict_multi(df: pd.DataFrame, X, targets: list[str], factory: Ca
     parts = []
     for f in folds:
         model = factory()
-        kw = {"groups": design[f.train]} if "groups" in inspect.signature(model.fit).parameters else {}
+        kw = _fit_kwargs(model, df, f.train, design)
         t0 = time.perf_counter()
         model.fit(_rows(X, f.train), Y[f.train], **kw)
         fit_s = time.perf_counter() - t0

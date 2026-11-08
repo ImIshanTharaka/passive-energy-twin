@@ -199,6 +199,21 @@ def add_indices(df: pd.DataFrame, table: pd.DataFrame | None = None) -> pd.DataF
     return out
 
 
+FEATURE_SET = "C-G+I"          # 3.4 plan F1: C-G (63) + the 7 indices = 70 columns
+BASE_FEATURE_SET = "C-G"
+
+
+def feature_matrix(df: pd.DataFrame, table: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Model inputs for 3.4: the selected 3.2 feature set C-G plus the 7 indices (same index as df)."""
+    from surrogate import features as FE
+    base = FE.engineer(df)[FE.feature_set(BASE_FEATURE_SET)]
+    idx = add_indices(df[["climate_key"]], table)[INDEX_COLUMNS]
+    clash = set(base.columns) & set(INDEX_COLUMNS)
+    if clash:
+        raise ValueError(f"index columns already in {BASE_FEATURE_SET}: {sorted(clash)}")
+    return pd.concat([base, idx], axis=1)
+
+
 def main() -> int:
     table = training_indices()
     pd.set_option("display.width", 140)
