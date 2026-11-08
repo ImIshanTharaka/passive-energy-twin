@@ -335,19 +335,17 @@ def _context(context, n: int, need: list[str]) -> pd.DataFrame:
     return context
 
 
-class DecomposedEUI(BaseEstimator, RegressorMixin):
-    """EUI = 48.87 + heating + cooling + OA level + OA deviation (fix 3, plan F3).
+class OATermModel(BaseEstimator, RegressorMixin):
+    """Outdoor-air (OA) term of EUI = OA level (straight line, climate) + OA deviation (design), F3.
 
-    heat, cool, dev: unfitted single-target estimators (same family; F3). Heating is learned in the
-    ratio form (heating / (HDD15 + 50), fix 2). OA level: OALevel line on the climate means of the
-    OA term over the TRAINING rows only. OA deviation = OA term - its climate mean (training rows),
-    learned by `dev`. fit() needs `context` = the training rows of the dataset (heating, cooling,
-    climate_key); cv passes it. predict() needs only X.
+    fit(X, y_eui, context): OA term = EUI - 48.87 - heating - cooling on the TRAINING rows (context
+    gives heating, cooling, climate_key); its climate means (training rows only) fit the OALevel
+    line; `dev` learns OA term - climate mean. predict(X) = line(X indices) + dev(X), i.e. the
+    predicted OA term. Used inside DecomposedEUI and on its own by climate_gen.py, which adds the
+    out-of-fold heating and cooling predictions instead of refitting them (identical result).
     """
 
-    def __init__(self, heat=None, cool=None, dev=None, level_cols=None):
-        self.heat = heat
-        self.cool = cool
+    def __init__(self, dev=None, level_cols=None):
         self.dev = dev
         self.level_cols = level_cols
 
@@ -360,32 +358,81 @@ class DecomposedEUI(BaseEstimator, RegressorMixin):
     def fit(self, X, y, context=None):
         from sklearn.base import clone
         ctx = _context(context, len(X), [HEAT, COOL, "climate_key"])
-        heat_y, cool_y = ctx[HEAT].to_numpy(dtype=float), ctx[COOL].to_numpy(dtype=float)
         climate = ctx["climate_key"].astype(str).to_numpy()
-        oa = oa_term(y, heat_y, cool_y)
-        oa_mean = pd.Series(oa).groupby(climate).mean()
+        oa = oa_term(y, ctx[HEAT].to_numpy(dtype=float), ctx[COOL].to_numpy(dtype=float))
+        self.climate_mean_ = pd.Series(oa).groupby(climate).mean()
         table = _climate_index_table(X, climate, self._level_cols())
-        self.level_ = OALevel(self._level_cols()).fit(table, oa_mean)
-        dev_y = oa - oa_mean.loc[climate].to_numpy()
-        self.heat_ = TargetForm(self.heat, "ratio").fit(X, heat_y)
-        self.cool_ = clone(self.cool).fit(X, cool_y)
-        self.dev_ = clone(self.dev).fit(X, dev_y)
-        self.oa_climate_mean_ = oa_mean
+        self.level_ = OALevel(self._level_cols()).fit(table, self.climate_mean_)
+        self.dev_ = clone(self.dev).fit(X, oa - self.climate_mean_.loc[climate].to_numpy())
         return self
 
     def predict_parts(self, X) -> pd.DataFrame:
+        return pd.DataFrame({"oa_level": self.level_.predict(X),
+                             "oa_dev": np.asarray(self.dev_.predict(X), dtype=float).ravel()})
+
+    def predict(self, X):
+        p = self.predict_parts(X)
+        return (p["oa_level"] + p["oa_dev"]).to_numpy()
+
+
+class DecomposedEUI(BaseEstimator, RegressorMixin):
+    """EUI = 48.87 + heating + cooling + OA level + OA deviation (fix 3, plan F3).
+
+    heat, cool, dev: unfitted single-target estimators (same family; F3). Heating is learned in the
+    ratio form (heating / (HDD15 + 50), fix 2). OA level and deviation: OATermModel (line on the
+    climate means of the OA term over the TRAINING rows only). fit() needs `context` = the training
+    rows of the dataset (heating, cooling, climate_key); cv passes it. predict() needs only X.
+    """
+
+    def __init__(self, heat=None, cool=None, dev=None, level_cols=None):
+        self.heat = heat
+        self.cool = cool
+        self.dev = dev
+        self.level_cols = level_cols
+
+    def fit(self, X, y, context=None):
+        from sklearn.base import clone
+        ctx = _context(context, len(X), [HEAT, COOL, "climate_key"])
+        self.oa_ = OATermModel(self.dev, self.level_cols).fit(X, y, context=ctx)
+        self.heat_ = TargetForm(self.heat, "ratio").fit(X, ctx[HEAT].to_numpy(dtype=float))
+        self.cool_ = clone(self.cool).fit(X, ctx[COOL].to_numpy(dtype=float))
+        return self
+
+    @property
+    def level_(self):
+        return self.oa_.level_
+
+    @property
+    def oa_climate_mean_(self):
+        return self.oa_.climate_mean_
+
+    def predict_parts(self, X) -> pd.DataFrame:
+        oa = self.oa_.predict_parts(X)
         parts = pd.DataFrame({
             "elec": np.full(len(X), ELEC),
             "heating": self.heat_.predict(X),
             "cooling": np.asarray(self.cool_.predict(X), dtype=float).ravel(),
-            "oa_level": self.level_.predict(X),
-            "oa_dev": np.asarray(self.dev_.predict(X), dtype=float).ravel(),
+            "oa_level": oa["oa_level"].to_numpy(),
+            "oa_dev": oa["oa_dev"].to_numpy(),
         })
         parts["eui"] = parts[["elec", "heating", "cooling", "oa_level", "oa_dev"]].sum(axis=1)
         return parts
 
     def predict(self, X):
         return self.predict_parts(X)["eui"].to_numpy()
+
+
+def make_oa_term(model: str, eui_params: dict):
+    """factory(target) -> OATermModel whose deviation model is the family with its EUI settings (F3)."""
+    if model in MULTI_OUTPUT:
+        raise ValueError("the MLP learns the OA deviation as an extra output of MLPPhysics (F4)")
+    dev = make(model, eui_params)
+
+    def factory(target):
+        if target != EUI:
+            raise ValueError(f"the OA-term model is fitted against {EUI}, not {target}")
+        return OATermModel(dev=dev(EUI))
+    return factory
 
 
 def make_form(model: str, params: dict, form: str):

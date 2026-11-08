@@ -39,4 +39,5 @@ surrogate/outputs/ablation_dev/
 # 3.3 (5 Nov 2026): dev runs of tune.py / benchmark.py; Optuna SQLite journals
 surrogate/outputs/tuning_dev/
 surrogate/outputs/benchmark_dev/
+surrogate/outputs/climate_gen_dev/
 surrogate/outputs/tuning/*.db-journal
