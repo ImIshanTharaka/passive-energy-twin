@@ -263,20 +263,32 @@ def from_form(z, form: str, X=None) -> np.ndarray:
 class TargetForm(BaseEstimator, RegressorMixin):
     """Wrap a single-target estimator so it learns `to_form(y)` and predicts in original units."""
 
-    def __init__(self, base=None, form: str = "direct"):
+    def __init__(self, base=None, form: str = "direct", scale_match: bool = False):
         self.base = base
         self.form = form
+        self.scale_match = scale_match
 
     def fit(self, X, y):
+        """scale_match (sensitivity_3_4 only): multiply the learned quantity by s = SD(y) / SD(form(y))
+        on the training rows, so scale-dependent settings tuned on y (e.g. LightGBM reg_alpha) mean the
+        same thing; predictions are divided by s before the inverse transform."""
         from sklearn.base import clone
         if self.form not in FORMS:
             raise ValueError(f"unknown target form {self.form!r}")
+        z = to_form(y, self.form, X)
+        self.scale_ = 1.0
+        if self.scale_match:
+            sz = float(np.std(z))
+            if not sz > 0:
+                raise ValueError("cannot scale-match a constant target")
+            self.scale_ = float(np.std(np.asarray(y, dtype=float))) / sz
         self.base_ = clone(self.base)
-        self.base_.fit(X, to_form(y, self.form, X))
+        self.base_.fit(X, z * self.scale_)
         return self
 
     def predict(self, X):
-        return from_form(np.asarray(self.base_.predict(X), dtype=float).ravel(), self.form, X)
+        z = np.asarray(self.base_.predict(X), dtype=float).ravel() / self.scale_
+        return from_form(z, self.form, X)
 
 
 def _climate_index_table(X: pd.DataFrame, climate, cols) -> pd.DataFrame:
@@ -435,14 +447,14 @@ def make_oa_term(model: str, eui_params: dict):
     return factory
 
 
-def make_form(model: str, params: dict, form: str):
+def make_form(model: str, params: dict, form: str, scale_match: bool = False):
     """factory(target) -> TargetForm(<family estimator>, form). Single-target families only."""
     base = make(model, params)
     if model in MULTI_OUTPUT:
         raise ValueError("the MLP gets its target forms through MLPPhysics (F4)")
     if form not in FORMS:
         raise ValueError(f"unknown target form {form!r}")
-    return lambda target: TargetForm(base(target), form)
+    return lambda target: TargetForm(base(target), form, scale_match)
 
 
 def make_decomposed(model: str, params_by_target: dict):

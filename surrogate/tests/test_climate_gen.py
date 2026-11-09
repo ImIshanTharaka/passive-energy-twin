@@ -188,6 +188,31 @@ def check_mlp_oof_frame():
     assert (y == 1).all()
 
 
+def check_scale_match_and_sensitivity_config():
+    import hashlib
+    from surrogate.config import CONFIG_PATH
+    df, X = _data()
+    y = df[HEAT].to_numpy(dtype=float)
+    tr, te = np.arange(0, 500), np.arange(500, 700)
+    w = models.TargetForm(models.make("lgbm", dict(SMALL))(HEAT), "ratio", scale_match=True).fit(X.iloc[tr], y[tr])
+    z = models.to_form(y[tr], "ratio", X.iloc[tr])
+    s = np.std(y[tr]) / np.std(z)
+    assert abs(w.scale_ - s) < 1e-12 and 100 < s < 1e5           # ratio is ~1/1000 of heating
+    manual = models.make("lgbm", dict(SMALL))(HEAT).fit(X.iloc[tr], z * s)
+    want = models.from_form(manual.predict(X.iloc[te]) / s, "ratio", X.iloc[te])
+    assert np.array_equal(w.predict(X.iloc[te]), want)
+    # default (no scale match) unchanged
+    assert models.TargetForm(models.make("lgbm", dict(SMALL))(HEAT), "ratio").fit(X.iloc[tr], y[tr]).scale_ == 1.0
+    # config: the 3.4 block above the sensitivity block is byte-identical to the frozen 8 Nov file
+    text = CONFIG_PATH.read_text(encoding="utf-8")
+    marker = "\n# ── Added 9 Nov 2026, AFTER the final 3.4 selection"
+    assert text.count(marker) == 1
+    assert hashlib.md5(text[: text.index(marker)].encode("utf-8")).hexdigest() == "f62456b360ea36c649efd33cd068b59a"
+    sc = CONFIG["sensitivity_3_4"]
+    assert sc["model"] == "lgbm" and sc["enters_selection"] is False
+    assert [tuple(c) for c in sc["candidates"]] == [(HEAT, "ratio"), (PEAK, "ratio"), (EUI, "decomposed")]
+
+
 def check_cli_guards():
     try:
         CG.main(["--stage", "grid", "--models", "lgbm"])
@@ -201,7 +226,7 @@ def check_cli_guards():
 
 ALL_CHECKS = [check_composed_decomposed_equals_refitted_model, check_fix4_runs_only_needed_parts, check_selection_rule,
               check_fix4_and_m7_triggers_end_to_end, check_climate_distances_and_fix4_inputs,
-              check_mlp_oof_frame, check_cli_guards]
+              check_mlp_oof_frame, check_scale_match_and_sensitivity_config, check_cli_guards]
 
 
 def main():

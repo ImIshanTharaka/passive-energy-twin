@@ -18,6 +18,9 @@ Stages (run in this order):
               not been run, the selection is marked 'awaiting_fix4' and M7 is not concluded.
     fix4      only if `select` says so: the triggering selected candidate(s) without mean DBT,
               latitude and wind -> fix4_table.csv (+ OOF); then run `select` again.
+    sensitivity  (config sensitivity_3_4, reported only) LightGBM ratio forms with the learned
+              quantity rescaled to the original target's SD -> sensitivity_table.csv
+    figures   thesis figures + climate_gen_summary.md from the saved tables (no model fits)
 
     ./venv/bin/python surrogate/climate_gen.py --stage indices
     caffeinate -i ./venv/bin/python surrogate/climate_gen.py --stage grid
@@ -362,6 +365,276 @@ def stage_fix4(dev: bool, log=print):
     record_stage(d, "fix4", {"needed_for": need, "inputs": cols}, dev)
 
 
+# ── sensitivity_3_4 (reported only) ────────────────────────────────────────────────────────
+
+SENS = CONFIG.get("sensitivity_3_4", {})
+
+
+def sensitivity_oof(pbt: dict, df, X, folds, scheme: str) -> pd.DataFrame:
+    """LightGBM ratio forms with scale matching (TargetForm(scale_match=True)); same folds as the grid.
+    Decomposed EUI = 48.87 + scaled heating ratio + cooling + OA term (cooling and OA term unscaled,
+    exactly as in the grid)."""
+    parts = []
+    for target, form, fac in ((HEAT, "ratio", models.make_form("lgbm", pbt[HEAT], "ratio", scale_match=True)),
+                              (PEAK, "ratio", models.make_form("lgbm", pbt[PEAK], "ratio", scale_match=True)),
+                              (COOL, "direct", models.make_form("lgbm", pbt[COOL], "direct")),
+                              (EUI, "oa_term", models.make_oa_term("lgbm", pbt[EUI]))):
+        parts.append(cv.cross_val_predict(df, X, [target], fac, folds, scheme).assign(form=form))
+    oof = compose_decomposed(pd.concat(parts, ignore_index=True))
+    keep = {(HEAT, "ratio"), (PEAK, "ratio"), (EUI, "decomposed")}
+    oof = oof[[(t, f) in keep for t, f in zip(oof["target"], oof["form"])]].copy()
+    oof["form"] = oof["form"] + "_scaled"
+    return oof
+
+
+def stage_sensitivity(dev: bool, log=print):
+    if not SENS:
+        raise SystemExit("config block sensitivity_3_4 missing")
+    df, X, heat = load(dev)
+    k = resolve_gpr_top_k(dev)
+    pbt = params_for("lgbm", PRIMARY_TARGETS + [PEAK], dev, k)
+    folds = {"grouped": cv.grouped_folds(df), "loco": cv.loco_folds(df)}
+    res = {s: sensitivity_oof(pbt, df, X, folds[s], s) for s in folds}
+    rows, pcs = score(res["grouped"], res["loco"], heat, "lgbm", FS, X.shape[1])
+    d = out_dir(dev)
+    grid = pd.read_csv(d / "grid_table.csv")
+    for r in rows:
+        base_form = r["form"].replace("_scaled", "")
+        g = grid[(grid["model"] == "lgbm") & (grid["target"] == r["target"]) & (grid["form"] == base_form)]
+        r["unscaled_grouped_design_skill"] = float(g["grouped_design_skill"].iloc[0]) if len(g) else np.nan
+        r["unscaled_loco_mape_pct"] = float(g["loco_mape_pct"].iloc[0]) if len(g) else np.nan
+        r["selectable"] = False
+    table = pd.DataFrame(rows)
+    table.to_csv(d / "sensitivity_table.csv", index=False)
+    pd.concat(pcs, ignore_index=True).to_csv(d / "sensitivity_per_climate.csv", index=False)
+    for s in folds:
+        res[s].assign(model="lgbm", feature_set=FS).to_csv(d / f"oof_sensitivity_{s}.csv.gz", index=False)
+    record_stage(d, "sensitivity", {"block": "sensitivity_3_4", "selectable": False}, dev)
+    for r in rows:
+        log(f"  {SHORT[r['target']]:13s} {r['form']:18s} skill {r['unscaled_grouped_design_skill']:.3f} -> "
+            f"{r['grouped_design_skill']:.3f}   LOCO MAPE {r['unscaled_loco_mape_pct']:.1f} -> {r['loco_mape_pct']:.1f} %")
+    return table
+
+
+# ── figures (step 7; reads saved tables only) ───────────────────────────────────────────────
+
+FAMILY_ORDER = ["rf", "xgb", "lgbm", "gpr", "mlp"]
+SERIES = ["#2a78d6", "#eb6834", "#1baf7a"]          # categorical slots 1-3 (dataviz palette, validated)
+INK, INK2, MUTED, GRID, AXIS, SURFACE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7", "#fcfcfb"
+PROVISIONAL_3_3 = {HEAT: "mlp", COOL: "mlp", EUI: "gpr"}   # 3.3 selection.json (provisional, E1)
+CITY = {"atlanta": "Atlanta", "chennai": "Chennai", "chicago": "Chicago", "colombo": "Colombo", "denver": "Denver",
+        "miami": "Miami", "minneapolis": "Minneapolis", "new_york": "New York", "phoenix": "Phoenix",
+        "san_francisco": "San Francisco"}
+
+
+def _style(ax):
+    ax.set_facecolor(SURFACE)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color(AXIS)
+    ax.tick_params(colors=INK2, labelsize=9, length=0)
+    ax.grid(axis="x", color=GRID, linewidth=0.6)
+    ax.set_axisbelow(True)
+
+
+def _save(fig, d: Path, name: str):
+    for ext in ("png", "pdf"):
+        fig.savefig(d / f"{name}.{ext}", dpi=200, bbox_inches="tight", facecolor="white")
+
+
+def fig_before_after(d: Path, grid: pd.DataFrame):
+    import matplotlib.pyplot as plt
+    panels = [(HEAT, [("direct", "As is"), ("log1p", "Log"), ("ratio", "Per unit of cold")]),
+              (EUI, [("direct", "As is"), ("decomposed", "Built from parts")])]
+    fig, axes = plt.subplots(1, 2, figsize=(10, 3.8), sharey=True)
+    for ax, (t, forms) in zip(axes, panels):
+        _style(ax)
+        h = 0.8 / len(forms)
+        for j, (form, label) in enumerate(forms):
+            colour = SERIES[2] if form in ("ratio", "decomposed") else SERIES[j]
+            for i, m in enumerate(FAMILY_ORDER):
+                r = grid[(grid["model"] == m) & (grid["target"] == t) & (grid["form"] == form)]
+                if r.empty:
+                    continue
+                v = float(r["loco_mape_pct"].iloc[0])
+                fails = float(r["grouped_design_skill"].iloc[0]) < SEL["primary_skill_min"]
+                y = i - 0.4 + h * (j + 0.5)
+                ax.barh(y, v, height=h - 0.04, color=colour, hatch="///" if fails else None,
+                        edgecolor="white", linewidth=0.8)
+                ax.text(v + 0.6, y, f"{v:.1f}", va="center", fontsize=7.5, color=INK2)
+        ax.set_yticks(range(len(FAMILY_ORDER)), [models.LABEL[m] for m in FAMILY_ORDER])
+        ax.invert_yaxis()
+        ax.set_xlabel("New-city error, LOCO MAPE (%)", color=INK2, fontsize=9)
+        ax.set_title(SHORT[t], color=INK, fontsize=11, loc="left", pad=22)
+        ax.set_xlim(0, ax.get_xlim()[1] * 1.08)
+        from matplotlib.patches import Patch
+        handles = [Patch(color=SERIES[2] if f in ("ratio", "decomposed") else SERIES[j], label=lab)
+                   for j, (f, lab) in enumerate(forms)]
+        ax.legend(handles=handles, frameon=False, fontsize=8, loc="lower left", bbox_to_anchor=(0, 1.0), ncol=len(forms),
+                  handlelength=1.2, borderaxespad=0.2)
+    fig.text(0.01, -0.04, "Hatched: grouped design skill below 0.90 (not eligible). LightGBM per unit of cold: "
+             "re-used regularisation not scale-free (see sensitivity_table.csv).", fontsize=7.5, color=MUTED)
+    fig.tight_layout()
+    _save(fig, d, "fig_before_after")
+    plt.close(fig)
+
+
+def _per_climate_loco(d: Path):
+    pc = pd.read_csv(d / "grid_per_climate.csv")
+    pc = pc[pc["scheme"] == "loco"]
+    old = pd.read_csv(B.out_dir(False) / "tuned_per_climate.csv")
+    old = old[old["scheme"] == "loco"].assign(feature_set="C-G", form="direct")
+    return pd.concat([pc, old], ignore_index=True)
+
+
+def _pick_rows(pc: pd.DataFrame, t: str, model: str, fs: str, form: str) -> pd.DataFrame:
+    return pc[(pc["target"] == t) & (pc["model"] == model) & (pc["feature_set"] == fs) & (pc["form"] == form)]
+
+
+def fig_bias_per_climate(d: Path, pc: pd.DataFrame, sel: dict):
+    import matplotlib.pyplot as plt
+    targets = [HEAT, COOL, EUI]
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4.2), sharey=False)
+    for ax, t in zip(axes, targets):
+        _style(ax)
+        new = _pick_rows(pc, t, sel[t]["model"], sel[t]["feature_set"], sel[t]["form"]).set_index("climate_key")
+        old = _pick_rows(pc, t, PROVISIONAL_3_3[t], "C-G", "direct").set_index("climate_key")
+        order = new["abs_bias_pct"].sort_values().index.tolist()
+        ys = np.arange(len(order))
+        ax.axvline(0, color=AXIS, linewidth=1)
+        ax.scatter(old.loc[order, "bias_pct"], ys, s=46, color=SERIES[0], zorder=3,
+                   edgecolor="white", linewidth=1.5, label=f"3.3: {models.LABEL[PROVISIONAL_3_3[t]]}, as is")
+        ax.scatter(new.loc[order, "bias_pct"], ys, s=46, color=SERIES[2], zorder=4, marker="D",
+                   edgecolor="white", linewidth=1.5,
+                   label=f"3.4: {models.LABEL[sel[t]['model']]}, {sel[t]['form']}")
+        for y, c in zip(ys, order):
+            ax.plot([old.loc[c, "bias_pct"], new.loc[c, "bias_pct"]], [y, y], color=GRID, linewidth=1.5, zorder=2)
+        ax.set_yticks(ys, [CITY[c] for c in order])
+        ax.set_xlabel("City bias when hidden (%)  — + over-predicts, − under-predicts", color=INK2, fontsize=8.5)
+        same = (sel[t]["model"], sel[t]["feature_set"], sel[t]["form"]) == (PROVISIONAL_3_3[t], "C-G", "direct")
+        ax.set_title(SHORT[t] + ("  (3.3 pick kept)" if same else ""), color=INK, fontsize=11, loc="left", pad=30)
+        ax.legend(frameon=False, fontsize=7.5, loc="lower left", bbox_to_anchor=(0, 1.0), ncol=1,
+                  borderaxespad=0.2, handletextpad=0.3)
+    fig.tight_layout()
+    _save(fig, d, "fig_bias_per_climate")
+    plt.close(fig)
+
+
+def fig_error_vs_distance(d: Path, pc: pd.DataFrame, sel: dict, dist: pd.DataFrame):
+    import matplotlib.pyplot as plt
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4))
+    for ax, t in zip(axes, [HEAT, EUI]):
+        _style(ax)
+        ax.grid(axis="y", color=GRID, linewidth=0.6)
+        new = _pick_rows(pc, t, sel[t]["model"], sel[t]["feature_set"], sel[t]["form"]).set_index("climate_key")
+        old = _pick_rows(pc, t, PROVISIONAL_3_3[t], "C-G", "direct").set_index("climate_key")
+        x = dist.loc[new.index, "distance_to_nearest"]
+        ax.scatter(dist.loc[old.index, "distance_to_nearest"], old["abs_bias_pct"], s=40, color=SERIES[0],
+                   edgecolor="white", linewidth=1.5, zorder=3, label=f"3.3: {models.LABEL[PROVISIONAL_3_3[t]]}, as is")
+        ax.scatter(x, new["abs_bias_pct"], s=46, color=SERIES[2], marker="D", edgecolor="white", linewidth=1.5,
+                   zorder=4, label=f"3.4: {models.LABEL[sel[t]['model']]}, {sel[t]['form']}")
+        below = {"chicago", "colombo", "new_york", "chennai"}            # nearest-pair labels go below to avoid overlap
+        for c in new.index:
+            dy = -11 if c in below else 4
+            ax.annotate(CITY[c], (x[c], new.loc[c, "abs_bias_pct"]), xytext=(5, dy), textcoords="offset points",
+                        fontsize=7, color=INK2)
+        ax.set_xlim(right=max(ax.get_xlim()[1], float(x.max()) + 0.45))
+        ax.set_xlabel("Distance to the nearest training climate (z-scored climate inputs)", color=INK2, fontsize=8.5)
+        ax.set_ylabel("|City bias| when hidden (%)", color=INK2, fontsize=8.5)
+        ax.set_title(SHORT[t], color=INK, fontsize=11, loc="left", pad=30)
+        ax.legend(frameon=False, fontsize=7.5, loc="lower left", bbox_to_anchor=(0, 1.0), ncol=1, borderaxespad=0.2)
+    fig.tight_layout()
+    _save(fig, d, "fig_error_vs_distance")
+    plt.close(fig)
+
+
+def fig_ranking_unseen(d: Path, pc: pd.DataFrame, sel: dict):
+    import matplotlib.pyplot as plt
+    targets = [HEAT, COOL, EUI]
+    fig, ax = plt.subplots(figsize=(7, 3.4))
+    _style(ax)
+    ax.grid(axis="y", color=GRID, linewidth=0.6)
+    ax.grid(axis="x", visible=False)
+    for i, t in enumerate(targets):
+        rows = _pick_rows(pc, t, sel[t]["model"], sel[t]["feature_set"], sel[t]["form"])
+        jitter = np.linspace(-0.18, 0.18, len(rows))
+        ax.scatter(i + jitter, rows["spearman"], s=40, color=SERIES[0], edgecolor="white", linewidth=1.5, zorder=3)
+        med = float(rows["spearman"].median())
+        ax.plot([i - 0.28, i + 0.28], [med, med], color=INK, linewidth=2)
+        ax.text(i + 0.31, med, f"median {med:.3f}", va="center", fontsize=7.5, color=INK2)
+        worst = rows.loc[rows["spearman"].idxmin()]
+        ax.annotate(CITY[worst["climate_key"]], (i + jitter[list(rows.index).index(worst.name)], worst["spearman"]),
+                    xytext=(-4, -10), textcoords="offset points", fontsize=7, color=MUTED, ha="right")
+    ax.set_xticks(range(len(targets)), [f"{SHORT[t]}\n{models.LABEL[sel[t]['model']]}, {sel[t]['form']}"
+                                        for t in targets], fontsize=8.5)
+    ax.set_ylabel("Rank agreement in the hidden city\n(Spearman, 1 = same order)", color=INK2, fontsize=8.5)
+    ax.set_ylim(min(0.9, ax.get_ylim()[0]), 1.0)
+    fig.tight_layout()
+    _save(fig, d, "fig_ranking_unseen")
+    plt.close(fig)
+
+
+def write_summary(d: Path, grid: pd.DataFrame, sel: dict, pc: pd.DataFrame, sens: pd.DataFrame | None):
+    old = pd.concat([pd.read_csv(B.out_dir(False) / "tuned_table.csv").assign(feature_set="C-G", form="direct")])
+    L = ["# Sub-task 3.4 — summary (thesis tables)", "",
+         "All errors in original units (kWh/m²) after the inverse transform; LOCO = leave-one-climate-out.", "",
+         "## Before (3.3 provisional) vs after (3.4 final)", "",
+         "| Target | 3.3 pick | LOCO MAPE % | median \\|bias\\| % | 3.4 pick | grouped skill | LOCO MAPE % | median \\|bias\\| % | max \\|bias\\| % |",
+         "|---|---|---|---|---|---|---|---|---|"]
+    for t in PRIMARY_TARGETS:
+        o = old[(old["target"] == t) & (old["model"] == PROVISIONAL_3_3[t])].iloc[0]
+        r = sel[t]
+        n = pd.concat([grid, old])
+        n = n[(n["target"] == t) & (n["model"] == r["model"]) & (n["feature_set"] == r["feature_set"]) & (n["form"] == r["form"])].iloc[0]
+        L.append(f"| {SHORT[t]} | {models.LABEL[PROVISIONAL_3_3[t]]} C-G direct | {o['loco_mape_pct']:.1f} | "
+                 f"{o['loco_median_abs_bias_pct']:.1f} | {models.LABEL[r['model']]} {r['feature_set']} {r['form']} | "
+                 f"{n['grouped_design_skill']:.3f} | {n['loco_mape_pct']:.1f} | {n['loco_median_abs_bias_pct']:.1f} | "
+                 f"{n['loco_max_abs_bias_pct']:.1f} ({CITY.get(n['loco_worst_climate'], n['loco_worst_climate'])}) |")
+    L += ["", "## LOCO MAPE % by family and form (C-G+I)", "",
+          "| Family | Heating direct | Heating log1p | Heating ratio | Cooling direct | EUI direct | EUI decomposed |",
+          "|---|---|---|---|---|---|---|"]
+    for m in FAMILY_ORDER:
+        cells = []
+        for t, f in ((HEAT, "direct"), (HEAT, "log1p"), (HEAT, "ratio"), (COOL, "direct"), (EUI, "direct"), (EUI, "decomposed")):
+            r = grid[(grid["model"] == m) & (grid["target"] == t) & (grid["form"] == f)]
+            cells.append("—" if r.empty else f"{r['loco_mape_pct'].iloc[0]:.1f} ({r['grouped_design_skill'].iloc[0]:.3f})")
+        L.append(f"| {models.LABEL[m]} | " + " | ".join(cells) + " |")
+    L += ["", "Cells: LOCO MAPE % (grouped design skill).", ""]
+    if sens is not None and not sens.empty:
+        L += ["## Sensitivity (sensitivity_3_4, reported only): LightGBM ratio forms with scale matching", "",
+              "| Target | Form | grouped skill (unscaled → scaled) | LOCO MAPE % (unscaled → scaled) | median \\|bias\\| % |",
+              "|---|---|---|---|---|"]
+        for r in sens.itertuples():
+            L.append(f"| {SHORT[r.target]} | {r.form} | {r.unscaled_grouped_design_skill:.3f} → {r.grouped_design_skill:.3f} | "
+                     f"{r.unscaled_loco_mape_pct:.1f} → {r.loco_mape_pct:.1f} | {r.loco_median_abs_bias_pct:.1f} |")
+        L.append("")
+    L += ["Figures: fig_before_after, fig_bias_per_climate, fig_error_vs_distance, fig_ranking_unseen (PNG + PDF)."]
+    (d / "climate_gen_summary.md").write_text("\n".join(L), encoding="utf-8")
+
+
+def stage_figures(dev: bool, log=print):
+    import matplotlib
+    matplotlib.use("Agg")
+    d = out_dir(dev)
+    grid = pd.read_csv(d / "grid_table.csv")
+    result = json.loads((d / "selection.json").read_text(encoding="utf-8"))
+    if result["status"] != "final":
+        raise SystemExit("selection is not final: run fix4/select first")
+    sel = result["selection"]
+    pc = _per_climate_loco(d)
+    dist = pd.read_csv(d / "climate_indices.csv", index_col="climate_key")
+    sens = pd.read_csv(d / "sensitivity_table.csv") if (d / "sensitivity_table.csv").exists() else None
+    fig_before_after(d, grid)
+    fig_bias_per_climate(d, pc, sel)
+    fig_error_vs_distance(d, pc, sel, dist)
+    fig_ranking_unseen(d, pc, sel)
+    write_summary(d, grid, sel, pc, sens)
+    record_stage(d, "figures", {"figures": ["fig_before_after", "fig_bias_per_climate", "fig_error_vs_distance",
+                                            "fig_ranking_unseen"], "summary": "climate_gen_summary.md"}, dev)
+    log("  figures + climate_gen_summary.md written")
+
+
 # ── selection (F6) ──────────────────────────────────────────────────────────────────────────
 
 def baseline_pool(dev: bool, log=print) -> pd.DataFrame:
@@ -519,7 +792,7 @@ def write_report(d: Path, pool: pd.DataFrame, result: dict, dev: bool):
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Sub-task 3.4 climate generalisation")
-    ap.add_argument("--stage", required=True, choices=["indices", "grid", "select", "fix4"])
+    ap.add_argument("--stage", required=True, choices=["indices", "grid", "select", "fix4", "sensitivity", "figures"])
     ap.add_argument("--dev", action="store_true", help="25 %% of designs, small models; writes outputs/climate_gen_dev")
     ap.add_argument("--models", nargs="+", choices=list(CFG["models"]), help="dev only: run a subset of families")
     a = ap.parse_args(argv)
@@ -534,6 +807,10 @@ def main(argv=None) -> int:
         stage_grid(a.dev, log, a.models)
     elif a.stage == "select":
         stage_select(a.dev, log)
+    elif a.stage == "sensitivity":
+        stage_sensitivity(a.dev, log)
+    elif a.stage == "figures":
+        stage_figures(a.dev, log)
     else:
         stage_fix4(a.dev, log)
     print(f"{'DEV' if a.dev else 'OFFICIAL'} stage '{a.stage}' done in {time.time() - t0:.0f} s -> "

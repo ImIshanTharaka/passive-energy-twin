@@ -249,3 +249,18 @@ climate_gen_3_4:
     ranking_metrics: [spearman_median, bias_removed_r2, top_hit_mean]   # M2, as 3.3
     gpr_selected_features_per_fold: true               # open item 5 (handoff §8)
     save_oof: {grouped: true, loco: true}              # grouped OOF feeds 3.5
+
+# ── Added 9 Nov 2026, AFTER the final 3.4 selection and BEFORE this run (claude/Phase3.4_Execution_Plan.md
+# open item b, agreed by Ishan 9 Nov). Reported only: cannot change the 3.4 selection. Nothing above changed.
+sensitivity_3_4:
+  question: does the LightGBM ratio-form result depend on scale-dependent regularisation re-used from 3.3?
+  model: lgbm
+  candidates:                                          # (target, form) on C-G+I, same folds as the grid
+    - [heating_demand_kwh_m2, ratio]
+    - [peak_heating_w_m2, ratio]
+    - [eui_kwh_m2, decomposed]                         # its heating part in the scaled ratio form
+  scaling: {rule: z_scaled = z * s, s: sd_y_over_sd_z_on_training_rows_of_each_fold, ddof: 0,
+            inverse: z = output / s}
+  params: same_as_grid                                 # 3.3 tuned settings, unchanged (reg_alpha etc.)
+  protocols: [grouped, loco]
+  enters_selection: false
