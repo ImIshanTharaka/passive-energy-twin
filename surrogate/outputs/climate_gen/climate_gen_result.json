@@ -418,7 +418,7 @@
     "figures": {
       "official": true,
       "dev": false,
-      "created_utc": "2026-11-09T17:19:19.266464+00:00",
+      "created_utc": "2026-11-09T17:28:06.270920+00:00",
       "dataset_sha256_training": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e",
       "environment": {
         "python": "3.13.9",

@@ -503,9 +503,9 @@ def fig_bias_per_climate(d: Path, pc: pd.DataFrame, sel: dict):
         order = new["abs_bias_pct"].sort_values().index.tolist()
         ys = np.arange(len(order))
         ax.axvline(0, color=AXIS, linewidth=1)
-        ax.scatter(old.loc[order, "bias_pct"], ys, s=46, color=SERIES[0], zorder=3,
-                   edgecolor="white", linewidth=1.5, label=f"3.3: {models.LABEL[PROVISIONAL_3_3[t]]}, as is")
-        ax.scatter(new.loc[order, "bias_pct"], ys, s=46, color=SERIES[2], zorder=4, marker="D",
+        ax.scatter(old.loc[order, "bias_pct"], ys, s=22, color=SERIES[0], zorder=5,
+                   edgecolor="white", linewidth=1.0, label=f"3.3: {models.LABEL[PROVISIONAL_3_3[t]]}, as is")
+        ax.scatter(new.loc[order, "bias_pct"], ys, s=60, color=SERIES[2], zorder=4, marker="D",
                    edgecolor="white", linewidth=1.5,
                    label=f"3.4: {models.LABEL[sel[t]['model']]}, {sel[t]['form']}")
         for y, c in zip(ys, order):
@@ -544,9 +544,9 @@ def fig_error_vs_distance(d: Path, pc: pd.DataFrame, sel: dict, dist: pd.DataFra
             if c in old.index:
                 ax.plot([x[c], x[c]], [old.loc[c, "abs_bias_pct"], new.loc[c, "abs_bias_pct"]], color=GRID,
                         linewidth=1.5, zorder=2)
-        ax.scatter(xo, old["abs_bias_pct"], s=40, color=SERIES[0],
-                   edgecolor="white", linewidth=1.5, zorder=3, label=f"3.3: {models.LABEL[PROVISIONAL_3_3[t]]}, as is")
-        ax.scatter(x, new["abs_bias_pct"], s=46, color=SERIES[2], marker="D", edgecolor="white", linewidth=1.5,
+        ax.scatter(xo, old["abs_bias_pct"], s=22, color=SERIES[0],          # on top, smaller: visible inside an
+                   edgecolor="white", linewidth=1.0, zorder=5, label=f"3.3: {models.LABEL[PROVISIONAL_3_3[t]]}, as is")
+        ax.scatter(x, new["abs_bias_pct"], s=60, color=SERIES[2], marker="D", edgecolor="white", linewidth=1.5,
                    zorder=4, label=f"3.4: {models.LABEL[sel[t]['model']]}, {sel[t]['form']}")
         for c in new.index:                                   # left member of a shared column: label on the left
             dx, ha = (-6, "right") if c in left else (6, "left")
