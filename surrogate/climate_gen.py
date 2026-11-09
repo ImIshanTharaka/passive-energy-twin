@@ -139,8 +139,16 @@ def _gpr_features(est) -> list | None:
     return getattr(base, "selected_features_", None)
 
 
-def single_family_oof(model: str, pbt: dict, df, X, folds, scheme: str, log=print) -> tuple[pd.DataFrame, dict]:
-    """All single-target candidates of one family on one fold set.
+# parts each candidate needs (fix 4 runs only these; the grid runs all)
+NEEDS = {(HEAT, "direct"): [(HEAT, "direct")], (HEAT, "log1p"): [(HEAT, "log1p")], (HEAT, "ratio"): [(HEAT, "ratio")],
+         (COOL, "direct"): [(COOL, "direct")], (EUI, "direct"): [(EUI, "direct")],
+         (EUI, "decomposed"): [(HEAT, "ratio"), (COOL, "direct"), (EUI, "oa_term")]}
+
+
+def single_family_oof(model: str, pbt: dict, df, X, folds, scheme: str, log=print,
+                      only: list[tuple[str, str]] | None = None) -> tuple[pd.DataFrame, dict]:
+    """Single-target candidates of one family on one fold set (all, or only the (target, form) pairs
+    in `only` and the parts they need).
 
     Returns (oof with columns + form, gpr_features {candidate: [per-fold feature lists]})."""
     parts, feats = [], {}
@@ -150,6 +158,9 @@ def single_family_oof(model: str, pbt: dict, df, X, folds, scheme: str, log=prin
             (COOL, "direct", models.make_form(model, pbt[COOL], "direct")),
             (EUI, "direct", models.make_form(model, pbt[EUI], "direct")),
             (EUI, "oa_term", models.make_oa_term(model, pbt[EUI]))]
+    if only is not None:
+        need = {p for cand in only for p in NEEDS[cand]}
+        jobs = [j for j in jobs if (j[0], j[1]) in need]
     for target, form, fac in jobs:
         keep = _Keep(fac)
         t0 = time.time()
@@ -159,7 +170,9 @@ def single_family_oof(model: str, pbt: dict, df, X, folds, scheme: str, log=prin
             feats[f"{target}|{form}"] = [_gpr_features(e) for e in keep.built]
         log(f"    {model:5s} {scheme:7s} {SHORT[target]:8s} {form:8s} {time.time() - t0:7.1f} s")
     oof = pd.concat(parts, ignore_index=True)
-    return compose_decomposed(oof), feats
+    if (oof["form"] == "oa_term").any():
+        oof = compose_decomposed(oof)
+    return oof, feats
 
 
 def compose_decomposed(oof: pd.DataFrame) -> pd.DataFrame:
@@ -337,7 +350,7 @@ def stage_fix4(dev: bool, log=print):
             res = {s: mlp_oof(p, df, Xr, folds[s], s) for s in folds}
         else:
             pbt = params_for(m, PRIMARY_TARGETS, dev, k)
-            res = {s: single_family_oof(m, pbt, df, Xr, folds[s], s, log)[0] for s in folds}
+            res = {s: single_family_oof(m, pbt, df, Xr, folds[s], s, log, only=[(t, form)])[0] for s in folds}
         res = {s: v[(v["target"] == t) & (v["form"] == form)] for s, v in res.items()}
         r, _ = score(res["grouped"], res["loco"], heat, m, FS_FIX4, len(cols))
         rows += r

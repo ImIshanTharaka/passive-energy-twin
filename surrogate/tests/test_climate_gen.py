@@ -67,6 +67,21 @@ def check_composed_decomposed_equals_refitted_model():
         assert (oof.groupby(["target", "form"]).size() == n_test).all()
 
 
+def check_fix4_runs_only_needed_parts():
+    df, X = _data()
+    pbt = {t: dict(SMALL) for t in (HEAT, COOL, EUI)}
+    fs = cv.grouped_folds(df)[:2]
+    full, _ = CG.single_family_oof("lgbm", pbt, df, X, fs, "grouped", log=lambda s: None)
+    for cand in ((HEAT, "log1p"), (EUI, "decomposed"), (COOL, "direct")):
+        part, _ = CG.single_family_oof("lgbm", pbt, df, X, fs, "grouped", log=lambda s: None, only=[cand])
+        got = set(map(tuple, part[["target", "form"]].drop_duplicates().to_numpy()))
+        want = {cand} | ({(HEAT, "ratio"), (COOL, "direct")} if cand == (EUI, "decomposed") else set())
+        assert got == want, (cand, got)
+        a = part[(part["target"] == cand[0]) & (part["form"] == cand[1])].sort_values(["fold", "run_id"])
+        b = full[(full["target"] == cand[0]) & (full["form"] == cand[1])].sort_values(["fold", "run_id"])
+        assert np.array_equal(a["yhat"].to_numpy(), b["yhat"].to_numpy()), cand
+
+
 def check_selection_rule():
     t = models.HEAT
     # lowest MAPE among skill >= 0.90; a better MAPE below the bar is ignored
@@ -184,7 +199,7 @@ def check_cli_guards():
     assert CG.CFG["models"] == list(models.MODELS)
 
 
-ALL_CHECKS = [check_composed_decomposed_equals_refitted_model, check_selection_rule,
+ALL_CHECKS = [check_composed_decomposed_equals_refitted_model, check_fix4_runs_only_needed_parts, check_selection_rule,
               check_fix4_and_m7_triggers_end_to_end, check_climate_distances_and_fix4_inputs,
               check_mlp_oof_frame, check_cli_guards]
 
