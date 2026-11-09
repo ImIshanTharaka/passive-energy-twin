@@ -529,17 +529,30 @@ def fig_error_vs_distance(d: Path, pc: pd.DataFrame, sel: dict, dist: pd.DataFra
         ax.grid(axis="y", color=GRID, linewidth=0.6)
         new = _pick_rows(pc, t, sel[t]["model"], sel[t]["feature_set"], sel[t]["form"]).set_index("climate_key")
         old = _pick_rows(pc, t, PROVISIONAL_3_3[t], "C-G", "direct").set_index("climate_key")
-        x = dist.loc[new.index, "distance_to_nearest"]
-        ax.scatter(dist.loc[old.index, "distance_to_nearest"], old["abs_bias_pct"], s=40, color=SERIES[0],
+        x = dist.loc[new.index, "distance_to_nearest"].copy()
+        # cities that are each other's nearest neighbour share a distance: nudge them apart so each
+        # blue-green pair has its own column (display only; the table holds exact distances)
+        left = set()
+        for _, grp in x.groupby(x.round(6)):
+            if len(grp) > 1:
+                for j, c in enumerate(sorted(grp.index)):
+                    x[c] += (j - (len(grp) - 1) / 2) * 0.06
+                    if j == 0:
+                        left.add(c)
+        xo = x.reindex(old.index)
+        for c in new.index:
+            if c in old.index:
+                ax.plot([x[c], x[c]], [old.loc[c, "abs_bias_pct"], new.loc[c, "abs_bias_pct"]], color=GRID,
+                        linewidth=1.5, zorder=2)
+        ax.scatter(xo, old["abs_bias_pct"], s=40, color=SERIES[0],
                    edgecolor="white", linewidth=1.5, zorder=3, label=f"3.3: {models.LABEL[PROVISIONAL_3_3[t]]}, as is")
         ax.scatter(x, new["abs_bias_pct"], s=46, color=SERIES[2], marker="D", edgecolor="white", linewidth=1.5,
                    zorder=4, label=f"3.4: {models.LABEL[sel[t]['model']]}, {sel[t]['form']}")
-        below = {"chicago", "colombo", "new_york", "chennai"}            # nearest-pair labels go below to avoid overlap
-        for c in new.index:
-            dy = -11 if c in below else 4
-            ax.annotate(CITY[c], (x[c], new.loc[c, "abs_bias_pct"]), xytext=(5, dy), textcoords="offset points",
-                        fontsize=7, color=INK2)
-        ax.set_xlim(right=max(ax.get_xlim()[1], float(x.max()) + 0.45))
+        for c in new.index:                                   # left member of a shared column: label on the left
+            dx, ha = (-6, "right") if c in left else (6, "left")
+            ax.annotate(CITY[c], (x[c], new.loc[c, "abs_bias_pct"]), xytext=(dx, -3), textcoords="offset points",
+                        fontsize=7, color=INK2, ha=ha)
+        ax.set_xlim(left=min(ax.get_xlim()[0], float(x.min()) - 0.35), right=max(ax.get_xlim()[1], float(x.max()) + 0.45))
         ax.set_xlabel("Distance to the nearest training climate (z-scored climate inputs)", color=INK2, fontsize=8.5)
         ax.set_ylabel("|City bias| when hidden (%)", color=INK2, fontsize=8.5)
         ax.set_title(SHORT[t], color=INK, fontsize=11, loc="left", pad=30)
