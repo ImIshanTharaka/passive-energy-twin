@@ -40,4 +40,5 @@ surrogate/outputs/ablation_dev/
 surrogate/outputs/tuning_dev/
 surrogate/outputs/benchmark_dev/
 surrogate/outputs/climate_gen_dev/
+surrogate/outputs/uncertainty_dev/
 surrogate/outputs/tuning/*.db-journal

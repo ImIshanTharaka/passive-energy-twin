@@ -296,7 +296,46 @@ def check_config_block_equals_code_and_selection():
                                else "benchmark_tuned" if t in s34["selection"] else "benchmark_secondary"), t
 
 
-ALL_CHECKS = [check_config_block_equals_code_and_selection, check_quantile_index, check_plain_coverage_exchangeable, check_normalised_coverage_adapts,
+def check_gpr_sd_wrapper_changes_nothing():
+    """R2 wrapper: same predictions as the plain TargetForm(GPR, log1p); records mu/SD in log space."""
+    from surrogate import cv, models
+    df, _ = cv.load_training()
+    X = CI.feature_matrix(df)
+    rows = np.arange(0, 3000, 12)                         # 250 rows, 3 features: fast
+    sub, Xs = df.iloc[rows].reset_index(drop=True), X.iloc[rows].reset_index(drop=True)
+    params = dict(models.default_params("gpr"), top_k=3)
+    fac = models.make_form("gpr", params, "log1p")
+    folds = cv.grouped_folds(sub)[:2]
+    ref = cv.cross_val_predict(sub, Xs, [U.HEAT_T], fac, folds, "grouped")
+    store: list = []
+    got = cv.cross_val_predict(sub, Xs, [U.HEAT_T], lambda t: U._GPRWithSD(fac(t), store), folds, "grouped")
+    assert np.array_equal(ref["yhat"].to_numpy(), got["yhat"].to_numpy())
+    mu = np.concatenate([m for m, _ in store])
+    sd = np.concatenate([s for _, s in store])
+    assert len(mu) == len(got) and np.allclose(np.expm1(mu), got["yhat"], rtol=1e-12, atol=1e-12)
+    assert (sd > 0).all()
+
+
+def check_pick_oof_frames():
+    """The saved out-of-fold rows of every final pick (grouped): one row per training run, grouped
+    folds 0-4 exactly as cv.grouped_folds, y equal to the dataset (LOCO MLP C-G comes from R1)."""
+    from surrogate import cv
+    from surrogate.config import ALL_TARGETS
+    df, _ = cv.load_training()
+    folds = {r: f.name for f in cv.grouped_folds(df) for r in df["run_id"].to_numpy()[f.test]}
+    y = df.set_index("run_id")
+    for t in ALL_TARGETS:
+        f = U.pick_oof(t, "grouped", dev=False)
+        assert len(f) == len(df) and set(f["run_id"]) == set(df["run_id"]), t
+        assert (f["fold"].to_numpy() == f["run_id"].map(folds).to_numpy()).all(), t
+        assert np.allclose(f["y"].to_numpy(), y.loc[f["run_id"], t].to_numpy(), rtol=0, atol=1e-6), t
+        if U.PICKS[t]["source"] == "climate_gen_grid":
+            g = U.pick_oof(t, "loco", dev=False)
+            assert len(g) == len(df) and (g["fold"] == g["climate_key"]).all(), t
+
+
+ALL_CHECKS = [check_config_block_equals_code_and_selection, check_gpr_sd_wrapper_changes_nothing,
+              check_pick_oof_frames, check_quantile_index, check_plain_coverage_exchangeable, check_normalised_coverage_adapts,
               check_inner_splits_partition, check_nested_never_calibrates_on_scored_rows,
               check_clipping_and_gpr_mappings, check_selection_rules, check_design_bounds_and_training_rows,
               check_climate_distances_levels_and_guard]
