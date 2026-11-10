@@ -55,23 +55,25 @@ from surrogate import climate_indices as CI
 from surrogate import features as FE
 from surrogate.paths import DESIGN_SPACE
 
-# ── Settings (plan G2-G7; mirrored in config.yaml block uncertainty_3_5, checked by the tests) ──
+# ── Settings: config.yaml block uncertainty_3_5 (frozen 10 Nov 2026, before any 3.5 run) ──────
 
-ALPHA = 0.10                                   # 90 % intervals (M8, gate S7)
-LEVELS = (0.50, 0.80, 0.90, 0.95)              # reliability curve (G4, report only)
-LOWER_BOUND = 0.0                              # all targets >= 0
-EPS_FRACTION = 0.01                            # eps = 1 % of the median |r| of the calibration rows
-SCALE_PARAMS = {                               # difficulty model, fixed (not tuned)
-    "n_estimators": 300, "num_leaves": 15, "learning_rate": 0.05, "min_child_samples": 40,
-    "random_state": 42, "n_jobs": 1, "deterministic": True, "force_col_wise": True, "verbose": -1,
-}
-INNER_SPLITS = 5                               # inner GroupKFold for many groups (design_id)
-LOGO_MAX_GROUPS = 12                           # <= this many groups (climates): leave-one-group-out
-INNER_SEED = 42
-YHAT_COLUMN = "_yhat"                          # yhat as an extra input of the difficulty model
-HYBRID_MIN_WIDTH_GAIN = 0.10                   # G5: hybrid must be >= 10 % narrower
-COVERAGE_BAND = (0.85, 0.95)                   # G2 / G5 per-climate band (= gate S7)
-TRAINING_DISTANCE_TOL = 1e-6                   # distance below this = one of the training climates
+from surrogate.config import CONFIG  # noqa: E402
+
+CFG = CONFIG["uncertainty_3_5"]
+_M = CFG["method"]
+ALPHA = float(CFG["alpha"])                                  # 90 % intervals (M8, gate S7)
+LEVELS = tuple(float(v) for v in CFG["levels"])              # reliability curve (G4, report only)
+LOWER_BOUND = float(CFG["lower_bound"])                      # all targets >= 0
+EPS_FRACTION = float(_M["difficulty_model"]["eps_fraction"])  # eps = share of the median |r|
+SCALE_PARAMS = dict(_M["difficulty_model"]["params"])        # difficulty model, fixed (not tuned)
+INNER_SPLITS = int(_M["inner_cross_fit"]["group_kfold_splits"])   # many groups (design_id)
+LOGO_MAX_GROUPS = int(_M["inner_cross_fit"]["logo_max_groups"])   # <= this many groups: leave-one-out
+INNER_SEED = int(_M["inner_cross_fit"]["seed"])
+COVERAGE_BAND = tuple(float(v) for v in _M["selection"]["band"])  # G2 / G5 per-climate band (= gate S7)
+HYBRID_MIN_WIDTH_GAIN = round(1.0 - float(CFG["gpr_comparison"]["deploy_rule"]["max_width_ratio"]), 12)
+TRAINING_DISTANCE_TOL = float(CFG["domain"]["climate"]["training_tolerance"])
+PICKS: dict = CFG["picks"]                                   # final model per target (3.3 / 3.4)
+YHAT_COLUMN = "_yhat"                                        # yhat as an extra input of the difficulty model
 
 SCALES = ("lgbm", "none", "given")
 

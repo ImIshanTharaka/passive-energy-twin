@@ -265,7 +265,38 @@ def check_climate_distances_levels_and_guard():
     assert abs(back.d_max - dom.d_max) < 1e-12 and back.holdout_keys == dom.holdout_keys
 
 
-ALL_CHECKS = [check_quantile_index, check_plain_coverage_exchangeable, check_normalised_coverage_adapts,
+def check_config_block_equals_code_and_selection():
+    """uncertainty_3_5 appended after the frozen 3.4 file (byte-identical prefix); code reads it; the
+    picks equal the official 3.4 selection (primary + peak heating) and 3.3 selection (other secondary)."""
+    import hashlib
+    import json
+    from surrogate.config import ALL_TARGETS, CONFIG, CONFIG_PATH
+    from surrogate.paths import OUT
+    text = CONFIG_PATH.read_text(encoding="utf-8")
+    marker = "\n# ── Added 10 Nov 2026 (Sub-task 3.5"
+    assert text.count(marker) == 1
+    assert hashlib.md5(text[: text.index(marker)].encode("utf-8")).hexdigest() == "006848e0fc19c23d0281b904db8fabe5"
+    c = CONFIG["uncertainty_3_5"]
+    assert U.ALPHA == 0.10 and U.LEVELS == (0.5, 0.8, 0.9, 0.95) and U.LOWER_BOUND == 0.0
+    assert U.SCALE_PARAMS == {"n_estimators": 300, "num_leaves": 15, "learning_rate": 0.05, "min_child_samples": 40,
+                              "random_state": 42, "n_jobs": 1, "deterministic": True, "force_col_wise": True,
+                              "verbose": -1}
+    assert U.EPS_FRACTION == 0.01 and U.INNER_SPLITS == 5 and U.LOGO_MAX_GROUPS == 12 and U.INNER_SEED == 42
+    assert U.COVERAGE_BAND == (0.85, 0.95) and U.HYBRID_MIN_WIDTH_GAIN == 0.10 and U.TRAINING_DISTANCE_TOL == 1e-6
+    assert c["method"]["primary"] == "normalised" and c["domain"]["design"]["api_default"] == "strict"
+    assert list(U.PICKS) == ALL_TARGETS
+    s33 = json.loads((OUT / "benchmark" / "selection.json").read_text())["selection"]
+    s34 = json.loads((OUT / "climate_gen" / "selection.json").read_text())
+    assert s34["status"] == "final"
+    for t in ALL_TARGETS:
+        p = U.PICKS[t]
+        ref = s34["selection"].get(t) or {**s33[t], "form": "direct"}
+        assert (p["model"], p["feature_set"], p["form"]) == (ref["model"], ref["feature_set"], ref["form"]), t
+        assert p["source"] == ("climate_gen_grid" if t in s34["selection"] and p["feature_set"] == "C-G+I"
+                               else "benchmark_tuned" if t in s34["selection"] else "benchmark_secondary"), t
+
+
+ALL_CHECKS = [check_config_block_equals_code_and_selection, check_quantile_index, check_plain_coverage_exchangeable, check_normalised_coverage_adapts,
               check_inner_splits_partition, check_nested_never_calibrates_on_scored_rows,
               check_clipping_and_gpr_mappings, check_selection_rules, check_design_bounds_and_training_rows,
               check_climate_distances_levels_and_guard]
