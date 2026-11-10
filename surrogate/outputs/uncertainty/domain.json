@@ -1,0 +1,352 @@
+{
+  "bounds": [
+    {
+      "input": "floor_area",
+      "min": 1500.0,
+      "max": 10000.0,
+      "tol": 0.05,
+      "integer": false
+    },
+    {
+      "input": "aspect_ratio",
+      "min": 1.0,
+      "max": 3.0,
+      "tol": 5e-05,
+      "integer": false
+    },
+    {
+      "input": "n_floors",
+      "min": 1.0,
+      "max": 5.0,
+      "tol": 0.5,
+      "integer": true
+    },
+    {
+      "input": "floor_height",
+      "min": 3.0,
+      "max": 4.5,
+      "tol": 0.0005,
+      "integer": false
+    },
+    {
+      "input": "wall_r_value",
+      "min": 1.0,
+      "max": 8.0,
+      "tol": 0.0005,
+      "integer": false
+    },
+    {
+      "input": "roof_r_value",
+      "min": 2.0,
+      "max": 12.0,
+      "tol": 0.0005,
+      "integer": false
+    },
+    {
+      "input": "floor_r_value",
+      "min": 0.5,
+      "max": 5.0,
+      "tol": 0.0005,
+      "integer": false
+    },
+    {
+      "input": "wall_thermal_mass",
+      "min": 50.0,
+      "max": 400.0,
+      "tol": 0.005,
+      "integer": false
+    },
+    {
+      "input": "infiltration_ach",
+      "min": 0.1,
+      "max": 2.0,
+      "tol": 5e-05,
+      "integer": false
+    },
+    {
+      "input": "wwr_north",
+      "min": 0.1,
+      "max": 0.8,
+      "tol": 5e-05,
+      "integer": false
+    },
+    {
+      "input": "wwr_east",
+      "min": 0.1,
+      "max": 0.8,
+      "tol": 5e-05,
+      "integer": false
+    },
+    {
+      "input": "wwr_south",
+      "min": 0.1,
+      "max": 0.8,
+      "tol": 5e-05,
+      "integer": false
+    },
+    {
+      "input": "wwr_west",
+      "min": 0.1,
+      "max": 0.8,
+      "tol": 5e-05,
+      "integer": false
+    },
+    {
+      "input": "glazing_u",
+      "min": 0.8,
+      "max": 5.8,
+      "tol": 0.0005,
+      "integer": false
+    },
+    {
+      "input": "glazing_shgc",
+      "min": 0.1,
+      "max": 0.8,
+      "tol": 5e-05,
+      "integer": false
+    },
+    {
+      "input": "overhang_depth_n",
+      "min": 0.0,
+      "max": 1.5,
+      "tol": 0.0005,
+      "integer": false
+    },
+    {
+      "input": "overhang_depth_e",
+      "min": 0.0,
+      "max": 1.5,
+      "tol": 0.0005,
+      "integer": false
+    },
+    {
+      "input": "overhang_depth_s",
+      "min": 0.0,
+      "max": 1.5,
+      "tol": 0.0005,
+      "integer": false
+    },
+    {
+      "input": "overhang_depth_w",
+      "min": 0.0,
+      "max": 1.5,
+      "tol": 0.0005,
+      "integer": false
+    },
+    {
+      "input": "sidefin_depth",
+      "min": 0.0,
+      "max": 1.0,
+      "tol": 0.0005,
+      "integer": false
+    },
+    {
+      "input": "orientation",
+      "min": 0.0,
+      "max": 180.0,
+      "tol": 0.005,
+      "integer": false
+    }
+  ],
+  "climates": [
+    {
+      "climate_key": "atlanta",
+      "hdd18": 1294.6,
+      "cdd10": 3189.3,
+      "annual_ghi": 1651.6,
+      "mean_dbt": 17.904,
+      "mean_rh": 67.12,
+      "latitude": 33.63,
+      "mean_wind": 3.54,
+      "occ_enth_excess": 34532.2387085054,
+      "occ_latent_excess": 28488.412651193306,
+      "occ_band_dh": 7915.200000000001,
+      "occ_cool_dh": 7541.299999999999,
+      "occ_heat_dh": 20266.300000000003,
+      "hdd15": 839.0083333333333,
+      "hdd12": 488.1958333333333
+    },
+    {
+      "climate_key": "chennai",
+      "hdd18": 0.0,
+      "cdd10": 6940.6,
+      "annual_ghi": 1906.1,
+      "mean_dbt": 29.015,
+      "mean_rh": 73.18,
+      "latitude": 12.994,
+      "mean_wind": 2.77,
+      "occ_enth_excess": 140730.87017489734,
+      "occ_latent_excess": 108121.70620423168,
+      "occ_band_dh": 175.5,
+      "occ_cool_dh": 29658.0,
+      "occ_heat_dh": 7.0,
+      "hdd15": 0.0,
+      "hdd12": 0.0
+    },
+    {
+      "climate_key": "chicago",
+      "hdd18": 3124.4,
+      "cdd10": 1937.8,
+      "annual_ghi": 1520.5,
+      "mean_dbt": 11.211,
+      "mean_rh": 66.57,
+      "latitude": 41.96,
+      "mean_wind": 4.479,
+      "occ_enth_excess": 15177.923334314291,
+      "occ_latent_excess": 12879.204177916828,
+      "occ_band_dh": 10849.3,
+      "occ_cool_dh": 3404.0999999999995,
+      "occ_heat_dh": 48914.09999999999,
+      "hdd15": 2445.2541666666666,
+      "hdd12": 1847.0458333333331
+    },
+    {
+      "climate_key": "colombo",
+      "hdd18": 0.0,
+      "cdd10": 6527.0,
+      "annual_ghi": 1878.8,
+      "mean_dbt": 27.882,
+      "mean_rh": 79.87,
+      "latitude": 6.9047,
+      "mean_wind": 1.388,
+      "occ_enth_excess": 141585.3310140678,
+      "occ_latent_excess": 116023.68589654272,
+      "occ_band_dh": 12.200000000000006,
+      "occ_cool_dh": 22564.7,
+      "occ_heat_dh": 0.0,
+      "hdd15": 0.0,
+      "hdd12": 0.0
+    },
+    {
+      "climate_key": "denver",
+      "hdd18": 2979.1,
+      "cdd10": 1773.4,
+      "annual_ghi": 1876.9,
+      "mean_dbt": 11.366,
+      "mean_rh": 49.67,
+      "latitude": 39.833,
+      "mean_wind": 4.446,
+      "occ_enth_excess": 1262.0401555993162,
+      "occ_latent_excess": 861.3076331898437,
+      "occ_band_dh": 10713.5,
+      "occ_cool_dh": 4940.400000000001,
+      "occ_heat_dh": 43273.6,
+      "hdd15": 2264.079166666667,
+      "hdd12": 1635.1791666666668
+    },
+    {
+      "climate_key": "miami",
+      "hdd18": 41.4,
+      "cdd10": 5667.4,
+      "annual_ghi": 1805.6,
+      "mean_dbt": 25.524,
+      "mean_rh": 72.26,
+      "latitude": 25.7552,
+      "mean_wind": 3.26,
+      "occ_enth_excess": 87111.54121164061,
+      "occ_latent_excess": 71120.05461293785,
+      "occ_band_dh": 2143.6000000000004,
+      "occ_cool_dh": 15345.5,
+      "occ_heat_dh": 1551.4,
+      "hdd15": 15.020833333333332,
+      "hdd12": 4.637499999999999
+    },
+    {
+      "climate_key": "minneapolis",
+      "hdd18": 3903.3,
+      "cdd10": 1778.6,
+      "annual_ghi": 1477.7,
+      "mean_dbt": 8.932,
+      "mean_rh": 64.09,
+      "latitude": 44.883,
+      "mean_wind": 4.144,
+      "occ_enth_excess": 10179.23990640886,
+      "occ_latent_excess": 8348.661824319379,
+      "occ_band_dh": 10888.6,
+      "occ_cool_dh": 3151.1,
+      "occ_heat_dh": 58212.7,
+      "hdd15": 3206.054166666667,
+      "hdd12": 2559.4791666666665
+    },
+    {
+      "climate_key": "new_york",
+      "hdd18": 2342.0,
+      "cdd10": 2191.8,
+      "annual_ghi": 1484.4,
+      "mean_dbt": 13.599,
+      "mean_rh": 63.87,
+      "latitude": 40.7789,
+      "mean_wind": 2.435,
+      "occ_enth_excess": 15328.840188011636,
+      "occ_latent_excess": 13554.371616799972,
+      "occ_band_dh": 10520.5,
+      "occ_cool_dh": 3142.6000000000004,
+      "occ_heat_dh": 37548.2,
+      "hdd15": 1716.8333333333335,
+      "hdd12": 1186.5875
+    },
+    {
+      "climate_key": "phoenix",
+      "hdd18": 490.4,
+      "cdd10": 5336.9,
+      "annual_ghi": 2140.1,
+      "mean_dbt": 24.576,
+      "mean_rh": 33.22,
+      "latitude": 33.428,
+      "mean_wind": 2.9,
+      "occ_enth_excess": 19909.295445034266,
+      "occ_latent_excess": 6403.619075579391,
+      "occ_band_dh": 5159.7,
+      "occ_cool_dh": 26310.700000000004,
+      "occ_heat_dh": 9907.400000000001,
+      "hdd15": 210.85,
+      "hdd12": 57.43749999999999
+    },
+    {
+      "climate_key": "san_francisco",
+      "hdd18": 1284.4,
+      "cdd10": 1763.5,
+      "annual_ghi": 1870.1,
+      "mean_dbt": 14.802,
+      "mean_rh": 70.89,
+      "latitude": 37.62,
+      "mean_wind": 4.644,
+      "occ_enth_excess": 1143.2430505146676,
+      "occ_latent_excess": 1828.7017838879794,
+      "occ_band_dh": 13253.4,
+      "occ_cool_dh": 626.1999999999999,
+      "occ_heat_dh": 25706.300000000003,
+      "hdd15": 521.1000000000001,
+      "hdd12": 101.70416666666667
+    }
+  ],
+  "holdout_keys": [
+    "london"
+  ],
+  "d_max": 3.55936420310255,
+  "climate_distance_features": [
+    "hdd18",
+    "cdd10",
+    "annual_ghi",
+    "mean_dbt",
+    "mean_rh",
+    "latitude",
+    "mean_wind"
+  ],
+  "range_features": [
+    "hdd18",
+    "cdd10",
+    "annual_ghi",
+    "mean_dbt",
+    "mean_rh",
+    "latitude",
+    "mean_wind",
+    "occ_enth_excess",
+    "occ_latent_excess",
+    "occ_band_dh",
+    "occ_cool_dh",
+    "occ_heat_dh",
+    "hdd15",
+    "hdd12"
+  ]
+}

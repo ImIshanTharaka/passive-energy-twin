@@ -1,0 +1,11 @@
+climate_key,distance_to_nearest,nearest_climate,out_of_range_vs_others,n_out_of_range,level_if_unseen
+atlanta,1.7852537018079835,san_francisco,,0,new
+chennai,1.4865852040910126,miami,"cdd10,mean_dbt,occ_cool_dh",3,extrapolation
+chicago,0.8218893988688123,minneapolis,,0,new
+colombo,1.5863562880951616,chennai,"mean_rh,latitude,mean_wind,occ_enth_excess,occ_latent_excess,occ_band_dh,occ_heat_dh",7,extrapolation
+denver,2.1421522678110634,san_francisco,occ_latent_excess,1,extrapolation
+miami,1.4865852040910126,chennai,,0,new
+minneapolis,0.8218893988688123,chicago,"hdd18,annual_ghi,mean_dbt,latitude,occ_heat_dh,hdd15,hdd12",7,extrapolation
+new_york,1.857198331990383,atlanta,,0,new
+phoenix,3.55936420310255,miami,"annual_ghi,mean_rh",2,extrapolation
+san_francisco,1.7852537018079835,atlanta,"cdd10,mean_wind,occ_enth_excess,occ_band_dh,occ_cool_dh",5,extrapolation

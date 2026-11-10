@@ -1,0 +1,367 @@
+{
+  "official": true,
+  "created_utc": "2026-11-10T15:34:58.980578+00:00",
+  "rule": {
+    "g2": {
+      "scheme": "grouped",
+      "band": [
+        0.85,
+        0.95
+      ],
+      "level": 0.9,
+      "rule": "normalised_unless_more_climates_outside_band_than_plain",
+      "tie": "normalised"
+    },
+    "g5": {
+      "use": "hybrid_if",
+      "max_width_ratio": 0.9,
+      "all_heating_climates_in_band": true,
+      "scheme": "grouped",
+      "otherwise": "normalised_conformal"
+    }
+  },
+  "selection": {
+    "heating_demand_kwh_m2": {
+      "g2_scale": "lgbm",
+      "n_climates_outside_band": {
+        "lgbm": 0,
+        "none": 6,
+        "given": 3
+      },
+      "g5_heating": "conformal",
+      "deployed_method": "lgbm",
+      "coverage_90": {
+        "standard_grouped": 0.8928571428571429,
+        "new_site_loco": 0.8857142857142857,
+        "standard_in_loco": 0.6728571428571428
+      },
+      "mean_width_90": {
+        "standard_grouped": 1.5554852259497638,
+        "new_site_loco": 3.916700653953738,
+        "standard_in_loco": 1.6665500009495355
+      },
+      "final_quantiles": {
+        "standard": {
+          "50": 1.1960380138040843,
+          "80": 2.32006260549124,
+          "90": 3.048013674146496,
+          "95": 3.806740946204913,
+          "n": 2100
+        },
+        "new_site": {
+          "50": 1.2198803687571773,
+          "80": 3.4382984787187163,
+          "90": 5.0553532287928045,
+          "95": 6.977220751195789,
+          "n": 2100
+        }
+      }
+    },
+    "cooling_demand_kwh_m2": {
+      "g2_scale": "lgbm",
+      "n_climates_outside_band": {
+        "lgbm": 0,
+        "none": 1
+      },
+      "deployed_method": "lgbm",
+      "coverage_90": {
+        "standard_grouped": 0.9,
+        "new_site_loco": 0.9143333333333333,
+        "standard_in_loco": 0.3596666666666667
+      },
+      "mean_width_90": {
+        "standard_grouped": 2.9157788152681023,
+        "new_site_loco": 10.576048864562043,
+        "standard_in_loco": 2.8754043698085447
+      },
+      "final_quantiles": {
+        "standard": {
+          "50": 1.1860914982261028,
+          "80": 2.305486391159272,
+          "90": 3.1682897060576423,
+          "95": 3.993357271515044,
+          "n": 3000
+        },
+        "new_site": {
+          "50": 1.1440343691157804,
+          "80": 2.0477906732765887,
+          "90": 2.623001212935251,
+          "95": 3.2185376115158815,
+          "n": 3000
+        }
+      }
+    },
+    "eui_kwh_m2": {
+      "g2_scale": "lgbm",
+      "n_climates_outside_band": {
+        "lgbm": 2,
+        "none": 5
+      },
+      "deployed_method": "lgbm",
+      "coverage_90": {
+        "standard_grouped": 0.9003333333333333,
+        "new_site_loco": 0.8913333333333333,
+        "standard_in_loco": 0.48133333333333334
+      },
+      "mean_width_90": {
+        "standard_grouped": 11.936051236061136,
+        "new_site_loco": 56.910499326987114,
+        "standard_in_loco": 12.120728192851876
+      },
+      "final_quantiles": {
+        "standard": {
+          "50": 1.1956809443297478,
+          "80": 2.0818974801477936,
+          "90": 2.6583627271698695,
+          "95": 3.262570852155713,
+          "n": 3000
+        },
+        "new_site": {
+          "50": 1.122797438892175,
+          "80": 3.337063478365894,
+          "90": 5.729536975120511,
+          "95": 8.571872111093718,
+          "n": 3000
+        }
+      }
+    },
+    "peak_heating_w_m2": {
+      "g2_scale": "lgbm",
+      "n_climates_outside_band": {
+        "lgbm": 0,
+        "none": 0
+      },
+      "deployed_method": "lgbm",
+      "coverage_90": {
+        "standard_grouped": 0.9038095238095238,
+        "new_site_loco": 0.9352380952380952,
+        "standard_in_loco": 0.23523809523809525
+      },
+      "mean_width_90": {
+        "standard_grouped": 1.767226844243054,
+        "new_site_loco": 10.093589689610553,
+        "standard_in_loco": 1.9572853983737666
+      },
+      "final_quantiles": {
+        "standard": {
+          "50": 1.2374171218783525,
+          "80": 2.5596797375223352,
+          "90": 3.556076886649523,
+          "95": 4.727367491585102,
+          "n": 2100
+        },
+        "new_site": {
+          "50": 1.0400187683223696,
+          "80": 2.0237964058059172,
+          "90": 2.512194089403285,
+          "95": 3.0992136591424475,
+          "n": 2100
+        }
+      }
+    },
+    "peak_cooling_w_m2": {
+      "g2_scale": "lgbm",
+      "n_climates_outside_band": {
+        "lgbm": 0,
+        "none": 1
+      },
+      "deployed_method": "lgbm",
+      "coverage_90": {
+        "standard_grouped": 0.9076666666666666,
+        "new_site_loco": 0.8876666666666667,
+        "standard_in_loco": 0.41433333333333333
+      },
+      "mean_width_90": {
+        "standard_grouped": 2.565244085422372,
+        "new_site_loco": 11.88808695673364,
+        "standard_in_loco": 2.4949199643589286
+      },
+      "final_quantiles": {
+        "standard": {
+          "50": 1.208361401781478,
+          "80": 2.4169885447609607,
+          "90": 3.248558372748692,
+          "95": 4.098820161454142,
+          "n": 3000
+        },
+        "new_site": {
+          "50": 1.1687960370717458,
+          "80": 2.5851716505996554,
+          "90": 4.787706188234663,
+          "95": 7.369084928538512,
+          "n": 3000
+        }
+      }
+    },
+    "zone_cooling_core_kwh_m2": {
+      "g2_scale": "lgbm",
+      "n_climates_outside_band": {
+        "lgbm": 0,
+        "none": 4
+      },
+      "deployed_method": "lgbm",
+      "coverage_90": {
+        "standard_grouped": 0.9006666666666666,
+        "new_site_loco": 0.844,
+        "standard_in_loco": 0.286
+      },
+      "mean_width_90": {
+        "standard_grouped": 0.914743436503357,
+        "new_site_loco": 12.53822423176451,
+        "standard_in_loco": 0.9257194942795385
+      },
+      "final_quantiles": {
+        "standard": {
+          "50": 1.1978940097708086,
+          "80": 2.408315504876541,
+          "90": 3.295937965595616,
+          "95": 4.1857668763137985,
+          "n": 3000
+        },
+        "new_site": {
+          "50": 1.03300452357203,
+          "80": 3.2282528435691633,
+          "90": 9.189842665790664,
+          "95": 12.565626045444581,
+          "n": 3000
+        }
+      }
+    },
+    "zone_cooling_south_kwh_m2": {
+      "g2_scale": "lgbm",
+      "n_climates_outside_band": {
+        "lgbm": 0,
+        "none": 0
+      },
+      "deployed_method": "lgbm",
+      "coverage_90": {
+        "standard_grouped": 0.9063333333333333,
+        "new_site_loco": 0.9113333333333333,
+        "standard_in_loco": 0.448
+      },
+      "mean_width_90": {
+        "standard_grouped": 15.66937074002717,
+        "new_site_loco": 61.76033903480555,
+        "standard_in_loco": 16.212529427160852
+      },
+      "final_quantiles": {
+        "standard": {
+          "50": 1.1836492948045945,
+          "80": 2.4929882332717335,
+          "90": 3.364608384883313,
+          "95": 4.272379532807346,
+          "n": 3000
+        },
+        "new_site": {
+          "50": 1.1038236858923782,
+          "80": 2.4497824455552863,
+          "90": 3.481435783462311,
+          "95": 4.273737054265752,
+          "n": 3000
+        }
+      }
+    },
+    "zone_cooling_east_kwh_m2": {
+      "g2_scale": "lgbm",
+      "n_climates_outside_band": {
+        "lgbm": 0,
+        "none": 1
+      },
+      "deployed_method": "lgbm",
+      "coverage_90": {
+        "standard_grouped": 0.9106666666666666,
+        "new_site_loco": 0.8876666666666667,
+        "standard_in_loco": 0.46
+      },
+      "mean_width_90": {
+        "standard_grouped": 21.9566108377194,
+        "new_site_loco": 68.50349373527725,
+        "standard_in_loco": 21.546433323282226
+      },
+      "final_quantiles": {
+        "standard": {
+          "50": 1.217454539966932,
+          "80": 2.467819049550348,
+          "90": 3.282205812479382,
+          "95": 4.1045867140517105,
+          "n": 3000
+        },
+        "new_site": {
+          "50": 1.3060023970617154,
+          "80": 2.6783391407930632,
+          "90": 3.648049446608835,
+          "95": 4.58168151669694,
+          "n": 3000
+        }
+      }
+    },
+    "zone_cooling_north_kwh_m2": {
+      "g2_scale": "lgbm",
+      "n_climates_outside_band": {
+        "lgbm": 0,
+        "none": 1
+      },
+      "deployed_method": "lgbm",
+      "coverage_90": {
+        "standard_grouped": 0.9066666666666666,
+        "new_site_loco": 0.8943333333333333,
+        "standard_in_loco": 0.296
+      },
+      "mean_width_90": {
+        "standard_grouped": 16.993182977868816,
+        "new_site_loco": 74.57766855162849,
+        "standard_in_loco": 16.79026149596753
+      },
+      "final_quantiles": {
+        "standard": {
+          "50": 1.2128427853301862,
+          "80": 2.461328917538026,
+          "90": 3.3168955940378275,
+          "95": 4.0876393074505355,
+          "n": 3000
+        },
+        "new_site": {
+          "50": 1.1367314128324746,
+          "80": 2.059630837234707,
+          "90": 2.77428847182939,
+          "95": 3.9207789923594754,
+          "n": 3000
+        }
+      }
+    },
+    "zone_cooling_west_kwh_m2": {
+      "g2_scale": "lgbm",
+      "n_climates_outside_band": {
+        "lgbm": 0,
+        "none": 4
+      },
+      "deployed_method": "lgbm",
+      "coverage_90": {
+        "standard_grouped": 0.903,
+        "new_site_loco": 0.8716666666666667,
+        "standard_in_loco": 0.28933333333333333
+      },
+      "mean_width_90": {
+        "standard_grouped": 14.683597875645102,
+        "new_site_loco": 71.16767332785528,
+        "standard_in_loco": 14.556559863637705
+      },
+      "final_quantiles": {
+        "standard": {
+          "50": 1.2002718421633722,
+          "80": 2.346520365432757,
+          "90": 3.2121445564926443,
+          "95": 4.0839938662959065,
+          "n": 3000
+        },
+        "new_site": {
+          "50": 1.1364566101111768,
+          "80": 2.2132194375020773,
+          "90": 3.4032532066057017,
+          "95": 4.90458861455837,
+          "n": 3000
+        }
+      }
+    }
+  }
+}
