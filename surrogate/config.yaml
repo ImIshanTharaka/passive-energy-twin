@@ -331,3 +331,83 @@ uncertainty_3_5:
       levels: {training: distance_below_tolerance, new: distance_le_d_max_and_all_in_range,
                extrapolation: otherwise}
       holdout: final_test_only                         # London checked only in final_test.py (3.7)
+
+# ── Added 14 Nov 2026 (Sub-task 3.6, claude/Phase3.6_Execution_Plan.md H1-H8, agreed by Ishan 14 Nov),
+# BEFORE any 3.6 run. Nothing above this line was changed. Read by surrogate/explain.py (single source).
+explain_3_6:
+  final_models:                                        # H1: fitted once, here; 3.7 tests these files
+    fit_rows: all_training_rows                        # 3,000 (holdout never read)
+    picks: uncertainty_3_5.picks                       # same final model per target (3.3 / 3.4 selection)
+    objects:                                           # one fitted object can serve several targets
+      gpr_heating: {model: gpr, feature_set: C-G+I, form: log1p, top_k: 15}
+      xgb_eui: {model: xgb, feature_set: C-G+I, form: decomposed}
+      mlp_cg: {model: mlp, feature_set: C-G, form: direct, params: mlp__all}
+      mlp_physics: {model: mlp, feature_set: C-G+I, form: direct, params: mlp__all, net: MLPPhysics}
+    params: same_as_cv                                 # best_params.json / gpr defaults + top_k (no re-tuning)
+    store: {dir: surrogate/outputs/models, format: pickle, manifest: manifest.json, hash: sha256}
+    predict_chunk_rows: 10000
+  oat:                                                 # H5, gate S5
+    samples: simulation/sampling/samples_oat.csv
+    results: simulation/outputs/oat/results.csv        # re-parsed 14 Nov 2026 (step 1)
+    climates: [colombo, minneapolis]
+    duplicate_of_base: drop                            # orientation__hi = base (K2)
+    heating_targets: heating_climates_only             # handoff §4
+    counted_if_abs_delta_ep_gt_share_of_base: 0.02
+    strong_set:                                        # all counted deltas here must be sign-correct
+      glazing_shgc: [heating_demand_kwh_m2, cooling_demand_kwh_m2, eui_kwh_m2]
+      glazing_u: [heating_demand_kwh_m2, cooling_demand_kwh_m2, eui_kwh_m2]
+      wwr_north: [heating_demand_kwh_m2, cooling_demand_kwh_m2, eui_kwh_m2, zone_cooling_north_kwh_m2]
+      wwr_east: [heating_demand_kwh_m2, cooling_demand_kwh_m2, eui_kwh_m2, zone_cooling_east_kwh_m2]
+      wwr_south: [heating_demand_kwh_m2, cooling_demand_kwh_m2, eui_kwh_m2, zone_cooling_south_kwh_m2]
+      wwr_west: [heating_demand_kwh_m2, cooling_demand_kwh_m2, eui_kwh_m2, zone_cooling_west_kwh_m2]
+    min_share_sign_correct: 0.90
+    zero_response_rel: 1.0e-6                          # |surrogate delta| <= this x |surrogate base|
+  sweeps:                                              # H6, gate S6
+    designs_per_climate: 200                           # random training designs, per climate
+    seed: 42
+    n_points: 21                                       # evenly spaced, design_space.yaml bounds
+    expectations:                                      # [input, target, direction, climates]
+      - [glazing_shgc, cooling_demand_kwh_m2, up, all]
+      - [glazing_shgc, heating_demand_kwh_m2, down, heating]
+      - [glazing_u, heating_demand_kwh_m2, up, heating]
+      - [wwr_north, zone_cooling_north_kwh_m2, up, all]
+      - [wwr_east, zone_cooling_east_kwh_m2, up, all]
+      - [wwr_south, zone_cooling_south_kwh_m2, up, all]
+      - [wwr_west, zone_cooling_west_kwh_m2, up, all]
+    reversal_size: largest_move_against_expected_direction   # up: max over i<j of y_i - y_j
+    threshold: pooled_grouped_cv_rmse_of_pick              # saved OOF of the pick, scored rows, original units
+    max_share_reversing: 0.01                              # per (input, target), pooled over climates
+    adjudication: {when: share_gt_max, max_designs: 20, points: 5, batch: sweep_check,
+                   generator_and_runner: phase2_unchanged, physics_if_energyplus_also_reverses: true}
+  zone_sum:                                            # H8, report only
+    perimeter_depth_m: 4.57
+    zone_area: {north_south: d*(L-d), east_west: d*(W-d), core: (L-2d)*(W-2d)}
+    gap: (sum(zone_area*zone_cooling)/floor_area - cooling)/cooling
+    min_cooling_kwh_m2: 1.0
+    sources: [energyplus_training_rows, grouped_oof_of_picks, final_models_new_designs]
+    new_designs: {per_climate: 200, sampler: scipy_lhs, seed: 42, n_floors: floor_of_uniform_1_6}
+  shap:                                                # H2 / H3
+    explainer: shap.PermutationExplainer
+    masker: independent_background
+    max_evals: 500
+    seed: 42
+    rows_per_climate: 100                              # stratified random training rows, seed 42
+    background: {overall: 100, per_climate: 50}        # random training rows (overall: across climates)
+    heating_targets: heating_climates_only             # rows and background (handoff §4)
+    views:
+      overall: {players: 21_design_inputs_plus_one_climate_block}   # block = 7 climate inputs + 7 indices
+      per_climate: {players: 21_design_inputs, climate: fixed}
+    units: original_after_inverse_transform
+    additivity_rel_tol: 1.0e-4                         # base + sum(SHAP) = prediction; 1e-4 (not 1e-6): the MLPs
+                                                       # compute in float32 (~1e-7 per evaluation, summed over ~500
+                                                       # evaluations). Changed 14 Nov 2026 after the Mac dev run,
+                                                       # before any official 3.6 run (gap seen: 1.05e-6).
+    groups: eda_lib.FEATURE_GROUPS                     # as 2.8; climate = the one block in the overall view
+    compare_2_8:
+      groups_by_climate: per_climate_view_vs_shap_group_share_by_climate
+      spearman_design_inputs: overall_view_mean_abs_vs_shap_importance   # 21 design inputs
+      top_k: 5
+    runtime_guard: {probe_rows: 10, max_hours_per_object_view: 2.0,
+                    fallback: {rows_per_climate: 50, background_overall: 50, background_per_climate: 50},
+                    applies_to: all_objects_and_views}
+    phase5_timing: {view: per_climate, background: 50, designs: 5, all_10_targets: true}
