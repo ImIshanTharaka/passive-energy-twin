@@ -1,0 +1,146 @@
+{
+  "status": "PASS",
+  "strong_all_sign_correct": true,
+  "share_ok": true,
+  "n_pairs_informative": 41,
+  "n_dropped_duplicate_pairs": 1,
+  "n_deltas_scored": 738,
+  "n_counted": 308,
+  "n_counted_strong": 62,
+  "n_strong_sign_correct": 62,
+  "share_sign_correct": 1.0,
+  "threshold_share": 0.9,
+  "r2_delta": 0.9947698598819505,
+  "median_abs_err_rel_base": 0.006658104047287184,
+  "median_ratio": 1.0331454131625422,
+  "strong_misses": [],
+  "other_misses": [],
+  "zero_responses": [
+    {
+      "parameter": "wall_thermal_mass",
+      "bound": "lo",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": 0.0990000000000002
+    },
+    {
+      "parameter": "wall_thermal_mass",
+      "bound": "hi",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": -0.03589999999999982
+    },
+    {
+      "parameter": "overhang_depth_n",
+      "bound": "lo",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": -0.2544000000000004
+    },
+    {
+      "parameter": "overhang_depth_n",
+      "bound": "hi",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": 0.24150000000000027
+    },
+    {
+      "parameter": "overhang_depth_e",
+      "bound": "lo",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": -0.16169999999999973
+    },
+    {
+      "parameter": "overhang_depth_e",
+      "bound": "hi",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": 0.21870000000000012
+    },
+    {
+      "parameter": "overhang_depth_s",
+      "bound": "lo",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": -0.24810000000000088
+    },
+    {
+      "parameter": "overhang_depth_s",
+      "bound": "hi",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": 0.23390000000000022
+    },
+    {
+      "parameter": "overhang_depth_w",
+      "bound": "lo",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": -0.019000000000000128
+    },
+    {
+      "parameter": "overhang_depth_w",
+      "bound": "hi",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": 0.015100000000000335
+    },
+    {
+      "parameter": "sidefin_depth",
+      "bound": "lo",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": -0.03420000000000023
+    },
+    {
+      "parameter": "sidefin_depth",
+      "bound": "hi",
+      "climate_key": "minneapolis",
+      "target": "heating_demand_kwh_m2",
+      "d_ep": 0.027599999999999625
+    }
+  ],
+  "by_target": {
+    "cooling_demand_kwh_m2": {
+      "correct": 45,
+      "counted": 45
+    },
+    "eui_kwh_m2": {
+      "correct": 33,
+      "counted": 33
+    },
+    "heating_demand_kwh_m2": {
+      "correct": 28,
+      "counted": 28
+    },
+    "peak_cooling_w_m2": {
+      "correct": 43,
+      "counted": 43
+    },
+    "peak_heating_w_m2": {
+      "correct": 28,
+      "counted": 28
+    },
+    "zone_cooling_core_kwh_m2": {
+      "correct": 14,
+      "counted": 14
+    },
+    "zone_cooling_east_kwh_m2": {
+      "correct": 33,
+      "counted": 33
+    },
+    "zone_cooling_north_kwh_m2": {
+      "correct": 27,
+      "counted": 27
+    },
+    "zone_cooling_south_kwh_m2": {
+      "correct": 28,
+      "counted": 28
+    },
+    "zone_cooling_west_kwh_m2": {
+      "correct": 29,
+      "counted": 29
+    }
+  }
+}

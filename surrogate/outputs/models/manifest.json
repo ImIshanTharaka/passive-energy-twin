@@ -1,0 +1,288 @@
+{
+  "created_utc": "2026-11-14T18:41:41.451006+00:00",
+  "dataset_sha256_training": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e",
+  "config_block": "explain_3_6.final_models",
+  "target_object": {
+    "heating_demand_kwh_m2": "gpr_heating",
+    "cooling_demand_kwh_m2": "mlp_cg",
+    "eui_kwh_m2": "xgb_eui",
+    "peak_heating_w_m2": "mlp_physics",
+    "peak_cooling_w_m2": "mlp_cg",
+    "zone_cooling_core_kwh_m2": "mlp_cg",
+    "zone_cooling_south_kwh_m2": "mlp_cg",
+    "zone_cooling_east_kwh_m2": "mlp_cg",
+    "zone_cooling_north_kwh_m2": "mlp_cg",
+    "zone_cooling_west_kwh_m2": "mlp_cg"
+  },
+  "picks": {
+    "heating_demand_kwh_m2": {
+      "model": "gpr",
+      "feature_set": "C-G+I",
+      "form": "log1p",
+      "source": "climate_gen_grid"
+    },
+    "cooling_demand_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_tuned"
+    },
+    "eui_kwh_m2": {
+      "model": "xgb",
+      "feature_set": "C-G+I",
+      "form": "decomposed",
+      "source": "climate_gen_grid"
+    },
+    "peak_heating_w_m2": {
+      "model": "mlp",
+      "feature_set": "C-G+I",
+      "form": "direct",
+      "source": "climate_gen_grid"
+    },
+    "peak_cooling_w_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    },
+    "zone_cooling_core_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    },
+    "zone_cooling_south_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    },
+    "zone_cooling_east_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    },
+    "zone_cooling_north_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    },
+    "zone_cooling_west_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    }
+  },
+  "environment": {
+    "python": "3.13.9",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "xgboost": "3.4.1",
+    "optuna": "5.0.0",
+    "torch": "2.15.0",
+    "matplotlib": "3.11.2"
+  },
+  "objects": {
+    "gpr_heating": {
+      "file": "gpr_heating.pkl",
+      "sha256": "a6dfcf2dab6c265bcff49fef33df7f7680530d955676a0e12273dd0eb509c917",
+      "bytes": 72418992,
+      "targets": [
+        "heating_demand_kwh_m2"
+      ],
+      "model": "gpr",
+      "feature_set": "C-G+I",
+      "form": "log1p",
+      "params": {
+        "nu": 2.5,
+        "length_scale_init": 1.0,
+        "length_scale_bounds": [
+          0.01,
+          1000.0
+        ],
+        "constant_init": 1.0,
+        "constant_bounds": [
+          0.001,
+          1000.0
+        ],
+        "noise_init": 0.01,
+        "noise_bounds": [
+          1e-06,
+          10.0
+        ],
+        "normalize_y": true,
+        "n_restarts_optimizer": 0,
+        "random_state": 42,
+        "top_k": 15
+      },
+      "fit_s": 159.93,
+      "gpr_selected_features": [
+        "floor_height",
+        "glazing_u",
+        "glazing_shgc",
+        "hdd18",
+        "cdd10",
+        "annual_ghi",
+        "mean_rh",
+        "sol_aperture",
+        "sol_aperture_true_S",
+        "ua_glass",
+        "ua_total",
+        "cx_ua_hdd",
+        "cx_aperture_ghi",
+        "cx_aperture_cdd",
+        "cx_infil_hdd"
+      ],
+      "gpr_length_scales": [
+        110.74453470621222,
+        17.325398534042222,
+        27.733071526330747,
+        6.008683638172892,
+        8.768151526243651,
+        25.41697839782748,
+        134.23562258809588,
+        999.9999999999998,
+        10.18367254900507,
+        15.0007975737913,
+        27.345068874442994,
+        5.707851566310838,
+        14.044368373134358,
+        999.9999999999998,
+        37.51133700086505
+      ],
+      "gpr_noise_level": 0.0019557471367745998,
+      "gpr_bound_warnings": [
+        "The optimal value found for dimension 7 of parameter k1__k2__length_scale is close to the specified upper bound 1000.0. Increasing the bound and calling fit again may find a better value.",
+        "The optimal value found for dimension 13 of parameter k1__k2__length_scale is close to the specified upper bound 1000.0. Increasing the bound and calling fit again may find a better value."
+      ]
+    },
+    "xgb_eui": {
+      "file": "xgb_eui.pkl",
+      "sha256": "04df009f0bab823f069bf1d890849dc003997d587d7e43b9e1abde2b4102c86a",
+      "bytes": 5631999,
+      "targets": [
+        "eui_kwh_m2"
+      ],
+      "model": "xgb",
+      "feature_set": "C-G+I",
+      "form": "decomposed",
+      "params": {
+        "heating_demand_kwh_m2": {
+          "n_estimators": 1849,
+          "learning_rate": 0.04171560023976343,
+          "max_depth": 3,
+          "min_child_weight": 2.8592892096700324,
+          "subsample": 0.7161380017295483,
+          "colsample_bytree": 0.7086789501293335,
+          "reg_alpha": 1.6409634565334437e-08,
+          "reg_lambda": 5.848585752517994e-06,
+          "tree_method": "hist",
+          "random_state": 42,
+          "n_jobs": -1
+        },
+        "cooling_demand_kwh_m2": {
+          "n_estimators": 1948,
+          "learning_rate": 0.053655771434125844,
+          "max_depth": 3,
+          "min_child_weight": 7.306874574621904,
+          "subsample": 0.8160529553248514,
+          "colsample_bytree": 0.6692228871284733,
+          "reg_alpha": 5.7912390248524755e-08,
+          "reg_lambda": 1.4115487033955495e-06,
+          "tree_method": "hist",
+          "random_state": 42,
+          "n_jobs": -1
+        },
+        "eui_kwh_m2": {
+          "n_estimators": 1680,
+          "learning_rate": 0.043841548189916466,
+          "max_depth": 3,
+          "min_child_weight": 8.403504781897686,
+          "subsample": 0.7699019437922897,
+          "colsample_bytree": 0.6164758034942013,
+          "reg_alpha": 5.169313881440804e-05,
+          "reg_lambda": 5.98620081845263e-08,
+          "tree_method": "hist",
+          "random_state": 42,
+          "n_jobs": -1
+        }
+      },
+      "fit_s": 5.03,
+      "oa_level_coef": [
+        12.156739159951693,
+        0.0005605700035818248,
+        -0.004717102556137196,
+        0.0005889596897553645
+      ],
+      "oa_climate_mean": {
+        "atlanta": 2.8493008266666675,
+        "chennai": 92.41803365333334,
+        "chicago": -1.798529833333331,
+        "colombo": 90.55430545333333,
+        "denver": -17.007505833333333,
+        "miami": 50.00473653333333,
+        "minneapolis": 4.291292566666666,
+        "new_york": -7.143948966666665,
+        "phoenix": 8.010806256666664,
+        "san_francisco": -32.217094837666664
+      }
+    },
+    "mlp_cg": {
+      "file": "mlp_cg.pkl",
+      "sha256": "c31e0ef89e55e350c166baeb5bd25df539ac3e37107f8903c643230814dfa881",
+      "bytes": 2290172,
+      "targets": [
+        "cooling_demand_kwh_m2",
+        "peak_cooling_w_m2",
+        "zone_cooling_core_kwh_m2",
+        "zone_cooling_south_kwh_m2",
+        "zone_cooling_east_kwh_m2",
+        "zone_cooling_north_kwh_m2",
+        "zone_cooling_west_kwh_m2"
+      ],
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "params": {
+        "n_layers": 3,
+        "width": 512,
+        "dropout": 0.0006709767534828354,
+        "lr": 0.00013516326176301048,
+        "weight_decay": 0.000563088290117349,
+        "batch_size": 64
+      },
+      "fit_s": 64.55,
+      "best_epoch": 618,
+      "n_epochs": 668
+    },
+    "mlp_physics": {
+      "file": "mlp_physics.pkl",
+      "sha256": "f884cadc9668b2682a4b560f779ea0803d952f1ff8e90367dee787da056afc70",
+      "bytes": 2314544,
+      "targets": [
+        "peak_heating_w_m2"
+      ],
+      "model": "mlp",
+      "feature_set": "C-G+I",
+      "form": "direct",
+      "params": {
+        "n_layers": 3,
+        "width": 512,
+        "dropout": 0.0006709767534828354,
+        "lr": 0.00013516326176301048,
+        "weight_decay": 0.000563088290117349,
+        "batch_size": 64
+      },
+      "fit_s": 47.74,
+      "best_epoch": 460,
+      "n_epochs": 510
+    }
+  }
+}

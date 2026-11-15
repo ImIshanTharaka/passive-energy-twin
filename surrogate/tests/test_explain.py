@@ -264,12 +264,48 @@ def check_shap_climate_block_additivity_and_shares():
     assert np.allclose(sh[groups].sum(axis=1), 1.0) and "climate" not in groups and len(groups) == 6
 
 
+def check_adjudication_rules():
+    """H6 adjudication: verdict per design (EnergyPlus reversal > CV RMSE), adjusted share, Wilson interval,
+    and the sample rows carry exactly the Phase 2 schema with the swept input on the grid."""
+    assert X.ADJ["designs_per_pair"] == 20 and list(X.ADJ["grid_points"]) == [0, 5, 10, 15, 20]
+    lo, hi = X.wilson(10, 20)
+    assert abs(lo - 0.2993) < 1e-3 and abs(hi - 0.7007) < 1e-3 and X.wilson(0, 20)[0] == 0.0
+
+    class Fake:                                     # surrogate: always a 10-unit dip at the middle point
+        def predict_designs(self, designs, keys, targets):
+            v = 50 - 10 * (designs["wwr_north"].to_numpy() > 0.4) * (designs["wwr_north"].to_numpy() < 0.6)
+            return pd.DataFrame({targets[0]: v}, index=designs.index)
+    grid = X.sweep_grid("wwr_north")
+    rows, ep = [], []
+    for j, src in enumerate(["a", "b"]):
+        for k in X.ADJ["grid_points"]:
+            rid = f"r_{src}_{k}"
+            rows.append({"run_id": rid, "climate_key": "denver", "_input": "wwr_north",
+                         "_target": "zone_cooling_north_kwh_m2", "_source_run": src, "_point": k,
+                         **{c: 0.3 for c in FE.DESIGN_INPUTS}, "wwr_north": grid[k], "n_floors": 2})
+            ep.append({"run_id": rid, "_ep": 60 - (k * 2.0 if src == "a" else -k * 1.0)})   # a falls 40, b rises
+    rmse = {"zone_cooling_north_kwh_m2": 5.0}
+    tab = X.adjudicate_table(pd.DataFrame(rows), pd.DataFrame(ep), Fake(), rmse)
+    v = tab.set_index("source_run")["verdict"]
+    assert v["a"] == "confirmed_by_energyplus" and v["b"] == "model_error"
+    assert np.allclose(tab["sur_reversal"], 10.0) and tab.set_index("source_run").loc["a", "ep_reversal"] == 40.0
+    pooled = pd.DataFrame([{"input": "wwr_north", "target": "zone_cooling_north_kwh_m2", "share_reversing": 0.04,
+                            "warn": True},
+                           {"input": "glazing_u", "target": "heating_demand_kwh_m2", "share_reversing": 0.0,
+                            "warn": False}])
+    summ, res = X.adjudication_summary(tab, pooled)
+    assert abs(summ["adjusted_share"].iloc[0] - 0.02) < 1e-12 and res["status"] == "WARN"
+    tab["verdict"] = "confirmed_by_energyplus"
+    summ, res = X.adjudication_summary(tab, pooled)
+    assert summ["adjusted_share"].iloc[0] == 0.0 and res["status"] == "OK"
+
+
 ALL_CHECKS = [check_config_block_appended_and_read, check_one_object_per_pick,
               check_raw_path_equals_feature_matrix_and_refuses_london, check_official_settings_equal_cv_settings,
               check_fitted_models_raw_path_and_persistence, check_oat_runs_read_and_duplicate_detected,
               check_s5_counting_rules, check_reversal_size, check_sweep_grid_and_starts,
               check_zone_areas_reproduce_energyplus, check_lhs_designs_inside_bounds,
-              check_shap_climate_block_additivity_and_shares]
+              check_shap_climate_block_additivity_and_shares, check_adjudication_rules]
 
 
 def main():

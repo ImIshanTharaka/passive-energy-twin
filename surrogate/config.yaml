@@ -411,3 +411,21 @@ explain_3_6:
                     fallback: {rows_per_climate: 50, background_overall: 50, background_per_climate: 50},
                     applies_to: all_objects_and_views}
     phase5_timing: {view: per_climate, background: 50, designs: 5, all_10_targets: true}
+
+# ── Added 15 Nov 2026 (Sub-task 3.6 step 6, H6 adjudication details), after the official sweeps flagged
+# wwr_north / wwr_south / wwr_west (S6 WARN) and BEFORE any EnergyPlus adjudication run.
+# Nothing above this line was changed. Read by surrogate/explain.py (stage adjudicate).
+explain_3_6_adjudication:
+  pairs: flagged_by_official_sweeps                  # (input, target) with share_reversing > 1 %
+  designs_per_pair: 20                               # random among that pair's reversing designs
+  seed: 42
+  grid_points: [0, 5, 10, 15, 20]                    # indices on the 21-point sweep: min, 25 %, 50 %, 75 %, max
+  batch: sweep_check                                 # simulation/sampling/samples_sweep_check.csv -> simulation/outputs/sweep_check/
+  generator_runner_parser: phase2_unchanged          # build_idf, batch_runner.py, output_parser.py as frozen in Phase 2
+  values: design_space_rounding                      # sampling.transform.DesignSpace.from_values (VT = SHGC)
+  compare_on: same_rounded_designs                   # surrogate re-predicted on exactly what EnergyPlus received
+  confirmed_by_energyplus_if: energyplus_reversal_gt_cv_rmse   # same reversal size and threshold as the sweep
+  otherwise: model_error                             # incl. reversals the 5 points cannot show (conservative)
+  adjusted_share: observed_share_x_share_not_confirmed
+  s6_after_adjudication: WARN_if_adjusted_share_gt_max_share_reversing_for_any_pair   # 1 %
+  interval: wilson_95_on_confirmed_share             # report only

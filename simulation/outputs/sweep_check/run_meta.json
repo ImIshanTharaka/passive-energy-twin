@@ -1,0 +1,19 @@
+[
+  {
+    "started": "2026-11-15T11:04:19+00:00",
+    "finished": "2026-11-15T11:20:22+00:00",
+    "samples": "sampling/samples_sweep_check.csv",
+    "samples_sha256": "20ee47958552ad081a7b9aecd1b7c928f3baa8e22a2c5c2fddc9ee278fb24c37",
+    "energyplus": "/Applications/EnergyPlus-24-1-0/energyplus",
+    "idd": "/Applications/EnergyPlus-24-1-0/Energy+.idd",
+    "workers": 8,
+    "timeout_s": 900.0,
+    "retries": 1,
+    "keep": "sql",
+    "host": "192.168.1.3",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "n_submitted": 300,
+    "n_ok": 300
+  }
+]

@@ -985,6 +985,157 @@ def stage_shap(dev: bool, log=print):
     return ranks
 
 
+# ── 6. adjudication of sweep reversals by EnergyPlus (H6; config explain_3_6_adjudication) ───────
+
+ADJ = CONFIG.get("explain_3_6_adjudication", {})
+ADJ_SAMPLES = SIM_ROOT / "sampling" / "samples_sweep_check.csv"
+ADJ_ID = ("run_id", "batch", "design_set", "design_id", "climate_key")      # = sampler.ID_COLUMNS
+
+
+def adjudication_pairs(dev: bool) -> list[tuple[str, str]]:
+    """(input, target) pairs flagged by the sweeps (share reversing > 1 %)."""
+    s = pd.read_csv(out_dir(dev) / "sweep_summary.csv")
+    return [(r.input, r.target) for r in s.itertuples() if bool(r.warn)]
+
+
+def adjudication_designs(dev: bool) -> pd.DataFrame:
+    """Per flagged pair: `designs_per_pair` random reversing designs (seed) x the 5 grid points,
+    as Phase 2 rows (rounded by sampling.transform, VT = SHGC), plus surrogate bookkeeping columns."""
+    from runner.oat import _fmt
+    from sampling.transform import load_design_space
+    space = load_design_space()
+    sw = pd.read_csv(out_dir(dev) / "sweeps.csv.gz")
+    df, _ = load(dev)
+    by_run = df.set_index("run_id")
+    rng = np.random.default_rng(int(ADJ["seed"]))
+    points = [int(k) for k in ADJ["grid_points"]]
+    batch = str(ADJ["batch"])
+    rows = []
+    for inp, t in adjudication_pairs(dev):
+        rev = sw[(sw["input"] == inp) & (sw["target"] == t) & sw["reverses"].astype(bool)].sort_values("run_id")
+        n = min(int(ADJ["designs_per_pair"]), len(rev))
+        pick = rev.iloc[np.sort(rng.choice(len(rev), size=n, replace=False))]
+        grid = sweep_grid(inp)
+        for src, c in zip(pick["run_id"], pick["climate_key"]):
+            base = {k: float(by_run.loc[src, k]) for k in space.sampled_names}
+            for k in points:
+                vals = dict(base)
+                vals[inp] = float(grid[k])
+                params = space.from_values(vals)
+                rid = f"{batch}_{inp}_{src}_p{k:02d}"
+                rows.append({"run_id": rid, "batch": batch, "design_set": batch,
+                             "design_id": f"{inp}_{src}_p{k:02d}", "climate_key": c,
+                             **{p: _fmt(space, p, params[p]) for p in space.idf_names},
+                             "_input": inp, "_target": t, "_source_run": src, "_point": k})
+    return pd.DataFrame(rows)
+
+
+def stage_adjudicate_build(dev: bool, log=print) -> Path:
+    if not ADJ:
+        raise SystemExit("config.yaml has no explain_3_6_adjudication block")
+    from sampling.transform import load_design_space
+    rows = adjudication_designs(dev)
+    if rows.empty:
+        log("adjudicate: no flagged pairs - nothing to simulate")
+        return ADJ_SAMPLES
+    names = load_design_space().idf_names
+    path = ADJ_SAMPLES if not dev else out_dir(dev) / "samples_sweep_check_dev.csv"
+    rows[list(ADJ_ID) + names].to_csv(path, index=False, lineterminator="\n")
+    rows.to_csv(out_dir(dev) / "adjudication_designs.csv", index=False)
+    record_stage(out_dir(dev), "adjudicate_build", {"samples": str(path), "n_runs": len(rows),
+                                                     "pairs": adjudication_pairs(dev)}, dev)
+    log(f"adjudicate: wrote {len(rows)} EnergyPlus runs to {path}")
+    for (inp, t), g in rows.groupby(["_input", "_target"]):
+        log(f"  {inp:10s} -> {t:28s} {g['_source_run'].nunique()} designs x {g['_point'].nunique()} points "
+            f"({', '.join(f'{k}: {v}' for k, v in g.drop_duplicates('_source_run')['climate_key'].value_counts().items())})")
+    return path
+
+
+def wilson(k: int, n: int, z: float = 1.959964) -> tuple[float, float]:
+    if n == 0:
+        return float("nan"), float("nan")
+    p = k / n
+    den = 1 + z * z / n
+    mid = (p + z * z / (2 * n)) / den
+    half = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / den
+    return float(mid - half), float(mid + half)
+
+
+def adjudicate_table(rows: pd.DataFrame, ep: pd.DataFrame, fm: FinalModels, rmse: dict) -> pd.DataFrame:
+    """One row per adjudicated design: EnergyPlus and surrogate values at the 5 points, reversal sizes,
+    verdict (confirmed_by_energyplus | model_error)."""
+    rows = rows.merge(ep, on="run_id", how="left", validate="one_to_one")
+    if rows["_ep"].isna().any():
+        missing = rows.loc[rows["_ep"].isna(), "run_id"].tolist()
+        raise SystemExit(f"{len(missing)} adjudication runs have no EnergyPlus result, e.g. {missing[:3]}")
+    designs = rows[FE.DESIGN_INPUTS].astype(float)
+    rows["_sur"] = np.nan
+    for t, g in rows.groupby("_target"):
+        rows.loc[g.index, "_sur"] = fm.predict_designs(designs.loc[g.index], g["climate_key"], [t])[t].to_numpy()
+    out = []
+    for (inp, t, src), g in rows.sort_values("_point").groupby(["_input", "_target", "_source_run"], sort=False):
+        direction = next(e[2] for e in EXPECTATIONS if e[0] == inp and e[1] == t)
+        e = g["_ep"].to_numpy(dtype=float)[None, :]
+        s = g["_sur"].to_numpy(dtype=float)[None, :]
+        ep_rev, sur_rev = float(reversal_size(e, direction)[0]), float(reversal_size(s, direction)[0])
+        out.append({"input": inp, "target": t, "source_run": src, "climate_key": g["climate_key"].iloc[0],
+                    "rmse": rmse[t], **{f"ep_p{k:02d}": v for k, v in zip(g["_point"], e[0])},
+                    **{f"sur_p{k:02d}": v for k, v in zip(g["_point"], s[0])},
+                    "ep_net_change": float(e[0, -1] - e[0, 0]), "sur_net_change": float(s[0, -1] - s[0, 0]),
+                    "ep_reversal": ep_rev, "sur_reversal": sur_rev,
+                    "mae_5pt": float(np.mean(np.abs(e - s))),
+                    "verdict": "confirmed_by_energyplus" if ep_rev > rmse[t] else "model_error"})
+    return pd.DataFrame(out)
+
+
+def adjudication_summary(tab: pd.DataFrame, pooled: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+    rows = []
+    for (inp, t), g in tab.groupby(["input", "target"], sort=False):
+        k, n = int((g["verdict"] == "confirmed_by_energyplus").sum()), len(g)
+        share = float(pooled.loc[(pooled["input"] == inp) & (pooled["target"] == t), "share_reversing"].iloc[0])
+        lo, hi = wilson(k, n)
+        adj = share * (1 - k / n)
+        rows.append({"input": inp, "target": t, "observed_share": share, "n_adjudicated": n, "n_confirmed": k,
+                     "confirmed_share": k / n, "confirmed_lo95": lo, "confirmed_hi95": hi,
+                     "adjusted_share": adj, "adjusted_share_hi": share * (1 - lo), "warn": adj > MAX_REVERSING,
+                     "median_mae_5pt": float(g["mae_5pt"].median()),
+                     "ep_net_negative": int((g["ep_net_change"] < 0).sum()),
+                     "sur_net_negative": int((g["sur_net_change"] < 0).sum())})
+    s = pd.DataFrame(rows)
+    other = pooled[~pooled.set_index(["input", "target"]).index.isin(s.set_index(["input", "target"]).index)]
+    warn = bool(s["warn"].any()) or bool(other["warn"].any())
+    return s, {"status": "WARN" if warn else "OK", "rule": ADJ["s6_after_adjudication"],
+               "flagged_after": s.loc[s["warn"], ["input", "target", "adjusted_share"]].to_dict("records")}
+
+
+def stage_adjudicate_score(dev: bool, log=print):
+    from runner.output_parser import TARGETS as SOURCES
+    d = out_dir(dev)
+    rows = pd.read_csv(d / "adjudication_designs.csv")
+    batch_dir = SIM_ROOT / "outputs" / str(ADJ["batch"])
+    res = pd.read_csv(batch_dir / "results.csv")
+    eps = []
+    for t, g in rows.groupby("_target"):
+        eps.append(res[["run_id", SOURCES[t]]].rename(columns={SOURCES[t]: "_ep"})
+                   .loc[lambda x: x["run_id"].isin(g["run_id"])])
+    ep = pd.concat(eps, ignore_index=True)
+    fm = final_models(dev)
+    _, heat = load(dev)
+    tab = adjudicate_table(rows, ep, fm, pick_rmse(heat))
+    pooled = pd.read_csv(d / "sweep_summary.csv")
+    summ, res6 = adjudication_summary(tab, pooled)
+    tab.to_csv(d / "adjudication_table.csv", index=False)
+    summ.to_csv(d / "adjudication_summary.csv", index=False)
+    record_stage(d, "adjudicate", {"S6_after_adjudication": res6["status"], **res6,
+                                   "summary": summ.to_dict("records")}, dev)
+    for r in summ.itertuples():
+        log(f"  {r.input:10s} -> {r.target:28s} confirmed by EnergyPlus {r.n_confirmed}/{r.n_adjudicated} "
+            f"(95 % {r.confirmed_lo95:.2f}-{r.confirmed_hi95:.2f}); adjusted share {r.adjusted_share:.2%} "
+            f"(observed {r.observed_share:.2%})")
+    log(f"  -> S6 after adjudication: {res6['status']}")
+    return res6
+
+
 # ── report ──────────────────────────────────────────────────────────────────────────────────────
 
 def write_report(dev: bool) -> Path:
@@ -1021,6 +1172,18 @@ def write_report(dev: bool) -> Path:
         L += [f"| {r.input} | {r.target} | {r.direction} | {r.share_reversing:.2%} | {r.max_reversal:.3f} | {r.rmse:.3f} |"
               for r in s.itertuples()]
         L += [""]
+    if (d / "adjudication_summary.csv").exists():
+        a = pd.read_csv(d / "adjudication_summary.csv")
+        L += ["### Adjudication by EnergyPlus (H6)", "",
+              f"**S6 after adjudication: {st.get('adjudicate', {}).get('S6_after_adjudication', '?')}** - "
+              "flagged designs re-simulated at 5 points (min, 25 %, 50 %, 75 %, max); a reversal is confirmed when "
+              "EnergyPlus reverses by more than the same CV RMSE; adjusted share = observed share x share not confirmed.",
+              "", "| Input | Target | Observed share | Confirmed by EnergyPlus | 95 % interval | Adjusted share | "
+              "EnergyPlus net decrease | Median 5-point MAE |", "|---|---|---|---|---|---|---|---|"]
+        L += [f"| {r.input} | {r.target} | {r.observed_share:.2%} | {r.n_confirmed}/{r.n_adjudicated} | "
+              f"{r.confirmed_lo95:.2f}-{r.confirmed_hi95:.2f} | {r.adjusted_share:.2%} | {r.ep_net_negative}/{r.n_adjudicated} | "
+              f"{r.median_mae_5pt:.2f} |" for r in a.itertuples()]
+        L += [""]
     if "zones" in st:
         L += ["## Zone-sum consistency (report)", "", "| Source | Rows | Median abs gap | 95th pct |", "|---|---|---|---|"]
         L += [f"| {r['source']} | {int(r['n'])} | {r['median_abs_gap']:.3%} | {r['p95_abs_gap']:.3%} |"
@@ -1052,9 +1215,12 @@ def write_report(dev: bool) -> Path:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Sub-task 3.6: final models, physics checks, SHAP")
-    ap.add_argument("--stage", required=True, choices=["fit", "oat", "sweeps", "zones", "shap", "figures", "report"])
+    ap.add_argument("--stage", required=True,
+                    choices=["fit", "oat", "sweeps", "zones", "shap", "adjudicate", "figures", "report"])
     ap.add_argument("--dev", action="store_true", help="small data and models -> outputs/explain_dev, models_dev")
     ap.add_argument("--probe", action="store_true", help="with --stage shap: timing probe only (H2 guard)")
+    ap.add_argument("--build", action="store_true", help="with --stage adjudicate: write the EnergyPlus sample file")
+    ap.add_argument("--score", action="store_true", help="with --stage adjudicate: compare after the EnergyPlus run")
     a = ap.parse_args(argv)
     if a.dev:
         print("[DEV] small data and models; numbers are NOT results", flush=True)
@@ -1070,11 +1236,15 @@ def main(argv=None) -> int:
         stage_zones(a.dev, log)
     elif a.stage == "shap":
         stage_shap_probe(a.dev, log) if a.probe else stage_shap(a.dev, log)
+    elif a.stage == "adjudicate":
+        if a.build == a.score:
+            raise SystemExit("--stage adjudicate needs exactly one of --build / --score")
+        stage_adjudicate_build(a.dev, log) if a.build else stage_adjudicate_score(a.dev, log)
     elif a.stage == "figures":
         from surrogate import explain_figures
         for p in explain_figures.make_all(out_dir(a.dev)):
             log(f"  wrote {p.name}")
-    if a.stage in ("oat", "sweeps", "zones", "shap", "report") and not a.probe:
+    if a.stage in ("oat", "sweeps", "zones", "shap", "adjudicate", "report") and not a.probe and not a.build:
         write_report(a.dev)
     log(f"done in {time.time() - t0:.0f} s")
     return 0

@@ -1,0 +1,157 @@
+{
+  "fallback": false,
+  "max_projected_hours": 0.5786498738323442,
+  "projection": [
+    {
+      "object": "gpr_heating",
+      "view": "overall",
+      "n_rows": 7,
+      "seconds": 20.83,
+      "seconds_per_row": 2.975913636852056,
+      "additivity_max_rel_gap": 6.601608149026106e-12,
+      "projected_hours": 0.5786498738323442
+    },
+    {
+      "object": "gpr_heating",
+      "view": "per_climate",
+      "n_rows": 7,
+      "seconds": 8.15,
+      "seconds_per_row": 1.1649942558391817,
+      "additivity_max_rel_gap": 4.504325009015632e-12,
+      "projected_hours": 0.22652666085761866
+    },
+    {
+      "object": "xgb_eui",
+      "view": "overall",
+      "n_rows": 10,
+      "seconds": 5.48,
+      "seconds_per_row": 0.5478658624924719,
+      "additivity_max_rel_gap": 2.2175332704872575e-15,
+      "projected_hours": 0.1521849618034644
+    },
+    {
+      "object": "xgb_eui",
+      "view": "per_climate",
+      "n_rows": 10,
+      "seconds": 3.05,
+      "seconds_per_row": 0.3048246292164549,
+      "additivity_max_rel_gap": 1.427845781152915e-15,
+      "projected_hours": 0.08467350811568192
+    },
+    {
+      "object": "mlp_cg",
+      "view": "overall",
+      "n_rows": 10,
+      "seconds": 3.86,
+      "seconds_per_row": 0.3864434791961685,
+      "additivity_max_rel_gap": 2.7420215772978446e-15,
+      "projected_hours": 0.10734541088782458
+    },
+    {
+      "object": "mlp_cg",
+      "view": "per_climate",
+      "n_rows": 10,
+      "seconds": 1.97,
+      "seconds_per_row": 0.19713285830803215,
+      "additivity_max_rel_gap": 2.38177877725475e-06,
+      "projected_hours": 0.05475912730778671
+    },
+    {
+      "object": "mlp_physics",
+      "view": "overall",
+      "n_rows": 7,
+      "seconds": 2.45,
+      "seconds_per_row": 0.34948533926425235,
+      "additivity_max_rel_gap": 1.8880481309924236e-15,
+      "projected_hours": 0.06795548263471574
+    },
+    {
+      "object": "mlp_physics",
+      "view": "per_climate",
+      "n_rows": 7,
+      "seconds": 1.46,
+      "seconds_per_row": 0.20903922012075782,
+      "additivity_max_rel_gap": 8.194614149140728e-08,
+      "projected_hours": 0.040646515023480684
+    }
+  ],
+  "rule": "fallback if any object/view > 2.0 h",
+  "settings_used": {
+    "rows_per_climate": 100,
+    "background_overall": 100,
+    "background_per_climate": 50,
+    "max_evals": 500
+  },
+  "phase5": {
+    "designs": 5,
+    "background": 50,
+    "seconds_per_design_median": 1.0586443331558257,
+    "seconds_per_design_max": 1.320188167039305
+  },
+  "runs": [
+    {
+      "object": "gpr_heating",
+      "view": "overall",
+      "n_rows": 700,
+      "seconds": 1541.77,
+      "seconds_per_row": 2.202524226785837,
+      "additivity_max_rel_gap": 3.78168438079185e-15
+    },
+    {
+      "object": "gpr_heating",
+      "view": "per_climate",
+      "n_rows": 700,
+      "seconds": 495.2,
+      "seconds_per_row": 0.7074255682142185,
+      "additivity_max_rel_gap": 1.7973800309371127e-15
+    },
+    {
+      "object": "xgb_eui",
+      "view": "overall",
+      "n_rows": 1000,
+      "seconds": 364.5,
+      "seconds_per_row": 0.3645026341669727,
+      "additivity_max_rel_gap": 2.7813387123006767e-15
+    },
+    {
+      "object": "xgb_eui",
+      "view": "per_climate",
+      "n_rows": 1000,
+      "seconds": 226.18,
+      "seconds_per_row": 0.22617780945799312,
+      "additivity_max_rel_gap": 1.481032268984115e-15
+    },
+    {
+      "object": "mlp_cg",
+      "view": "overall",
+      "n_rows": 1000,
+      "seconds": 198.63,
+      "seconds_per_row": 0.19862813633307816,
+      "additivity_max_rel_gap": 3.4978082226568317e-15
+    },
+    {
+      "object": "mlp_cg",
+      "view": "per_climate",
+      "n_rows": 1000,
+      "seconds": 113.46,
+      "seconds_per_row": 0.11345749099995009,
+      "additivity_max_rel_gap": 2.2354899008962817e-15
+    },
+    {
+      "object": "mlp_physics",
+      "view": "overall",
+      "n_rows": 700,
+      "seconds": 139.35,
+      "seconds_per_row": 0.19906887750008276,
+      "additivity_max_rel_gap": 3.47179813879585e-15
+    },
+    {
+      "object": "mlp_physics",
+      "view": "per_climate",
+      "n_rows": 700,
+      "seconds": 79.86,
+      "seconds_per_row": 0.11409264493999736,
+      "additivity_max_rel_gap": 1.937187616294649e-15
+    }
+  ]
+}

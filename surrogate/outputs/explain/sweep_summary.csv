@@ -1,0 +1,8 @@
+input,target,direction,n,n_reversing,share_reversing,max_reversal,rmse,share_net_wrong,warn
+glazing_shgc,cooling_demand_kwh_m2,up,2000,0,0.0,0.0,0.8982880829403178,0.0,False
+glazing_shgc,heating_demand_kwh_m2,down,1400,1,0.0007142857142857143,2.2803301027441236,0.5591182674260725,0.0,False
+glazing_u,heating_demand_kwh_m2,up,1400,1,0.0007142857142857143,2.6630377769273395,0.5591182674260725,0.0,False
+wwr_north,zone_cooling_north_kwh_m2,up,2000,106,0.053,21.647913616010754,5.191286962284366,0.075,True
+wwr_east,zone_cooling_east_kwh_m2,up,2000,14,0.007,12.780085387905302,6.590005851276027,0.0255,False
+wwr_south,zone_cooling_south_kwh_m2,up,2000,95,0.0475,20.099818172685744,4.664365747406139,0.0675,True
+wwr_west,zone_cooling_west_kwh_m2,up,2000,114,0.057,17.947518648773993,4.994325576471602,0.0965,True

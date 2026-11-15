@@ -45,3 +45,7 @@ surrogate/outputs/tuning/*.db-journal
 # 3.6 (14 Nov 2026): dev runs of explain.py (--dev) and their small models
 surrogate/outputs/explain_dev/
 surrogate/outputs/models_dev/
+# 3.6 (15 Nov 2026): raw EnergyPlus run folders of the sweep adjudication batch
+simulation/outputs/sweep_check/*/
+# 3.6 (15 Nov 2026): model files > 10 MB are not tracked (master plan §4.3); SHA-256 in surrogate/outputs/models/manifest.json
+surrogate/outputs/models/gpr_heating.pkl

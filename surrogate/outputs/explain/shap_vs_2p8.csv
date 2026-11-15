@@ -1,0 +1,11 @@
+target,spearman_21_design_inputs,top5_3_6,top5_2_8,top5_overlap
+cooling_demand_kwh_m2,0.890909090909091,"glazing_shgc, floor_area, wwr_south, wwr_north, floor_height","glazing_shgc, floor_area, glazing_u, wwr_south, wwr_north",4
+eui_kwh_m2,0.9259740259740258,"glazing_shgc, floor_area, floor_height, wwr_south, wwr_north","glazing_shgc, floor_area, wwr_south, floor_height, wwr_north",5
+heating_demand_kwh_m2,0.9445615777650125,"glazing_u, floor_area, glazing_shgc, n_floors, floor_height","glazing_u, floor_area, glazing_shgc, floor_height, n_floors",5
+peak_cooling_w_m2,0.9285714285714285,"glazing_shgc, floor_area, wwr_south, floor_height, wwr_north","glazing_shgc, floor_area, wwr_south, floor_height, wwr_north",5
+peak_heating_w_m2,0.9454545454545454,"n_floors, glazing_u, floor_area, glazing_shgc, roof_r_value","n_floors, glazing_u, floor_area, glazing_shgc, roof_r_value",5
+zone_cooling_core_kwh_m2,0.8324675324675326,"n_floors, roof_r_value, infiltration_ach, glazing_shgc, glazing_u","n_floors, roof_r_value, infiltration_ach, glazing_shgc, glazing_u",5
+zone_cooling_east_kwh_m2,0.7090909090909091,"glazing_shgc, wwr_east, overhang_depth_e, floor_height, glazing_u","glazing_shgc, wwr_east, overhang_depth_e, glazing_u, floor_height",5
+zone_cooling_north_kwh_m2,0.6363636363636362,"glazing_shgc, wwr_north, orientation, overhang_depth_n, floor_height","glazing_shgc, wwr_north, orientation, overhang_depth_n, glazing_u",4
+zone_cooling_south_kwh_m2,0.6090909090909091,"glazing_shgc, wwr_south, orientation, overhang_depth_s, floor_height","glazing_shgc, wwr_south, orientation, overhang_depth_s, glazing_u",4
+zone_cooling_west_kwh_m2,0.6584415584415585,"glazing_shgc, wwr_west, orientation, floor_height, glazing_u","glazing_shgc, wwr_west, orientation, glazing_u, floor_height",5
