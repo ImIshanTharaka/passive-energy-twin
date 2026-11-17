@@ -429,3 +429,72 @@ explain_3_6_adjudication:
   adjusted_share: observed_share_x_share_not_confirmed
   s6_after_adjudication: WARN_if_adjusted_share_gt_max_share_reversing_for_any_pair   # 1 %
   interval: wilson_95_on_confirmed_share             # report only
+
+# ── Added 17 Nov 2026 (Sub-task 3.7, claude/Phase3.7_Execution_Plan.md I1-I6, agreed 17 Nov 2026),
+# BEFORE any 3.7 run and before the holdout was read. Nothing above this line was changed.
+# Read by surrogate/final_test.py and surrogate/timing.py.
+final_test_3_7:
+  models: explain_3_6.final_models                   # the files fitted in 3.6, loaded with SHA-256 check (no refit)
+  write_once:                                        # I1
+    out_dir: surrogate/outputs/final_test
+    lock_file: RUN_STARTED                           # created before the holdout is read; never removed by code
+    result_file: final_test_result.json
+    requires: [confirm_flag, clean_git_tree, config_block_present]
+    clean_tree_paths: [surrogate, simulation]        # no modified tracked files here (untracked allowed)
+  holdout:
+    loader: eda_lib.load_split                       # sha256-verified Phase 2 loader, checked against dataset_sha256.holdout
+    in_distribution: {design_set: holdout, rows: 300, per_climate: 30}
+    london: {design_set: anchor, rows: 100, climate_key: london}
+    london_indices: climate_indices.indices_for_key(london, allow_holdout=True)   # only here
+    london_heating_scored: true                      # London is scored as a heating climate (median reported)
+  intervals:                                         # I2 - fitted from training out-of-fold rows only
+    method: uncertainty_3_5.selection                # deployed method per target (all "lgbm" = scaled conformal)
+    calibration: {standard: [grouped, design_id], new_site: [loco, climate_key]}   # same calls as U.final_quantiles
+    must_reproduce: outputs/uncertainty/selection.json final_quantiles   # |dq| <= 1e-9, else stop
+    store: {dir: surrogate/outputs/models, file: intervals.pkl, manifest: intervals_manifest.json, hash: sha256}
+    in_distribution_rows: standard                   # gate S7 (binding)
+    london_rows: new_site                            # report; standard also shown for comparison
+    levels: uncertainty_3_5.levels                   # 0.5, 0.8, 0.9, 0.95 (reliability, report)
+  variants:                                          # I3 - both scored in the same single run
+    primary: uncertainty_3_5.picks                   # GPR heating, XGB EUI, MLPs
+    all_mlp:                                         # reported only; NOT used to choose (decided in 3.8 on handoff §7 evidence)
+      heating_demand_kwh_m2: {object: mlp_physics, form: ratio}
+      eui_kwh_m2: {object: mlp_physics, form: decomposed}
+      others: same_as_primary                        # already MLP
+  s3:                                                # I4 - reference = grouped-CV OOF of the same model, same metric code
+    targets: primary                                 # FAIL-level on the 3 primary targets
+    reference: grouped_cv_oof_of_the_variant         # uncertainty.pick_oof (primary) / climate_gen grid rows (all_mlp)
+    design_skill_min: 0.88
+    pooled_r2_max_drop: 0.03
+    secondary_report: {design_skill_min: 0.85}       # secondary targets: same table, flag only (no gate effect)
+    heating_targets: heating_climates_only           # the 7 training heating climates
+  s4:                                                # I5 - London, WARN-level
+    metrics: [bias_pct, mape_pct, mae, rmse, r2, r2_bias_removed, spearman, top_hit]
+    mape_max_pct: {cooling_demand_kwh_m2: 10, eui_kwh_m2: 10, heating_demand_kwh_m2: 25}
+    spearman_min: 0.90                               # each primary target, within London
+  s7:
+    level: 0.90
+    targets: all                                     # all 10 targets, scored rows (heating: heating climates)
+    coverage_band: [0.85, 0.95]
+  dev:                                               # code check only, never a result
+    in_distribution_per_climate: 30                  # training designs posing as the holdout (seed below)
+    new_site_climate: san_francisco                  # training climate posing as London (EPW path, new-site intervals)
+    seed: 42
+  timing:                                            # I6 - never reads the holdout
+    designs_from: training_rows                      # raw 28 inputs, cycled / resampled (seed below)
+    seed: 42
+    warmup_calls: 3
+    single_calls: 500                                # one design per call, raw inputs -> all 10 targets
+    batch_sizes: [10000, 100000]
+    batch_repeats: 5                                 # median reported
+    with_intervals: report_only                      # S8 is judged on point predictions
+    variants: [primary, all_mlp]                     # S8 judged on primary
+    s8: {single_statistic: median, batch_size_for_gate: 100000}
+    energyplus_s_per_run: {single: 16.7, campaign_throughput: 2.3}   # Phase 2 (master plan §2.3)
+    torch_threads: 1
+  prior_gate:                                        # recorded results (handoff §1), for the Phase 4 decision
+    S0: PASS
+    S1: PASS
+    S2: PASS
+    S5: PASS
+    S6: OK_after_adjudication                        # WARN -> adjusted shares 0.27-0.71 % <= 1 %
