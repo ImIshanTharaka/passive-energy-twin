@@ -1,0 +1,200 @@
+{
+  "official": true,
+  "dev": false,
+  "created_utc": "2026-11-17T07:20:48.496573+00:00",
+  "config_md5": "e5487b737b2dbd60bf714325de43ac1f",
+  "git": {
+    "commit": "adf12e7c4cf9bdcd66adf3ead50bcf3a3091d7d1",
+    "modified_tracked": []
+  },
+  "settings": {
+    "warmup_calls": 3,
+    "single_calls": 500,
+    "batch_sizes": [
+      10000,
+      100000
+    ],
+    "batch_repeats": 5
+  },
+  "machine": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "machine": "arm64",
+    "cpu_count": 10,
+    "cpu_brand": "Apple M4",
+    "torch_threads": 1
+  },
+  "environment": {
+    "python": "3.13.9",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "xgboost": "3.4.1",
+    "optuna": "5.0.0",
+    "torch": "2.15.0",
+    "matplotlib": "3.11.2"
+  },
+  "load_s": {
+    "models": 0.7596680419519544,
+    "intervals": 0.022693166974931955
+  },
+  "single_ms_per_object_primary": {
+    "gpr_heating": 0.15347893349826336,
+    "xgb_eui": 3.335416433401406,
+    "mlp_cg": 0.1883750082924962,
+    "mlp_physics": 0.7179788080975413
+  },
+  "single_ms_feature_engineering": 1.4701875625178218,
+  "batch_s_per_object_primary": {
+    "designs": 10000,
+    "gpr_heating": 0.21226804214529693,
+    "xgb_eui": 0.0363427079282701,
+    "mlp_cg": 0.022460333071649075,
+    "mlp_physics": 0.023806708166375756
+  },
+  "variants": {
+    "primary": {
+      "single": {
+        "calls": 500,
+        "median_ms": 5.923208547756076,
+        "p95_ms": 6.1373812379315495,
+        "mean_ms": 5.939339161384851,
+        "max_ms": 6.269042147323489
+      },
+      "single_with_intervals": {
+        "calls": 500,
+        "median_ms": 11.94887445308268,
+        "p95_ms": 12.256875075399876,
+        "mean_ms": 11.970240583643317,
+        "max_ms": 12.566874967887998
+      },
+      "batch": [
+        {
+          "designs": 10000,
+          "repeats": 5,
+          "median_s": 0.3039713338948786,
+          "designs_per_s": 32897.83898983799,
+          "us_per_design": 30.397133389487863,
+          "all_s": [
+            0.3706300409976393,
+            0.3010402920190245,
+            0.30334250000305474,
+            0.3039713338948786,
+            0.30435812496580184
+          ]
+        },
+        {
+          "designs": 100000,
+          "repeats": 5,
+          "median_s": 3.054692249977961,
+          "designs_per_s": 32736.5219853887,
+          "us_per_design": 30.546922499779612,
+          "all_s": [
+            3.048015416134149,
+            3.0542017919942737,
+            3.054692249977961,
+            3.070435999892652,
+            3.058596499962732
+          ]
+        }
+      ],
+      "batch_with_intervals": [
+        {
+          "designs": 10000,
+          "repeats": 5,
+          "median_s": 1.3790184590034187,
+          "designs_per_s": 7251.534549600405,
+          "us_per_design": 137.90184590034187,
+          "all_s": [
+            1.3790184590034187,
+            1.375876709120348,
+            1.3782999170944095,
+            1.379288458963856,
+            1.3814987919759005
+          ]
+        }
+      ]
+    },
+    "all_mlp": {
+      "single": {
+        "calls": 500,
+        "median_ms": 2.568500582128763,
+        "p95_ms": 2.645194111391902,
+        "mean_ms": 2.5909330816939473,
+        "max_ms": 2.8400421142578125
+      },
+      "single_with_intervals": {
+        "calls": 500,
+        "median_ms": 8.317895932123065,
+        "p95_ms": 8.48625594517216,
+        "mean_ms": 8.354549665004015,
+        "max_ms": 8.685041917487979
+      },
+      "batch": [
+        {
+          "designs": 10000,
+          "repeats": 5,
+          "median_s": 0.051012791926041245,
+          "designs_per_s": 196029.26290523523,
+          "us_per_design": 5.1012791926041245,
+          "all_s": [
+            0.05092920898459852,
+            0.05093637481331825,
+            0.05113058304414153,
+            0.051012791926041245,
+            0.05114275007508695
+          ]
+        },
+        {
+          "designs": 100000,
+          "repeats": 5,
+          "median_s": 0.5114177919458598,
+          "designs_per_s": 195534.8475842356,
+          "us_per_design": 5.114177919458598,
+          "all_s": [
+            0.5115817501209676,
+            0.5111898330505937,
+            0.5115620831493288,
+            0.5107013331726193,
+            0.5114177919458598
+          ]
+        }
+      ],
+      "batch_with_intervals": [
+        {
+          "designs": 10000,
+          "repeats": 5,
+          "median_s": 1.1203564999159425,
+          "designs_per_s": 8925.730337397314,
+          "us_per_design": 112.03564999159425,
+          "all_s": [
+            1.1216878751292825,
+            1.1203564999159425,
+            1.113030333071947,
+            1.12187095801346,
+            1.1176761251408607
+          ]
+        }
+      ]
+    }
+  },
+  "speedup": {
+    "single_vs_energyplus_run": 2819.4178653943495,
+    "batch_vs_campaign_throughput": 75294.000566394,
+    "energyplus_s_per_run": {
+      "single": 16.7,
+      "campaign_throughput": 2.3
+    }
+  },
+  "s8": {
+    "status": "PASS",
+    "severity": "FAIL",
+    "single_median_ms": 5.923208547756076,
+    "single_max_ms": 50.0,
+    "batch_designs_per_s": 32736.5219853887,
+    "batch_min_per_s": 10000.0
+  }
+}
