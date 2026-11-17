@@ -179,7 +179,8 @@ def fig_coverage(d: Path, r: dict, dev: bool):
     ax.scatter(cl.loc[ALL_TARGETS, "coverage_90"], y - 0.12, s=60, marker=PART["london"][1],
                facecolor=SERIES[1], edgecolor="white", linewidth=0.6, zorder=3,
                label=("Unseen climate" if not dev else f"DEV: {r['new_site']}") + " (new-site interval)")
-    ax.text(band[0], len(ALL_TARGETS) - 0.35, f" target band {band[0]:.2f}–{band[1]:.2f}", fontsize=7.5, color=INK2)
+    ax.text(band[0] - 0.006, len(ALL_TARGETS) - 0.35, f"target band {band[0]:.2f}–{band[1]:.2f}", fontsize=7.5,
+            color=INK2, ha="right", va="center")
     ax.set_yticks(y, [NAME[t] for t in ALL_TARGETS])
     lo = min(0.70, float(np.nanmin(np.r_[ci["coverage_90"], cl["coverage_90"]])) - 0.02)
     ax.set_xlim(lo, 1.01)
