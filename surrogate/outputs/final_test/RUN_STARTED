@@ -1,0 +1,29 @@
+{
+  "started_utc": "2026-11-17T07:38:16.382384+00:00",
+  "git": {
+    "commit": "751c6b1c1908f86723a3308b80fc75918ba200c0",
+    "modified_tracked": []
+  },
+  "config_md5": "e5487b737b2dbd60bf714325de43ac1f",
+  "dataset_sha256_training": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e",
+  "models": {
+    "gpr_heating": "a6dfcf2dab6c265bcff49fef33df7f7680530d955676a0e12273dd0eb509c917",
+    "xgb_eui": "04df009f0bab823f069bf1d890849dc003997d587d7e43b9e1abde2b4102c86a",
+    "mlp_cg": "c31e0ef89e55e350c166baeb5bd25df539ac3e37107f8903c643230814dfa881",
+    "mlp_physics": "f884cadc9668b2682a4b560f779ea0803d952f1ff8e90367dee787da056afc70"
+  },
+  "intervals_sha256": "460ad9899ac8942754a0472d44f24d4dbb6b4b9540ded91831be6c0608d3b702",
+  "environment": {
+    "python": "3.13.9",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "xgboost": "3.4.1",
+    "optuna": "5.0.0",
+    "torch": "2.15.0",
+    "matplotlib": "3.11.2"
+  }
+}
