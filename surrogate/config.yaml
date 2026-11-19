@@ -498,3 +498,82 @@ final_test_3_7:
     S2: PASS
     S5: PASS
     S6: OK_after_adjudication                        # WARN -> adjusted shares 0.27-0.71 % <= 1 %
+
+# ── Added 18 Nov 2026 (Sub-task 3.8, claude/Phase3.8_Execution_Plan.md J1-J7, agreed 18 Nov 2026),
+# BEFORE any 3.8 run. Nothing above this line was changed (prefix MD5 e5487b73...).
+# Read by surrogate/registry.py. No refit and no choice uses holdout or London numbers (3.7 I1).
+registry_3_8:
+  deployed:                                          # J1 = option A: the tested mixed set (M10 picks, 3.4)
+    variant: primary                                 # final_test_3_7.variants.primary; all-MLP = reported alternative only
+    models: explain_3_6.final_models                 # same fitted objects, SHA-256 checked against models/manifest.json
+    target_object: from_models_manifest              # heating gpr_heating, EUI xgb_eui, peak heating mlp_physics, others mlp_cg
+  storage:                                           # J2
+    gpr_slim:
+      source: gpr_heating.pkl                        # 3.6 file, kept unchanged as the archived artefact
+      file: gpr_heating_slim.pkl                     # same object, gp_.L_ removed (only used for the GPR's own SD)
+      return_std: refuse                             # deployed intervals are conformal (3.5 G5)
+      equality_rel_tol: 1.0e-12                      # slim vs full predictions
+      equality_rows: [training_all, lhs_500, non_training_site]
+      lhs_seed: 42
+      tracked_in_git: true
+    mlp_format: torch_cpu_pickle                     # no ONNX (future work)
+    manifest: registry.json                          # in surrogate/outputs/models
+  intervals:                                         # J3 = option A
+    method: uncertainty_3_5.selection                # scaled conformal for both types, all 10 targets (unchanged)
+    file: final_test_3_7.intervals.store             # intervals.pkl fitted in 3.7, SHA-256 checked
+    levels: [0.5, 0.8, 0.9, 0.95]
+    default_level: 0.9
+    type_by_climate_level: {training: standard, new: new_site, extrapolation: new_site}
+    clip_lower: 0.0
+  domain:                                            # J4: 3.5 G7 levels unchanged
+    levels: [training, new, extrapolation]
+    d_max: 3.559                                     # stored and restored explicitly (from_dict fix)
+    d_max_tol: 0.001                                 # must equal the recomputed 10-climate value within this
+    strict_default: true                             # 3.5 G6: refuse designs outside design_space.yaml
+    readable_names:                                  # shown in warnings instead of column names
+      hdd18: heating degree-days (base 18 °C)
+      cdd10: cooling degree-days (base 10 °C)
+      annual_ghi: annual solar radiation
+      mean_dbt: mean outdoor air temperature
+      mean_rh: mean relative humidity
+      latitude: latitude
+      mean_wind: mean wind speed
+      occ_enth_excess: humid heat during office hours
+      occ_latent_excess: outdoor moisture during office hours
+      occ_band_dh: mild hours (21-24 °C) during office hours
+      occ_cool_dh: hot hours (above 24 °C) during office hours
+      occ_heat_dh: cold hours (below 21 °C) during office hours
+      hdd15: heating degree-days (base 15 °C)
+      hdd12: heating degree-days (base 12 °C)
+  prediction:                                        # J5, J6
+    path: shared_features_per_chunk                  # = final_test.predict_variant; registry must not import final_test
+    one_site_per_call: true
+    site_sources: [training_key, epw_file, explicit_values]
+    epw_default_ashrae_zone: unknown                 # metadata only; not a model input
+    torch_threads: 1                                 # boosting libraries imported before torch (handoff §2.4)
+    equality_with_3_7_path: {exact_rel_tol: 1.0e-12, mlp_rel_tol: 1.0e-5}   # GPR/XGB exact; MLP float32
+  messages:                                          # J7, shown by Phase 5 as written; no internal codes
+    version: 1
+    training: >-
+      This site is one of the 10 climates the model was trained on. Each range shows where the
+      full EnergyPlus result is expected to fall 9 times out of 10.
+    new: >-
+      This is a new site, similar to the training climates (nearest: {nearest}). Predictions are
+      less certain than for a training climate, so the ranges are wider.
+    extrapolation: >-
+      This site is outside the model's experience (nearest training climate: {nearest}; outside
+      the training range for: {inputs}). Absolute values may be off by 15 % or more - in a test on
+      an unseen cool, low-sun site, cooling was over-predicted by about 14 % and heating
+      under-predicted by about 16 % - but the ranking of designs stayed reliable. Use the results
+      to compare designs, and confirm the chosen design with an EnergyPlus simulation.
+    heating_note: >-
+      Heating predictions hardly respond to shading devices or thermal mass (their simulated effect
+      on heating is below 2 %). Judge shading through cooling and total energy use.
+    design_refused: "{input} = {value} is outside the allowed range {min}-{max}."
+  acceptance:                                        # --stage check (Mac, official); regression of 3.7, no new gate
+    timing: final_test_3_7.timing                    # same protocol (seed, warm-up, 500 single calls, 10^4/10^5 batches)
+    single_max_ms: 50                                # S8 thresholds
+    batch_min_per_s: 10000
+    with_intervals: report_only
+  dev:
+    out_dir: surrogate/outputs/registry_dev          # git-ignored; never a result
