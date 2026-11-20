@@ -1,0 +1,969 @@
+{
+  "created_utc": "2026-11-20T08:00:57.577514+00:00",
+  "official": true,
+  "dev": false,
+  "plan": "claude/Phase3.8_Execution_Plan.md (J1-J7, agreed 18 Nov 2026)",
+  "config_block": "registry_3_8",
+  "config_md5": "a5585a58e4414927e27429e409ebb695",
+  "dataset_sha256_training": "b826d61b541fc59d40df9ba21a75dde37d37c0a025a3f09cc3f277c21df5216e",
+  "deployed_variant": "primary",
+  "objects": [
+    "gpr_heating",
+    "xgb_eui",
+    "mlp_cg",
+    "mlp_physics"
+  ],
+  "target_object": {
+    "heating_demand_kwh_m2": "gpr_heating",
+    "cooling_demand_kwh_m2": "mlp_cg",
+    "eui_kwh_m2": "xgb_eui",
+    "peak_heating_w_m2": "mlp_physics",
+    "peak_cooling_w_m2": "mlp_cg",
+    "zone_cooling_core_kwh_m2": "mlp_cg",
+    "zone_cooling_south_kwh_m2": "mlp_cg",
+    "zone_cooling_east_kwh_m2": "mlp_cg",
+    "zone_cooling_north_kwh_m2": "mlp_cg",
+    "zone_cooling_west_kwh_m2": "mlp_cg"
+  },
+  "picks": {
+    "heating_demand_kwh_m2": {
+      "model": "gpr",
+      "feature_set": "C-G+I",
+      "form": "log1p",
+      "source": "climate_gen_grid"
+    },
+    "cooling_demand_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_tuned"
+    },
+    "eui_kwh_m2": {
+      "model": "xgb",
+      "feature_set": "C-G+I",
+      "form": "decomposed",
+      "source": "climate_gen_grid"
+    },
+    "peak_heating_w_m2": {
+      "model": "mlp",
+      "feature_set": "C-G+I",
+      "form": "direct",
+      "source": "climate_gen_grid"
+    },
+    "peak_cooling_w_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    },
+    "zone_cooling_core_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    },
+    "zone_cooling_south_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    },
+    "zone_cooling_east_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    },
+    "zone_cooling_north_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    },
+    "zone_cooling_west_kwh_m2": {
+      "model": "mlp",
+      "feature_set": "C-G",
+      "form": "direct",
+      "source": "benchmark_secondary"
+    }
+  },
+  "units": {
+    "heating_demand_kwh_m2": "kWh/m\u00b2",
+    "cooling_demand_kwh_m2": "kWh/m\u00b2",
+    "eui_kwh_m2": "kWh/m\u00b2",
+    "peak_heating_w_m2": "W/m\u00b2",
+    "peak_cooling_w_m2": "W/m\u00b2",
+    "zone_cooling_core_kwh_m2": "kWh/m\u00b2",
+    "zone_cooling_south_kwh_m2": "kWh/m\u00b2",
+    "zone_cooling_east_kwh_m2": "kWh/m\u00b2",
+    "zone_cooling_north_kwh_m2": "kWh/m\u00b2",
+    "zone_cooling_west_kwh_m2": "kWh/m\u00b2"
+  },
+  "files": {
+    "gpr_heating": {
+      "path": "models/gpr_heating_slim.pkl",
+      "sha256": "fef62058a24f290a3a4fda540ea40f18ede379866e3d509c4c3d098bc7fe23cb",
+      "bytes": 418989,
+      "slim_of": "gpr_heating.pkl"
+    },
+    "xgb_eui": {
+      "path": "models/xgb_eui.pkl",
+      "sha256": "04df009f0bab823f069bf1d890849dc003997d587d7e43b9e1abde2b4102c86a",
+      "bytes": 5631999
+    },
+    "mlp_cg": {
+      "path": "models/mlp_cg.pkl",
+      "sha256": "c31e0ef89e55e350c166baeb5bd25df539ac3e37107f8903c643230814dfa881",
+      "bytes": 2290172
+    },
+    "mlp_physics": {
+      "path": "models/mlp_physics.pkl",
+      "sha256": "f884cadc9668b2682a4b560f779ea0803d952f1ff8e90367dee787da056afc70",
+      "bytes": 2314544
+    },
+    "intervals": {
+      "path": "models/intervals.pkl",
+      "sha256": "460ad9899ac8942754a0472d44f24d4dbb6b4b9540ded91831be6c0608d3b702",
+      "bytes": 9459143
+    }
+  },
+  "archive": {
+    "gpr_heating_full": {
+      "file": "gpr_heating.pkl",
+      "sha256": "a6dfcf2dab6c265bcff49fef33df7f7680530d955676a0e12273dd0eb509c917",
+      "note": "3.6 artefact with the Cholesky factor; not loaded"
+    }
+  },
+  "slim_gpr_check": {
+    "rows": 4000,
+    "max_rel_diff": 0.0,
+    "identical": true,
+    "pass": true
+  },
+  "feature_sets": {
+    "C-G": [
+      "floor_area",
+      "aspect_ratio",
+      "n_floors",
+      "floor_height",
+      "wall_r_value",
+      "roof_r_value",
+      "floor_r_value",
+      "wall_thermal_mass",
+      "infiltration_ach",
+      "wwr_north",
+      "wwr_east",
+      "wwr_south",
+      "wwr_west",
+      "glazing_u",
+      "glazing_shgc",
+      "overhang_depth_n",
+      "overhang_depth_e",
+      "overhang_depth_s",
+      "overhang_depth_w",
+      "sidefin_depth",
+      "orientation",
+      "hdd18",
+      "cdd10",
+      "annual_ghi",
+      "mean_dbt",
+      "mean_rh",
+      "latitude",
+      "mean_wind",
+      "sol_glazed_ratio_n",
+      "sol_glazed_ratio_e",
+      "sol_glazed_ratio_s",
+      "sol_glazed_ratio_w",
+      "sol_glazed_ratio",
+      "sol_aperture_n",
+      "sol_aperture_e",
+      "sol_aperture_s",
+      "sol_aperture_w",
+      "sol_aperture",
+      "sol_orient_sin",
+      "sol_orient_cos",
+      "sol_aperture_true_N",
+      "sol_aperture_true_E",
+      "sol_aperture_true_S",
+      "sol_aperture_true_W",
+      "sol_pf_overhang_n",
+      "sol_pf_overhang_e",
+      "sol_pf_overhang_s",
+      "sol_pf_overhang_w",
+      "sol_pf_fin_n",
+      "sol_pf_fin_e",
+      "sol_pf_fin_s",
+      "sol_pf_fin_w",
+      "ua_wall",
+      "ua_roof",
+      "ua_glass",
+      "ua_ground",
+      "ua_infiltration",
+      "ua_total",
+      "cx_ua_hdd",
+      "cx_aperture_ghi",
+      "cx_aperture_cdd",
+      "cx_infil_hdd",
+      "cx_infil_rh"
+    ],
+    "C-G+I": [
+      "floor_area",
+      "aspect_ratio",
+      "n_floors",
+      "floor_height",
+      "wall_r_value",
+      "roof_r_value",
+      "floor_r_value",
+      "wall_thermal_mass",
+      "infiltration_ach",
+      "wwr_north",
+      "wwr_east",
+      "wwr_south",
+      "wwr_west",
+      "glazing_u",
+      "glazing_shgc",
+      "overhang_depth_n",
+      "overhang_depth_e",
+      "overhang_depth_s",
+      "overhang_depth_w",
+      "sidefin_depth",
+      "orientation",
+      "hdd18",
+      "cdd10",
+      "annual_ghi",
+      "mean_dbt",
+      "mean_rh",
+      "latitude",
+      "mean_wind",
+      "sol_glazed_ratio_n",
+      "sol_glazed_ratio_e",
+      "sol_glazed_ratio_s",
+      "sol_glazed_ratio_w",
+      "sol_glazed_ratio",
+      "sol_aperture_n",
+      "sol_aperture_e",
+      "sol_aperture_s",
+      "sol_aperture_w",
+      "sol_aperture",
+      "sol_orient_sin",
+      "sol_orient_cos",
+      "sol_aperture_true_N",
+      "sol_aperture_true_E",
+      "sol_aperture_true_S",
+      "sol_aperture_true_W",
+      "sol_pf_overhang_n",
+      "sol_pf_overhang_e",
+      "sol_pf_overhang_s",
+      "sol_pf_overhang_w",
+      "sol_pf_fin_n",
+      "sol_pf_fin_e",
+      "sol_pf_fin_s",
+      "sol_pf_fin_w",
+      "ua_wall",
+      "ua_roof",
+      "ua_glass",
+      "ua_ground",
+      "ua_infiltration",
+      "ua_total",
+      "cx_ua_hdd",
+      "cx_aperture_ghi",
+      "cx_aperture_cdd",
+      "cx_infil_hdd",
+      "cx_infil_rh",
+      "occ_enth_excess",
+      "occ_latent_excess",
+      "occ_band_dh",
+      "occ_cool_dh",
+      "occ_heat_dh",
+      "hdd15",
+      "hdd12"
+    ]
+  },
+  "predict_chunk_rows": 10000,
+  "intervals": {
+    "method": "scaled split-conformal (3.5 G2), both types",
+    "levels": [
+      0.5,
+      0.8,
+      0.9,
+      0.95
+    ],
+    "default_level": 0.9,
+    "type_by_climate_level": {
+      "training": "standard",
+      "new": "new_site",
+      "extrapolation": "new_site"
+    },
+    "quantiles": {
+      "heating_demand_kwh_m2": {
+        "standard": {
+          "50": 1.1960380138040843,
+          "80": 2.32006260549124,
+          "90": 3.048013674146496,
+          "95": 3.806740946204913
+        },
+        "new_site": {
+          "50": 1.2198803687571773,
+          "80": 3.4382984787187163,
+          "90": 5.0553532287928045,
+          "95": 6.977220751195789
+        }
+      },
+      "cooling_demand_kwh_m2": {
+        "standard": {
+          "50": 1.1860914982261028,
+          "80": 2.305486391159272,
+          "90": 3.1682897060576423,
+          "95": 3.993357271515044
+        },
+        "new_site": {
+          "50": 1.1440343691157804,
+          "80": 2.0477906732765887,
+          "90": 2.623001212935251,
+          "95": 3.2185376115158815
+        }
+      },
+      "eui_kwh_m2": {
+        "standard": {
+          "50": 1.1956809443297478,
+          "80": 2.0818974801477936,
+          "90": 2.6583627271698695,
+          "95": 3.262570852155713
+        },
+        "new_site": {
+          "50": 1.122797438892175,
+          "80": 3.337063478365894,
+          "90": 5.729536975120511,
+          "95": 8.571872111093718
+        }
+      },
+      "peak_heating_w_m2": {
+        "standard": {
+          "50": 1.2374171218783525,
+          "80": 2.5596797375223352,
+          "90": 3.556076886649523,
+          "95": 4.727367491585102
+        },
+        "new_site": {
+          "50": 1.0400187683223696,
+          "80": 2.0237964058059172,
+          "90": 2.512194089403285,
+          "95": 3.0992136591424475
+        }
+      },
+      "peak_cooling_w_m2": {
+        "standard": {
+          "50": 1.208361401781478,
+          "80": 2.4169885447609607,
+          "90": 3.248558372748692,
+          "95": 4.098820161454142
+        },
+        "new_site": {
+          "50": 1.1687960370717458,
+          "80": 2.5851716505996554,
+          "90": 4.787706188234663,
+          "95": 7.369084928538512
+        }
+      },
+      "zone_cooling_core_kwh_m2": {
+        "standard": {
+          "50": 1.1978940097708086,
+          "80": 2.408315504876541,
+          "90": 3.295937965595616,
+          "95": 4.1857668763137985
+        },
+        "new_site": {
+          "50": 1.03300452357203,
+          "80": 3.2282528435691633,
+          "90": 9.189842665790664,
+          "95": 12.565626045444581
+        }
+      },
+      "zone_cooling_south_kwh_m2": {
+        "standard": {
+          "50": 1.1836492948045945,
+          "80": 2.4929882332717335,
+          "90": 3.364608384883313,
+          "95": 4.272379532807346
+        },
+        "new_site": {
+          "50": 1.1038236858923782,
+          "80": 2.4497824455552863,
+          "90": 3.481435783462311,
+          "95": 4.273737054265752
+        }
+      },
+      "zone_cooling_east_kwh_m2": {
+        "standard": {
+          "50": 1.217454539966932,
+          "80": 2.467819049550348,
+          "90": 3.282205812479382,
+          "95": 4.1045867140517105
+        },
+        "new_site": {
+          "50": 1.3060023970617154,
+          "80": 2.6783391407930632,
+          "90": 3.648049446608835,
+          "95": 4.58168151669694
+        }
+      },
+      "zone_cooling_north_kwh_m2": {
+        "standard": {
+          "50": 1.2128427853301862,
+          "80": 2.461328917538026,
+          "90": 3.3168955940378275,
+          "95": 4.0876393074505355
+        },
+        "new_site": {
+          "50": 1.1367314128324746,
+          "80": 2.059630837234707,
+          "90": 2.77428847182939,
+          "95": 3.9207789923594754
+        }
+      },
+      "zone_cooling_west_kwh_m2": {
+        "standard": {
+          "50": 1.2002718421633722,
+          "80": 2.346520365432757,
+          "90": 3.2121445564926443,
+          "95": 4.0839938662959065
+        },
+        "new_site": {
+          "50": 1.1364566101111768,
+          "80": 2.2132194375020773,
+          "90": 3.4032532066057017,
+          "95": 4.90458861455837
+        }
+      }
+    },
+    "max_abs_diff_vs_selection_json": 0.0
+  },
+  "climates": {
+    "table": [
+      {
+        "climate_key": "atlanta",
+        "hdd18": 1294.6,
+        "cdd10": 3189.3,
+        "annual_ghi": 1651.6,
+        "mean_dbt": 17.904,
+        "mean_rh": 67.12,
+        "latitude": 33.63,
+        "mean_wind": 3.54,
+        "occ_enth_excess": 34532.2387085054,
+        "occ_latent_excess": 28488.412651193306,
+        "occ_band_dh": 7915.200000000001,
+        "occ_cool_dh": 7541.299999999999,
+        "occ_heat_dh": 20266.300000000003,
+        "hdd15": 839.0083333333333,
+        "hdd12": 488.1958333333333
+      },
+      {
+        "climate_key": "chennai",
+        "hdd18": 0.0,
+        "cdd10": 6940.6,
+        "annual_ghi": 1906.1,
+        "mean_dbt": 29.015,
+        "mean_rh": 73.18,
+        "latitude": 12.994,
+        "mean_wind": 2.77,
+        "occ_enth_excess": 140730.87017489734,
+        "occ_latent_excess": 108121.70620423168,
+        "occ_band_dh": 175.5,
+        "occ_cool_dh": 29658.0,
+        "occ_heat_dh": 7.0,
+        "hdd15": 0.0,
+        "hdd12": 0.0
+      },
+      {
+        "climate_key": "chicago",
+        "hdd18": 3124.4,
+        "cdd10": 1937.8,
+        "annual_ghi": 1520.5,
+        "mean_dbt": 11.211,
+        "mean_rh": 66.57,
+        "latitude": 41.96,
+        "mean_wind": 4.479,
+        "occ_enth_excess": 15177.923334314291,
+        "occ_latent_excess": 12879.204177916828,
+        "occ_band_dh": 10849.3,
+        "occ_cool_dh": 3404.0999999999995,
+        "occ_heat_dh": 48914.09999999999,
+        "hdd15": 2445.2541666666666,
+        "hdd12": 1847.0458333333331
+      },
+      {
+        "climate_key": "colombo",
+        "hdd18": 0.0,
+        "cdd10": 6527.0,
+        "annual_ghi": 1878.8,
+        "mean_dbt": 27.882,
+        "mean_rh": 79.87,
+        "latitude": 6.9047,
+        "mean_wind": 1.388,
+        "occ_enth_excess": 141585.3310140678,
+        "occ_latent_excess": 116023.68589654272,
+        "occ_band_dh": 12.200000000000006,
+        "occ_cool_dh": 22564.7,
+        "occ_heat_dh": 0.0,
+        "hdd15": 0.0,
+        "hdd12": 0.0
+      },
+      {
+        "climate_key": "denver",
+        "hdd18": 2979.1,
+        "cdd10": 1773.4,
+        "annual_ghi": 1876.9,
+        "mean_dbt": 11.366,
+        "mean_rh": 49.67,
+        "latitude": 39.833,
+        "mean_wind": 4.446,
+        "occ_enth_excess": 1262.0401555993162,
+        "occ_latent_excess": 861.3076331898437,
+        "occ_band_dh": 10713.5,
+        "occ_cool_dh": 4940.400000000001,
+        "occ_heat_dh": 43273.6,
+        "hdd15": 2264.079166666667,
+        "hdd12": 1635.1791666666668
+      },
+      {
+        "climate_key": "miami",
+        "hdd18": 41.4,
+        "cdd10": 5667.4,
+        "annual_ghi": 1805.6,
+        "mean_dbt": 25.524,
+        "mean_rh": 72.26,
+        "latitude": 25.7552,
+        "mean_wind": 3.26,
+        "occ_enth_excess": 87111.54121164061,
+        "occ_latent_excess": 71120.05461293785,
+        "occ_band_dh": 2143.6000000000004,
+        "occ_cool_dh": 15345.5,
+        "occ_heat_dh": 1551.4,
+        "hdd15": 15.020833333333332,
+        "hdd12": 4.637499999999999
+      },
+      {
+        "climate_key": "minneapolis",
+        "hdd18": 3903.3,
+        "cdd10": 1778.6,
+        "annual_ghi": 1477.7,
+        "mean_dbt": 8.932,
+        "mean_rh": 64.09,
+        "latitude": 44.883,
+        "mean_wind": 4.144,
+        "occ_enth_excess": 10179.23990640886,
+        "occ_latent_excess": 8348.661824319379,
+        "occ_band_dh": 10888.6,
+        "occ_cool_dh": 3151.1,
+        "occ_heat_dh": 58212.7,
+        "hdd15": 3206.054166666667,
+        "hdd12": 2559.4791666666665
+      },
+      {
+        "climate_key": "new_york",
+        "hdd18": 2342.0,
+        "cdd10": 2191.8,
+        "annual_ghi": 1484.4,
+        "mean_dbt": 13.599,
+        "mean_rh": 63.87,
+        "latitude": 40.7789,
+        "mean_wind": 2.435,
+        "occ_enth_excess": 15328.840188011636,
+        "occ_latent_excess": 13554.371616799972,
+        "occ_band_dh": 10520.5,
+        "occ_cool_dh": 3142.6000000000004,
+        "occ_heat_dh": 37548.2,
+        "hdd15": 1716.8333333333335,
+        "hdd12": 1186.5875
+      },
+      {
+        "climate_key": "phoenix",
+        "hdd18": 490.4,
+        "cdd10": 5336.9,
+        "annual_ghi": 2140.1,
+        "mean_dbt": 24.576,
+        "mean_rh": 33.22,
+        "latitude": 33.428,
+        "mean_wind": 2.9,
+        "occ_enth_excess": 19909.295445034266,
+        "occ_latent_excess": 6403.619075579391,
+        "occ_band_dh": 5159.7,
+        "occ_cool_dh": 26310.700000000004,
+        "occ_heat_dh": 9907.400000000001,
+        "hdd15": 210.85,
+        "hdd12": 57.43749999999999
+      },
+      {
+        "climate_key": "san_francisco",
+        "hdd18": 1284.4,
+        "cdd10": 1763.5,
+        "annual_ghi": 1870.1,
+        "mean_dbt": 14.802,
+        "mean_rh": 70.89,
+        "latitude": 37.62,
+        "mean_wind": 4.644,
+        "occ_enth_excess": 1143.2430505146676,
+        "occ_latent_excess": 1828.7017838879794,
+        "occ_band_dh": 13253.4,
+        "occ_cool_dh": 626.1999999999999,
+        "occ_heat_dh": 25706.300000000003,
+        "hdd15": 521.1000000000001,
+        "hdd12": 101.70416666666667
+      }
+    ],
+    "display_names": {
+      "atlanta": "Atlanta",
+      "chennai": "Chennai",
+      "chicago": "Chicago",
+      "colombo": "Colombo",
+      "denver": "Denver",
+      "miami": "Miami",
+      "minneapolis": "Minneapolis",
+      "new_york": "New York",
+      "phoenix": "Phoenix",
+      "san_francisco": "San Francisco"
+    }
+  },
+  "domain": {
+    "bounds": [
+      {
+        "input": "floor_area",
+        "min": 1500.0,
+        "max": 10000.0,
+        "tol": 0.05,
+        "integer": false
+      },
+      {
+        "input": "aspect_ratio",
+        "min": 1.0,
+        "max": 3.0,
+        "tol": 5e-05,
+        "integer": false
+      },
+      {
+        "input": "n_floors",
+        "min": 1.0,
+        "max": 5.0,
+        "tol": 0.5,
+        "integer": true
+      },
+      {
+        "input": "floor_height",
+        "min": 3.0,
+        "max": 4.5,
+        "tol": 0.0005,
+        "integer": false
+      },
+      {
+        "input": "wall_r_value",
+        "min": 1.0,
+        "max": 8.0,
+        "tol": 0.0005,
+        "integer": false
+      },
+      {
+        "input": "roof_r_value",
+        "min": 2.0,
+        "max": 12.0,
+        "tol": 0.0005,
+        "integer": false
+      },
+      {
+        "input": "floor_r_value",
+        "min": 0.5,
+        "max": 5.0,
+        "tol": 0.0005,
+        "integer": false
+      },
+      {
+        "input": "wall_thermal_mass",
+        "min": 50.0,
+        "max": 400.0,
+        "tol": 0.005,
+        "integer": false
+      },
+      {
+        "input": "infiltration_ach",
+        "min": 0.1,
+        "max": 2.0,
+        "tol": 5e-05,
+        "integer": false
+      },
+      {
+        "input": "wwr_north",
+        "min": 0.1,
+        "max": 0.8,
+        "tol": 5e-05,
+        "integer": false
+      },
+      {
+        "input": "wwr_east",
+        "min": 0.1,
+        "max": 0.8,
+        "tol": 5e-05,
+        "integer": false
+      },
+      {
+        "input": "wwr_south",
+        "min": 0.1,
+        "max": 0.8,
+        "tol": 5e-05,
+        "integer": false
+      },
+      {
+        "input": "wwr_west",
+        "min": 0.1,
+        "max": 0.8,
+        "tol": 5e-05,
+        "integer": false
+      },
+      {
+        "input": "glazing_u",
+        "min": 0.8,
+        "max": 5.8,
+        "tol": 0.0005,
+        "integer": false
+      },
+      {
+        "input": "glazing_shgc",
+        "min": 0.1,
+        "max": 0.8,
+        "tol": 5e-05,
+        "integer": false
+      },
+      {
+        "input": "overhang_depth_n",
+        "min": 0.0,
+        "max": 1.5,
+        "tol": 0.0005,
+        "integer": false
+      },
+      {
+        "input": "overhang_depth_e",
+        "min": 0.0,
+        "max": 1.5,
+        "tol": 0.0005,
+        "integer": false
+      },
+      {
+        "input": "overhang_depth_s",
+        "min": 0.0,
+        "max": 1.5,
+        "tol": 0.0005,
+        "integer": false
+      },
+      {
+        "input": "overhang_depth_w",
+        "min": 0.0,
+        "max": 1.5,
+        "tol": 0.0005,
+        "integer": false
+      },
+      {
+        "input": "sidefin_depth",
+        "min": 0.0,
+        "max": 1.0,
+        "tol": 0.0005,
+        "integer": false
+      },
+      {
+        "input": "orientation",
+        "min": 0.0,
+        "max": 180.0,
+        "tol": 0.005,
+        "integer": false
+      }
+    ],
+    "d_max": 3.55936420310255,
+    "holdout_keys": [
+      "london"
+    ],
+    "levels": [
+      "training",
+      "new",
+      "extrapolation"
+    ],
+    "training_distance_tol": 1e-06,
+    "strict_default": true
+  },
+  "readable_names": {
+    "hdd18": "heating degree-days (base 18 \u00b0C)",
+    "cdd10": "cooling degree-days (base 10 \u00b0C)",
+    "annual_ghi": "annual solar radiation",
+    "mean_dbt": "mean outdoor air temperature",
+    "mean_rh": "mean relative humidity",
+    "latitude": "latitude",
+    "mean_wind": "mean wind speed",
+    "occ_enth_excess": "humid heat during office hours",
+    "occ_latent_excess": "outdoor moisture during office hours",
+    "occ_band_dh": "mild hours (21-24 \u00b0C) during office hours",
+    "occ_cool_dh": "hot hours (above 24 \u00b0C) during office hours",
+    "occ_heat_dh": "cold hours (below 21 \u00b0C) during office hours",
+    "hdd15": "heating degree-days (base 15 \u00b0C)",
+    "hdd12": "heating degree-days (base 12 \u00b0C)"
+  },
+  "messages": {
+    "training": "This site is one of the 10 climates the model was trained on. Each range shows where the full EnergyPlus result is expected to fall 9 times out of 10.",
+    "new": "This is a new site, similar to the training climates (nearest: {nearest}). Predictions are less certain than for a training climate, so the ranges are wider.",
+    "extrapolation": "This site is outside the model's experience (nearest training climate: {nearest}; outside the training range for: {inputs}). Absolute values may be off by 15 % or more - in a test on an unseen cool, low-sun site, cooling was over-predicted by about 14 % and heating under-predicted by about 16 % - but the ranking of designs stayed reliable. Use the results to compare designs, and confirm the chosen design with an EnergyPlus simulation.",
+    "heating_note": "Heating predictions hardly respond to shading devices or thermal mass (their simulated effect on heating is below 2 %). Judge shading through cooling and total energy use.",
+    "design_refused": "{input} = {value} is outside the allowed range {min}-{max}."
+  },
+  "messages_version": 1,
+  "cv_reference": {
+    "heating_demand_kwh_m2": {
+      "design_skill": 0.9879161279232588,
+      "r2": 0.9955312705132212,
+      "mae": 0.2482226244190443,
+      "rmse": 0.4680658131281897
+    },
+    "cooling_demand_kwh_m2": {
+      "design_skill": 0.995674831565816,
+      "r2": 0.9980337567576604,
+      "mae": 0.6334829335279553,
+      "rmse": 0.8982880829403178
+    },
+    "eui_kwh_m2": {
+      "design_skill": 0.9353073402681372,
+      "r2": 0.995447307053842,
+      "mae": 2.8552412699867893,
+      "rmse": 3.6068292049768487
+    },
+    "peak_heating_w_m2": {
+      "design_skill": 0.98450032631481,
+      "r2": 0.9951440042624736,
+      "mae": 0.294880087728799,
+      "rmse": 0.438544680517468
+    },
+    "peak_cooling_w_m2": {
+      "design_skill": 0.9795504022834975,
+      "r2": 0.9820487075258716,
+      "mae": 0.5533553284039635,
+      "rmse": 0.7805895391589069
+    },
+    "zone_cooling_core_kwh_m2": {
+      "design_skill": 0.9942115135004318,
+      "r2": 0.9984565739841113,
+      "mae": 0.1914646453135147,
+      "rmse": 0.2719414286306612
+    },
+    "zone_cooling_south_kwh_m2": {
+      "design_skill": 0.993658040460838,
+      "r2": 0.9955458468877896,
+      "mae": 3.2040459720382897,
+      "rmse": 4.664365747406139
+    },
+    "zone_cooling_east_kwh_m2": {
+      "design_skill": 0.991661150321902,
+      "r2": 0.9936965300169476,
+      "mae": 4.616361575251368,
+      "rmse": 6.590005851276027
+    },
+    "zone_cooling_north_kwh_m2": {
+      "design_skill": 0.9922928390061212,
+      "r2": 0.994948872935115,
+      "mae": 3.544103313800949,
+      "rmse": 5.191286962284366
+    },
+    "zone_cooling_west_kwh_m2": {
+      "design_skill": 0.988365328097978,
+      "r2": 0.9938187014011094,
+      "mae": 3.2335306514840347,
+      "rmse": 4.994325576471602
+    }
+  },
+  "results_3_7_report_only": {
+    "final_test": {
+      "finished_utc": "2026-11-17T07:38:17.151761+00:00",
+      "git_commit": "751c6b1c1908f86723a3308b80fc75918ba200c0",
+      "gate": {
+        "S3": "PASS",
+        "S4": "WARN",
+        "S7": "WARN"
+      },
+      "primary_s3": {
+        "heating_demand_kwh_m2": {
+          "design_skill": 0.9889722780696142,
+          "r2": 0.9958566066259377
+        },
+        "cooling_demand_kwh_m2": {
+          "design_skill": 0.9964474902647316,
+          "r2": 0.998323552894893
+        },
+        "eui_kwh_m2": {
+          "design_skill": 0.939344625377562,
+          "r2": 0.9954890496151683
+        },
+        "peak_heating_w_m2": {
+          "design_skill": 0.9902223621077231,
+          "r2": 0.9969005310497366
+        },
+        "peak_cooling_w_m2": {
+          "design_skill": 0.9860089909299234,
+          "r2": 0.9879039366526496
+        },
+        "zone_cooling_core_kwh_m2": {
+          "design_skill": 0.9961382304744049,
+          "r2": 0.9988351672052004
+        },
+        "zone_cooling_south_kwh_m2": {
+          "design_skill": 0.9935794449496981,
+          "r2": 0.9953121500966627
+        },
+        "zone_cooling_east_kwh_m2": {
+          "design_skill": 0.9933810136436508,
+          "r2": 0.995178082311848
+        },
+        "zone_cooling_north_kwh_m2": {
+          "design_skill": 0.9952192260053115,
+          "r2": 0.9968229375652634
+        },
+        "zone_cooling_west_kwh_m2": {
+          "design_skill": 0.9937475759993107,
+          "r2": 0.9964856192391968
+        }
+      }
+    },
+    "timing_3_7": {
+      "single_median_ms": 5.923208547756076,
+      "batch_designs_per_s": 32736.5219853887,
+      "s8": "PASS"
+    }
+  },
+  "runtime_modules": {
+    "surrogate": [
+      "__init__.py",
+      "registry.py",
+      "models.py",
+      "mlp.py",
+      "features.py",
+      "climate_indices.py",
+      "uncertainty.py",
+      "config.py",
+      "paths.py",
+      "config.yaml"
+    ],
+    "simulation": [
+      "climate/",
+      "idf_generator/ (construction, fenestration, internal_loads and their packages)",
+      "config/design_space.yaml",
+      "config/climate_config.yaml"
+    ]
+  },
+  "environment": {
+    "python": "3.13.9",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "xgboost": "3.4.1",
+    "torch": "2.15.0"
+  },
+  "git": {
+    "commit": "8981fc98e221839a02a170d9a5d0f38a6fc28b9d",
+    "modified_tracked": []
+  },
+  "build_s": 2.781551458174363
+}
