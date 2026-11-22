@@ -804,7 +804,19 @@ def check(dev: bool, log=print) -> dict:
     log(f"  load: {load_s:.2f} s (all hashes verified)")
     sites = {k: sur.site(k) for k in sur.training_climates}
     pool = design_pool()
-    # self-checks
+    vals = lambda D, site: sur.predict_values(D, site)                       # noqa: E731
+    full = lambda D, site: sur.predict(D, site)                              # noqa: E731
+    # timing first, straight after loading - the 3.7 timing order (single, then batches, then with ranges).
+    # Found 21 Nov: a one-design values timing taken just after a call WITH ranges (LightGBM difficulty
+    # models) ran ~2x slower on the Mac, while batches and with-range calls were unaffected; the
+    # "after a ranges call" row below records that effect (report only, not the acceptance number).
+    tm = {"values": {"single": _time_single(vals, pool, sites, s),
+                     "batch": [_time_batch(vals, pool, sites, n, s) for n in s["batch_sizes"]]},
+          "with_intervals": {"single": _time_single(full, pool, sites, s),
+                             "batch": [_time_batch(full, pool, sites, s["batch_sizes"][0], s)]}}
+    sur.predict(pool[FE.DESIGN_INPUTS].iloc[:200], sites[sorted(sites)[0]])
+    tm["values_after_ranges_call"] = {"single": _time_single(vals, pool, sites, s)}
+    # self-checks (after timing, so they cannot change the timed state)
     q = interval_quantiles(sur.intervals)
     dq = check_quantiles_against_selection(q)
     lvl = {k: sur.climate_check(sites[k])["level"] for k in sites}
@@ -816,13 +828,6 @@ def check(dev: bool, log=print) -> dict:
                                                           & (probe.values <= probe.upper + 1e-9)).all().all())}
     ok_self = dq <= 1e-9 and self_checks["all_training_level"] and self_checks["probe_finite"] \
         and self_checks["probe_lower_le_value_le_upper"]
-    # timing (regression of 3.7 S8, same protocol)
-    vals = lambda D, site: sur.predict_values(D, site)                       # noqa: E731
-    full = lambda D, site: sur.predict(D, site)                              # noqa: E731
-    tm = {"values": {"single": _time_single(vals, pool, sites, s),
-                     "batch": [_time_batch(vals, pool, sites, n, s) for n in s["batch_sizes"]]},
-          "with_intervals": {"single": _time_single(full, pool, sites, s),
-                             "batch": [_time_batch(full, pool, sites, s["batch_sizes"][0], s)]}}
     gate_b = tm["values"]["batch"][-1]
     single = tm["values"]["single"]["median_ms"]
     ok_t = single < float(_ACC["single_max_ms"]) and gate_b["designs_per_s"] >= float(_ACC["batch_min_per_s"])
@@ -841,7 +846,8 @@ def check(dev: bool, log=print) -> dict:
         f"{single:.1f} ms (< {_ACC['single_max_ms']}), {gate_b['designs']:,} designs "
         f"{gate_b['designs_per_s']:,.0f}/s (>= {_ACC['batch_min_per_s']:,}); with ranges "
         f"{tm['with_intervals']['single']['median_ms']:.1f} ms / "
-        f"{tm['with_intervals']['batch'][0]['designs_per_s']:,.0f}/s")
+        f"{tm['with_intervals']['batch'][0]['designs_per_s']:,.0f}/s; values after a ranges call "
+        f"{tm['values_after_ranges_call']['single']['median_ms']:.1f} ms (report only)")
     write_report(dev)
     return res
 
@@ -882,6 +888,10 @@ def write_report(dev: bool) -> Path:
             for b in tm[key]["batch"]:
                 L.append(f"| {lab} | {sg['median_ms']:.1f} ms | {sg['p95_ms']:.1f} ms | {b['designs']:,} "
                          f"({b['calls']} calls) | {b['designs_per_s']:,.0f} |")
+        if "values_after_ranges_call" in tm:
+            sg = tm["values_after_ranges_call"]["single"]
+            L.append(f"| values only, just after one call with ranges (report only) | {sg['median_ms']:.1f} ms | "
+                     f"{sg['p95_ms']:.1f} ms | - | - |")
         L += ["", f"Limits (same as the 3.7 speed check): one design < {a['single_max_ms']:.0f} ms; "
               f"{a['batch_designs']:,} designs ≥ {a['batch_min_per_s']:,.0f} designs/s.", ""]
         r37 = reg.get("results_3_7_report_only", {}).get("timing_3_7")
