@@ -1,0 +1,138 @@
+{
+  "official": true,
+  "dev": false,
+  "created_utc": "2026-11-22T06:12:53.100650+00:00",
+  "config_md5": "a5585a58e4414927e27429e409ebb695",
+  "git": {
+    "commit": "fde7f8ca8dc6ee7bc9a8fd68228f42623141ebe0",
+    "modified_tracked": []
+  },
+  "environment": {
+    "python": "3.13.9",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "xgboost": "3.4.1",
+    "torch": "2.15.0"
+  },
+  "machine": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "processor": "arm"
+  },
+  "load_s": 0.5107493328396231,
+  "self_checks": {
+    "quantiles_max_abs_diff": 0.0,
+    "training_levels": {
+      "atlanta": "training",
+      "chennai": "training",
+      "chicago": "training",
+      "colombo": "training",
+      "denver": "training",
+      "miami": "training",
+      "minneapolis": "training",
+      "new_york": "training",
+      "phoenix": "training",
+      "san_francisco": "training"
+    },
+    "all_training_level": true,
+    "probe_finite": true,
+    "probe_lower_le_value_le_upper": true
+  },
+  "timing_settings": {
+    "seed": 42,
+    "warmup_calls": 3,
+    "single_calls": 500,
+    "batch_sizes": [
+      10000,
+      100000
+    ],
+    "batch_repeats": 5
+  },
+  "timing": {
+    "values": {
+      "single": {
+        "calls": 500,
+        "median_ms": 6.6551248310133815,
+        "p95_ms": 7.06704588374123,
+        "mean_ms": 6.77543748030439,
+        "max_ms": 39.247124921530485
+      },
+      "batch": [
+        {
+          "designs": 10000,
+          "calls": 10,
+          "repeats": 5,
+          "median_s": 0.3848400830756873,
+          "designs_per_s": 25984.819252918827,
+          "all_s": [
+            0.44362654187716544,
+            0.37639820808544755,
+            0.3827454170677811,
+            0.3848400830756873,
+            0.38607525010593235
+          ]
+        },
+        {
+          "designs": 100000,
+          "calls": 10,
+          "repeats": 5,
+          "median_s": 3.1738683751318604,
+          "designs_per_s": 31507.2927357441,
+          "all_s": [
+            3.345795084023848,
+            3.1740377920214087,
+            3.1738683751318604,
+            3.1238439169246703,
+            3.1036505000665784
+          ]
+        }
+      ]
+    },
+    "with_intervals": {
+      "single": {
+        "calls": 500,
+        "median_ms": 14.109270414337516,
+        "p95_ms": 14.718606474343687,
+        "mean_ms": 14.25062975846231,
+        "max_ms": 39.62787496857345
+      },
+      "batch": [
+        {
+          "designs": 10000,
+          "calls": 10,
+          "repeats": 5,
+          "median_s": 1.4380900831893086,
+          "designs_per_s": 6953.667309785357,
+          "all_s": [
+            1.4386157081462443,
+            1.5009271670132875,
+            1.435733332997188,
+            1.4380900831893086,
+            1.4362808750011027
+          ]
+        }
+      ]
+    },
+    "values_after_ranges_call": {
+      "single": {
+        "calls": 500,
+        "median_ms": 6.897416431456804,
+        "p95_ms": 7.073745597153902,
+        "mean_ms": 6.905056706164032,
+        "max_ms": 7.291125133633614
+      }
+    }
+  },
+  "acceptance": {
+    "self_checks": "PASS",
+    "speed": "PASS",
+    "single_median_ms": 6.6551248310133815,
+    "single_max_ms": 50.0,
+    "batch_designs": 100000,
+    "batch_designs_per_s": 31507.2927357441,
+    "batch_min_per_s": 10000.0
+  }
+}
